@@ -1,16 +1,8 @@
 # PI2-SI-2026-Pronto_Socorro
 
-Este repositório engloba a versão **Front-End** do Projeto Integrador II, que está em fase de desenvolvimento para o curso de **Sistemas de Informação da PUC-Campinas**.
+Este repositório engloba o Projeto Integrador II, que está em fase de desenvolvimento para o curso de **Sistemas de Informação da PUC-Campinas**.
 
 A solução desenvolvida será um **Sistema de Atendimentos de Pronto Socorro**.
-
-## Repositórios
-
-**Front-End:**  
-https://github.com/PI2-SI-2026-Pronto-Socorro/PI2-SI-2026-Pronto-Socorro-FRONTEND
-
-**Back-End:**  
-https://github.com/PI2-SI-2026-Pronto-Socorro/PI2-SI-2026-Pronto-Socorro-BACKEND
 
 ## Integrantes
 
