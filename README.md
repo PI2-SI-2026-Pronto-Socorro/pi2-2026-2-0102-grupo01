@@ -1,13 +1,24 @@
 # PI2-SI-2026-Pronto_Socorro
-Este repositório engloba a versão Front-End Projeto Integrador II que está em fase de desenvolvimento para o curso de Sistemas de Informação da PUC-Campinas. A solução desenvolvida será um Sistema de Atendimentos de Pronto Socorro.
 
-Repositorio FRONT-END: https://github.com/PI2-SI-2026-Pronto-Socorro/PI2-SI-2026-Pronto-Socorro-FRONTEND
-Repositorio BACK-END: https://github.com/PI2-SI-2026-Pronto-Socorro/PI2-SI-2026-Pronto-Socorro-BACKEND
+Este repositório engloba a versão **Front-End** do Projeto Integrador II, que está em fase de desenvolvimento para o curso de **Sistemas de Informação da PUC-Campinas**.
 
-Integrantes:
-  Angelina Elisa          @AngelinaBueno
-  Ellen Samara            @aellenb
-  Gabrielle Caixeta       @caixetss
-  Ivan Henrique           @Iwanhrq
-  Julia Amorim da Silva   @julia-amorim-silva
-  Vicente Dei Santi       @VicenteDeiSanti
+A solução desenvolvida será um **Sistema de Atendimentos de Pronto Socorro**.
+
+## Repositórios
+
+**Front-End:**  
+https://github.com/PI2-SI-2026-Pronto-Socorro/PI2-SI-2026-Pronto-Socorro-FRONTEND
+
+**Back-End:**  
+https://github.com/PI2-SI-2026-Pronto-Socorro/PI2-SI-2026-Pronto-Socorro-BACKEND
+
+## Integrantes
+
+| Nome | GitHub |
+|---|---|
+| Angelina Elisa | [@AngelinaBueno](https://github.com/AngelinaBueno) |
+| Ellen Samara | [@aellenb](https://github.com/aellenb) |
+| Gabrielle Caixeta | [@caixetss](https://github.com/caixetss) |
+| Ivan Henrique | [@Iwanhrq](https://github.com/Iwanhrq) |
+| Julia Amorim da Silva | [@julia-amorim-silva](https://github.com/julia-amorim-silva) |
+| Vicente Dei Santi | [@VicenteDeiSanti](https://github.com/VicenteDeiSanti) |
