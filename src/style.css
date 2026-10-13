@@ -1,0 +1,211 @@
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: #67c9c8;
+  color: #1f2937;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+}
+
+button,
+input {
+  font: inherit;
+}
+
+.conteudo {
+  width: 100%;
+  max-width: 1100px;
+  padding: 40px;
+}
+
+.pagina {
+  display: none;
+  background: #fff;
+  border-radius: 8px; /* Ajustado para bater com a imagem */
+  padding: 80px 40px;
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06);
+}
+
+.pagina.ativa {
+  display: block;
+}
+
+/* Área Inicial (Seleção) */
+#inicio {
+  /* Removemos as sobreposições de fundo e altura que quebravam o layout branco */
+}
+
+#inicio .cabecalho {
+  display: none;
+}
+
+#inicio .grid {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 34px;
+  background: transparent; /* Removido o fundo cinza que existia antes */
+}
+
+.cartao {
+  width: 270px;
+  height: 380px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 28px;
+  border-radius: 12px;
+  background: #fff;
+  border: 1px solid #dfe7f3; /* Borda fina igual à imagem */
+  text-align: center;
+  cursor: pointer;
+  padding: 24px;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.cartao:hover {
+  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+  transform: translateY(-2px);
+}
+
+.cartao strong {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #000;
+}
+
+.cartao small {
+  display: block;
+  width: 100%;
+  max-width: 200px;
+  color: #1f1f1f;
+  font-size: 1rem;
+  line-height: 1.4;
+  font-weight: 400;
+}
+
+#inicio .icone {
+  display: none; /* Esconde os emojis conforme o design da imagem */
+}
+
+/* Estilos das Páginas Internas */
+.cabecalho {
+  margin-bottom: 24px;
+}
+
+.cabecalho h1,
+.cabecalho h2 {
+  margin: 8px 0 0;
+}
+
+.tag {
+  margin: 0;
+  color: #2d5fe8;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.topo {
+  margin-bottom: 16px;
+}
+
+.botao-principal,
+.botao-voltar {
+  border: none;
+  border-radius: 10px;
+  padding: 11px 18px;
+  cursor: pointer;
+}
+
+.botao-principal {
+  background: #1d4ed8;
+  color: #fff;
+}
+
+.botao-voltar {
+  background: #edf3ff;
+  color: #1d4ed8;
+}
+
+.busca {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 22px;
+}
+
+.busca label {
+  font-weight: 700;
+}
+
+.linha-busca {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.linha-busca input {
+  flex: 1;
+  min-width: 220px;
+  padding: 12px 14px;
+  border: 1px solid #dfe7f3;
+  border-radius: 10px;
+}
+
+.resultado {
+  min-height: 120px;
+}
+
+.card-paciente {
+  border: 1px solid #dfe7f3;
+  border-radius: 12px;
+  background: #f9fbff;
+  padding: 18px;
+}
+
+.tag-card {
+  display: inline-block;
+  background: #e8f7ee;
+  color: #0f766e;
+  padding: 6px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.card-paciente h3 {
+  margin: 16px 0;
+}
+
+.dados-paciente {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+}
+
+.dados-paciente div {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.dados-paciente span {
+  color: #667085;
+  font-size: 12px;
+}
+
+.caixa-vazia {
+  background: #f9fafb;
+  border: 1px dashed #dfe7f3;
+  border-radius: 12px;
+  padding: 18px;
+  color: #667085;
+}
