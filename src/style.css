@@ -27,7 +27,7 @@ input {
 .pagina {
   display: none;
   background: #fff;
-  border-radius: 8px; /* Ajustado para bater com a imagem */
+  border-radius: 8px; 
   padding: 80px 40px;
   box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06);
 }
@@ -36,9 +36,7 @@ input {
   display: block;
 }
 
-/* Área Inicial (Seleção) */
 #inicio {
-  /* Removemos as sobreposições de fundo e altura que quebravam o layout branco */
 }
 
 #inicio .cabecalho {
@@ -50,7 +48,7 @@ input {
   justify-content: center;
   align-items: center;
   gap: 34px;
-  background: transparent; /* Removido o fundo cinza que existia antes */
+  background: transparent; 
 }
 
 .cartao {
@@ -63,7 +61,7 @@ input {
   gap: 28px;
   border-radius: 12px;
   background: #fff;
-  border: 1px solid #dfe7f3; /* Borda fina igual à imagem */
+  border: 1px solid #dfe7f3; 
   text-align: center;
   cursor: pointer;
   padding: 24px;
@@ -92,10 +90,9 @@ input {
 }
 
 #inicio .icone {
-  display: none; /* Esconde os emojis conforme o design da imagem */
+  display: none; 
 }
 
-/* Estilos das Páginas Internas */
 .cabecalho {
   margin-bottom: 24px;
 }
