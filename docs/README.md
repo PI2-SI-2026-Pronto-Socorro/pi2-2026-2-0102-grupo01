@@ -15,93 +15,94 @@ A solução desenvolvida será um **Sistema de Atendimentos de Pronto Socorro**.
 | Julia Amorim da Silva | [@julia-amorim-silva](https://github.com/julia-amorim-silva) |
 | Vicente Dei Santi | [@VicenteDeiSanti](https://github.com/VicenteDeiSanti) |
 
+## Estrutura do Projeto
 
+```
+pronto-socorro/
+├── index.html, style.css, script.js   → front-end
+└── api/
+    ├── main.py          → API ligada ao Oracle
+    ├── main_mock.py     → API de teste sem banco
+    ├── requirements.txt
+    └── .env.example     → modelo do .env
+```
 
-# Passo a passo para subir o projeto em uma máquina limpa.
+# Passo a passo para subir o projeto em uma máquina limpa
+
 1. Preparo do ambiente;
 2. Configuração do banco de dados;
-3. Back-end (Node.JS);
-4. Front-end (HTML e CSS puro).
+3. Back-end (API em Python);
+4. Front-end (HTML, CSS e JavaScript puro).
 
 ## 1. Preparo do Ambiente
 
-* **Node.js e npm:** Baixe e instale o Node.JS.
-* O pacote NPM estará incluído.
+* **Python:** Baixe e instale o Python (o `pip` já vem incluído).
 
-  Link: https://nodejs.org/.
+  Link: https://www.python.org/downloads/
 
-* **Git:** Prepare o Git/GitHub para clonar os repositórios do projeto.
+* **Git:** Prepare o Git/GitHub para clonar o repositório do projeto.
 * **Editor de Código:** Utilizamos o VSCode para realizar a codificação do projeto.
 
 ## 2. Configuração do Banco de Dados Oracle
 
-Para configurar o banco de dados Oracle, é necessário criar uma conta, informando login e senha. Para isso, a Oracle solicita
-que o usuário insira um cartão de crédito. Entretanto, você pode escolher a opção sem custos.  
+Para configurar o banco de dados Oracle, é necessário criar uma conta, informando login e senha. Para isso, a Oracle solicita que o usuário insira um cartão de crédito. Entretanto, você pode escolher a opção sem custos.
 
-Instale aqui: https://www.oracle.com/br/database/sqldeveloper/
+1. Crie o banco e baixe o **Wallet** de conexão.
+2. Extraia o Wallet numa pasta (ex.: `C:/wallet-ps`).
+3. (Opcional) Instale o SQL Developer para visualizar e administrar o banco:
 
-## 3. Configuração e Execução do Back-end (Node.js)
+   https://www.oracle.com/br/database/sqldeveloper/
+
+## 3. Configuração e Execução do Back-end (API)
 
 O back-end precisa ser configurado primeiro para que o front-end tenha uma API para consumir.
 
-1. **Clonar Repositório do GitHub:** Baixe o código e instale os pacotes.
-Abra o terminal do VSCode e clone o repositório do back-end:
+1. **Clonar o repositório:**
 
 ```bash
-git clone <https://github.com/PI2-SI-2026-Pronto-Socorro/pi2-2026-2-0102-grupo01/tree/main/src>
-cd <src>
-npm install
-
+git clone https://github.com/PI2-SI-2026-Pronto-Socorro/pi2-2026-2-0102-grupo01.git
+cd pi2-2026-2-0102-grupo01
 ```
 
-2. **Configurar as Variáveis de Ambiente:** Crie e ajuste o arquivo .env.
-Na raiz do projeto back-end, localize o arquivo de exemplo (geralmente `.env.example`) e renomeie-o para `.env`. Preencha com os dados de conexão do banco Oracle criado no passo anterior:
+2. **Configurar as variáveis de ambiente:** em `api/`, copie `.env.example` para `.env` e preencha com os dados de conexão do banco Oracle e o caminho do Wallet.
 
-```env
-PORT=3000
-DB_USER=seu_usuario
-DB_PASSWORD=sua_senha
-DB_CONNECTION_STRING=localhost:1521/XEPDB1
-
-```
-
-3. **Executar Migrations e Iniciar o Servidor:** Prepare o banco e suba a API.
-Caso o projeto utilize migrations (como Sequelize, Knex ou Prisma), execute-as para criar as tabelas automaticamente:
+3. **Instalar as dependências:**
 
 ```bash
-npm run migrate
-
+cd api
+python -m pip install -r requirements.txt
 ```
 
-Em seguida, inicie a aplicação em modo de desenvolvimento:
+4. **Iniciar a API** (dentro de `api/`):
 
 ```bash
-npm run dev
+python -m uvicorn main:app --reload
+```
 
+A API ficará disponível em `http://localhost:8000`.
+
+### Testar a conexão com o banco
+
+* http://localhost:8000/pacientes → lista a tabela `paciente`
+* http://localhost:8000/docs → testa todas as rotas
+
+### Rodar sem banco
+
+Para testar o sistema sem conexão com o Oracle, use a API de teste:
+
+```bash
+python -m uvicorn main_mock:app --reload
 ```
 
 ## 4. Configuração e Execução do Front-end
 
-Com a API rodando, o front-end (seja React, Vue, Angular ou Vanilla) pode ser configurado.
+1. Abra uma **nova aba ou janela do terminal** (mantenha a API rodando na outra).
+2. Na raiz do projeto, execute:
 
-1. Abra uma **nova aba ou janela do terminal** (mantenha o back-end rodando na outra).
-2. Clone o repositório do front-end e instale as dependências:
 ```bash
-git clone <url-do-repositorio-frontend>
-cd <pasta-do-frontend>
-npm install
-
+python -m http.server 5500
 ```
 
-3. Inicie o ambiente de desenvolvimento do front-end:
-```bash
-npm run dev
+3. Acesse http://localhost:5500 no navegador.
 
-```
-
-4. Você também pode visualizar o front-end do projeto abrindo a pasta no VS Code e utilizando o Live Server para abrir o arquivo index.html.
-
-
-5. Acesse o endereço fornecido no terminal (geralmente `http://localhost:5173` ou `http://localhost:3000`) através do seu navegador.
-
----
+Você também pode visualizar o front-end abrindo a pasta no VSCode e utilizando o Live Server para abrir o arquivo `index.html`.s
