@@ -18,44 +18,52 @@ A solução desenvolvida será um **Sistema de Atendimentos de Pronto Socorro**.
 ## Estrutura do Projeto
 
 ```
-pronto-socorro/
-├── index.html, style.css, script.js   → front-end
-└── api/
-    ├── main.py          → API ligada ao Oracle
-    ├── main_mock.py     → API de teste sem banco
-    ├── requirements.txt
-    └── .env.example     → modelo do .env
+pi2-2026-2-0102-grupo01/
+├── docs/
+│   └── criar-tabelas-atendimento-paciente.sql  → script de criação das tabelas
+├── ps-front/
+│   └── index.html, style.css, app.js           → front-end
+└── ps-back/
+    ├── server.js       → API (Node + Express), também serve o front-end
+    ├── db.js           → conexão com o banco
+    ├── schema.js       → tabelas descritas para o Drizzle ORM
+    ├── package.json
+    └── .env.example    → modelo do .env
 ```
 
 # Passo a passo para subir o projeto em uma máquina limpa
 
 1. Preparo do ambiente;
 2. Configuração do banco de dados;
-3. Back-end (API em Python);
-4. Front-end (HTML, CSS e JavaScript puro).
+3. Back-end e front-end (Node.js, HTML, CSS e JavaScript puro).
 
 ## 1. Preparo do Ambiente
 
-* **Python:** Baixe e instale o Python (o `pip` já vem incluído).
+* **Node.js:** Baixe e instale a versão LTS do Node.js (o `npm` já vem incluído).
 
-  Link: https://www.python.org/downloads/
+  Link: https://nodejs.org/
 
 * **Git:** Prepare o Git/GitHub para clonar o repositório do projeto.
 * **Editor de Código:** Utilizamos o VSCode para realizar a codificação do projeto.
 
-## 2. Configuração do Banco de Dados Oracle
+## 2. Configuração do Banco de Dados PostgreSQL (Neon)
 
-Para configurar o banco de dados Oracle, é necessário criar uma conta, informando login e senha. Para isso, a Oracle solicita que o usuário insira um cartão de crédito. Entretanto, você pode escolher a opção sem custos.
+O banco de dados é um PostgreSQL hospedado no [Neon](https://neon.tech), que possui plano gratuito.
 
-1. Crie o banco e baixe o **Wallet** de conexão.
-2. Extraia o Wallet numa pasta (ex.: `C:/wallet-ps`).
-3. (Opcional) Instale o SQL Developer para visualizar e administrar o banco:
+O grupo já utiliza um banco compartilhado. **Peça a `DATABASE_URL` a um integrante por mensagem privada** e pule para a etapa 3.
 
-   https://www.oracle.com/br/database/sqldeveloper/
+Para criar um banco novo:
 
-## 3. Configuração e Execução do Back-end (API)
+1. Crie uma conta no Neon e clique em **New Project**.
+2. Em **Region**, escolha **AWS South America East 1 (São Paulo)**.
+3. Abra o **SQL Editor**, cole o conteúdo de `docs/criar-tabelas-atendimento-paciente.sql` e clique em **Run**.
+4. Clique em **Connect**, deixe **Connection pooling** ligado e copie a URL de conexão.
 
-O back-end precisa ser configurado primeiro para que o front-end tenha uma API para consumir.
+O projeto não usa migrations: qualquer alteração em tabela deve ser feita no banco (pelo SQL Editor), no script em `docs/` e no `ps-back/schema.js`.
+
+## 3. Configuração e Execução da Aplicação
+
+A API em Node também entrega o front-end, então basta subir o back-end.
 
 1. **Clonar o repositório:**
 
@@ -64,45 +72,36 @@ git clone https://github.com/PI2-SI-2026-Pronto-Socorro/pi2-2026-2-0102-grupo01.
 cd pi2-2026-2-0102-grupo01
 ```
 
-2. **Configurar as variáveis de ambiente:** em `api/`, copie `.env.example` para `.env` e preencha com os dados de conexão do banco Oracle e o caminho do Wallet.
+2. **Configurar as variáveis de ambiente:** em `ps-back/`, copie `.env.example` para `.env` e substitua `COLE_AQUI_A_URL_DO_NEON` pela URL do banco. A URL deve terminar com `?sslmode=require`.
+
+   > O `.env` contém a senha do banco e **nunca** deve ser commitado (ele já está no `.gitignore`). Não coloque a URL no `.env.example`.
 
 3. **Instalar as dependências:**
 
 ```bash
-cd api
-python -m pip install -r requirements.txt
+cd ps-back
+npm install
 ```
 
-4. **Iniciar a API** (dentro de `api/`):
+4. **Iniciar a aplicação** (dentro de `ps-back/`):
 
 ```bash
-python -m uvicorn main:app --reload
+npm run dev
 ```
 
-A API ficará disponível em `http://localhost:8000`.
+A aplicação ficará disponível em `http://localhost:3000`.
+
+Sempre que o `.env` for alterado, reinicie o servidor (`Ctrl + C` e `npm run dev`).
 
 ### Testar a conexão com o banco
 
-* http://localhost:8000/pacientes → lista a tabela `paciente`
-* http://localhost:8000/docs → testa todas as rotas
+* http://localhost:3000/api/pacientes → lista a tabela `paciente`
 
-### Rodar sem banco
+### Problemas comuns
 
-Para testar o sistema sem conexão com o Oracle, use a API de teste:
-
-```bash
-python -m uvicorn main_mock:app --reload
-```
-
-## 4. Configuração e Execução do Front-end
-
-1. Abra uma **nova aba ou janela do terminal** (mantenha a API rodando na outra).
-2. Na raiz do projeto, execute:
-
-```bash
-python -m http.server 5500
-```
-
-3. Acesse http://localhost:5500 no navegador.
-
-Você também pode visualizar o front-end abrindo a pasta no VSCode e utilizando o Live Server para abrir o arquivo `index.html`.s
+| Erro | Solução |
+|---|---|
+| `Missing script: "dev"` | O comando foi rodado fora da pasta `ps-back`. |
+| `Cannot find module '...'` | Rode `npm install` dentro de `ps-back`. |
+| Rotas respondendo `500` | Confira a `DATABASE_URL` no `.env` e reinicie o servidor. |
+| `relation "paciente" does not exist` | Rode o script de `docs/` no SQL Editor do Neon. |
