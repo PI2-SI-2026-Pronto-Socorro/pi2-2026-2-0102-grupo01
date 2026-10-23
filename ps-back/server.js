@@ -1,37 +1,23 @@
 const express = require('express');
 const path = require('path');
+const { eq, desc } = require('drizzle-orm');
+const db = require('./db');
+const { paciente, atendimento } = require('./schema');
 
 const app = express();
 app.use(express.json());
 app.use(express.static(path.join(__dirname, '..', 'ps-front'))); // serve o front
 
-// ---------- "Banco" em memória ----------
-// Ao reiniciar o servidor, tudo volta aos dados iniciais.
-
-const pacientes = [
-  { id_paciente: 1, nome: 'Maria da Silva', cpf: '12345678900',
-    data_nascimento: '1990-03-14', genero: 'Feminino', telefone: '(11) 98765-4321' },
-  { id_paciente: 2, nome: 'João Pereira', cpf: '98765432100',
-    data_nascimento: '1987-09-02', genero: 'Masculino', telefone: '(19) 99123-4567' },
-  { id_paciente: 3, nome: 'Ana Souza', cpf: '45678912300',
-    data_nascimento: '2002-11-30', genero: null, telefone: null },
-];
-
-const atendimentos = [
-  { id_atendimento: 1, id_paciente: 1, data_hora_chegada: new Date('2026-10-14T08:00:00'), status: 'Em espera' },
-  { id_atendimento: 2, id_paciente: 2, data_hora_chegada: new Date('2026-10-14T09:30:00'), status: 'Em atendimento' },
-];
-
-let proximoIdPaciente = 4;
-let proximoIdAtendimento = 3;
-
 // ---------- Util ----------
 
-function statusAtual(idPaciente) {
-  const doPaciente = atendimentos.filter((a) => a.id_paciente === idPaciente);
-  if (doPaciente.length === 0) return null;
-  doPaciente.sort((a, b) => b.data_hora_chegada - a.data_hora_chegada);
-  return doPaciente[0].status;
+async function statusAtual(idPaciente) {
+  const [ultimo] = await db
+    .select({ status: atendimento.status })
+    .from(atendimento)
+    .where(eq(atendimento.id_paciente, idPaciente))
+    .orderBy(desc(atendimento.data_hora_chegada))
+    .limit(1);
+  return ultimo ? ultimo.status : null;
 }
 
 function textoOpcional(valor, max) {
@@ -48,48 +34,59 @@ function validarPaciente(p) {
   return null;
 }
 
+// Express 4 não captura erro de função async: sem isso a requisição ficaria pendurada.
+function rota(fn) {
+  return (req, res) => fn(req, res).catch((erro) => {
+    console.error(erro);
+    res.status(500).json({ detail: 'Erro interno no servidor' });
+  });
+}
+
 // ---------- Rotas ----------
 
-app.get('/api/pacientes', (req, res) => res.json(pacientes));
+app.get('/api/pacientes', rota(async (req, res) => {
+  res.json(await db.select().from(paciente));
+}));
 
-app.get('/api/pacientes/:cpf', (req, res) => {
-  const paciente = pacientes.find((p) => p.cpf === req.params.cpf);
-  if (!paciente) return res.status(404).json({ detail: 'Paciente não encontrado' });
-  res.json({ ...paciente, status: statusAtual(paciente.id_paciente) });
-});
+app.get('/api/pacientes/:cpf', rota(async (req, res) => {
+  const [encontrado] = await db.select().from(paciente).where(eq(paciente.cpf, req.params.cpf));
+  if (!encontrado) return res.status(404).json({ detail: 'Paciente não encontrado' });
+  res.json({ ...encontrado, status: await statusAtual(encontrado.id_paciente) });
+}));
 
-app.post('/api/pacientes', (req, res) => {
+app.post('/api/pacientes', rota(async (req, res) => {
   const body = req.body || {};
   const erro = validarPaciente(body);
   if (erro) return res.status(422).json({ detail: erro });
-  if (pacientes.some((p) => p.cpf === body.cpf)) {
-    return res.status(409).json({ detail: 'CPF já cadastrado' });
+
+  try {
+    const [novo] = await db.insert(paciente).values({
+      nome: body.nome,
+      cpf: body.cpf,
+      data_nascimento: body.data_nascimento,
+      genero: body.genero ?? null,
+      telefone: body.telefone ?? null,
+    }).returning();
+    res.status(201).json(novo);
+  } catch (e) {
+    // 23505 = violação de UNIQUE no PostgreSQL (CPF repetido)
+    if ((e.cause ?? e).code === '23505') return res.status(409).json({ detail: 'CPF já cadastrado' });
+    throw e;
   }
+}));
 
-  const novo = {
-    id_paciente: proximoIdPaciente++,
-    nome: body.nome,
-    cpf: body.cpf,
-    data_nascimento: body.data_nascimento,
-    genero: body.genero ?? null,
-    telefone: body.telefone ?? null,
-  };
-  pacientes.push(novo);
-  res.status(201).json(novo);
-});
-
-app.post('/api/atendimentos', (req, res) => {
+app.post('/api/atendimentos', rota(async (req, res) => {
   const { id_paciente, status = 'Em espera' } = req.body || {};
   if (!Number.isInteger(id_paciente)) return res.status(422).json({ detail: 'id_paciente inválido' });
   if (typeof status !== 'string' || status.length > 30) return res.status(422).json({ detail: 'Status inválido' });
-  if (!pacientes.some((p) => p.id_paciente === id_paciente)) {
-    return res.status(404).json({ detail: 'Paciente não existe' });
-  }
 
-  const novo = { id_atendimento: proximoIdAtendimento++, id_paciente, data_hora_chegada: new Date(), status };
-  atendimentos.push(novo);
+  const [existe] = await db.select({ id: paciente.id_paciente }).from(paciente)
+    .where(eq(paciente.id_paciente, id_paciente));
+  if (!existe) return res.status(404).json({ detail: 'Paciente não existe' });
+
+  const [novo] = await db.insert(atendimento).values({ id_paciente, status }).returning();
   res.status(201).json({ id_atendimento: novo.id_atendimento, id_paciente, status });
-});
+}));
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`Rodando em http://localhost:${PORT}`));
