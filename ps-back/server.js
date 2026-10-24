@@ -1,13 +1,24 @@
-require('dotenv').config();
 const express = require('express');
 const path = require('path');
+const { eq, desc, count } = require('drizzle-orm');
 const db = require('./db');
+const { paciente, atendimento } = require('./schema');
 
 const app = express();
 app.use(express.json());
 app.use(express.static(path.join(__dirname, '..', 'ps-front'))); // serve o front
 
 // ---------- Util ----------
+
+async function statusAtual(idPaciente) {
+  const [ultimo] = await db
+    .select({ status: atendimento.status })
+    .from(atendimento)
+    .where(eq(atendimento.id_paciente, idPaciente))
+    .orderBy(desc(atendimento.data_hora_chegada))
+    .limit(1);
+  return ultimo ? ultimo.status : null;
+}
 
 function textoOpcional(valor, max) {
   return valor === undefined || valor === null || (typeof valor === 'string' && valor.length <= max);
@@ -23,82 +34,69 @@ function validarPaciente(p) {
   return null;
 }
 
-const COLUNAS_PACIENTE = `id_paciente, nome, cpf, to_char(data_nascimento, 'YYYY-MM-DD') AS data_nascimento, genero, telefone`;
+// Express 4 não captura erro de função async: sem isso a requisição ficaria pendurada.
+function rota(fn) {
+  return (req, res) => fn(req, res).catch((erro) => {
+    console.error(erro);
+    res.status(500).json({ detail: 'Erro interno no servidor' });
+  });
+}
 
 // ---------- Rotas ----------
 
 // Operação de teste: confirma a conexão lendo a tabela paciente
 app.get('/api/health', async (req, res) => {
   try {
-    const { rows } = await db.query('SELECT COUNT(*)::int AS total FROM paciente');
-    res.json({ banco: 'ok', pacientes: rows[0].total });
-  } catch (err) {
-    res.status(500).json({ banco: 'erro', detail: err.message });
+    const [{ total }] = await db.select({ total: count() }).from(paciente);
+    res.json({ banco: 'ok', pacientes: total });
+  } catch (erro) {
+    res.status(500).json({ banco: 'erro', detail: erro.message });
   }
 });
 
-app.get('/api/pacientes', async (req, res, next) => {
-  try {
-    const { rows } = await db.query(`SELECT ${COLUNAS_PACIENTE} FROM paciente ORDER BY id_paciente`);
-    res.json(rows);
-  } catch (err) { next(err); }
-});
+app.get('/api/pacientes', rota(async (req, res) => {
+  res.json(await db.select().from(paciente));
+}));
 
-app.get('/api/pacientes/:cpf', async (req, res, next) => {
-  try {
-    const { rows } = await db.query(
-      `SELECT ${COLUNAS_PACIENTE},
-              (SELECT a.status FROM atendimento a
-                WHERE a.id_paciente = p.id_paciente
-                ORDER BY a.data_hora_chegada DESC LIMIT 1) AS status
-         FROM paciente p WHERE p.cpf = $1`,
-      [req.params.cpf],
-    );
-    if (rows.length === 0) return res.status(404).json({ detail: 'Paciente não encontrado' });
-    res.json(rows[0]);
-  } catch (err) { next(err); }
-});
+app.get('/api/pacientes/:cpf', rota(async (req, res) => {
+  const [encontrado] = await db.select().from(paciente).where(eq(paciente.cpf, req.params.cpf));
+  if (!encontrado) return res.status(404).json({ detail: 'Paciente não encontrado' });
+  res.json({ ...encontrado, status: await statusAtual(encontrado.id_paciente) });
+}));
 
-app.post('/api/pacientes', async (req, res, next) => {
+app.post('/api/pacientes', rota(async (req, res) => {
   const body = req.body || {};
   const erro = validarPaciente(body);
   if (erro) return res.status(422).json({ detail: erro });
 
   try {
-    const { rows } = await db.query(
-      `INSERT INTO paciente (nome, cpf, data_nascimento, genero, telefone)
-       VALUES ($1, $2, $3, $4, $5) RETURNING ${COLUNAS_PACIENTE}`,
-      [body.nome, body.cpf, body.data_nascimento, body.genero ?? null, body.telefone ?? null],
-    );
-    res.status(201).json(rows[0]);
-  } catch (err) {
-    if (err.code === '23505') return res.status(409).json({ detail: 'CPF já cadastrado' });
-    next(err);
+    const [novo] = await db.insert(paciente).values({
+      nome: body.nome,
+      cpf: body.cpf,
+      data_nascimento: body.data_nascimento,
+      genero: body.genero ?? null,
+      telefone: body.telefone ?? null,
+    }).returning();
+    res.status(201).json(novo);
+  } catch (e) {
+    // 23505 = violação de UNIQUE no PostgreSQL (CPF repetido)
+    if ((e.cause ?? e).code === '23505') return res.status(409).json({ detail: 'CPF já cadastrado' });
+    throw e;
   }
-});
+}));
 
-app.post('/api/atendimentos', async (req, res, next) => {
+app.post('/api/atendimentos', rota(async (req, res) => {
   const { id_paciente, status = 'Em espera' } = req.body || {};
   if (!Number.isInteger(id_paciente)) return res.status(422).json({ detail: 'id_paciente inválido' });
   if (typeof status !== 'string' || status.length > 30) return res.status(422).json({ detail: 'Status inválido' });
 
-  try {
-    const { rows } = await db.query(
-      `INSERT INTO atendimento (id_paciente, status) VALUES ($1, $2)
-       RETURNING id_atendimento, id_paciente, status`,
-      [id_paciente, status],
-    );
-    res.status(201).json(rows[0]);
-  } catch (err) {
-    if (err.code === '23503') return res.status(404).json({ detail: 'Paciente não existe' });
-    next(err);
-  }
-});
+  const [existe] = await db.select({ id: paciente.id_paciente }).from(paciente)
+    .where(eq(paciente.id_paciente, id_paciente));
+  if (!existe) return res.status(404).json({ detail: 'Paciente não existe' });
 
-app.use((err, req, res, next) => {
-  console.error(err);
-  res.status(500).json({ detail: 'Erro interno' });
-});
+  const [novo] = await db.insert(atendimento).values({ id_paciente, status }).returning();
+  res.status(201).json({ id_atendimento: novo.id_atendimento, id_paciente, status });
+}));
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`Rodando em http://localhost:${PORT}`));
