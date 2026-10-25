@@ -13,7 +13,7 @@ const atendimento = pgTable('atendimento', {
   id_atendimento: integer('id_atendimento').primaryKey().generatedAlwaysAsIdentity(),
   id_paciente: integer('id_paciente').notNull()
     .references(() => paciente.id_paciente, { onDelete: 'cascade' }),
-  data_hora_chegada: timestamp('data_hora_chegada').notNull().defaultNow(),
+  data_hora_chegada: timestamp('data_hora_chegada', { withTimezone: true }).notNull().defaultNow(),
   status: varchar('status', { length: 30 }).notNull(),
 });
 

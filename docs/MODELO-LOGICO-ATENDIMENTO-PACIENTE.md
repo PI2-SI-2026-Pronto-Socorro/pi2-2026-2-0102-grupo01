@@ -30,5 +30,5 @@ Representa a entrada do paciente no Pronto Socorro (Geração do número de aten
 | :--- | :--- | :--- | :--- |
 | `id_atendimento` | `INT` | `PK`, `AUTO_INCREMENT` | Número do atendimento |
 | `id_paciente` | `INT` | `FK`, `NOT NULL` | Paciente que está sendo atendido (`PACIENTE.id_paciente`) |
-| `data_hora_chegada` | `DATETIME` | `NOT NULL` | Data e hora exatas da recepção |
+| `data_hora_chegada` | `TIMESTAMPTZ` | `NOT NULL` | Data e hora exatas da recepção |
 | `status` | `VARCHAR(30)` | `NOT NULL` | Status do atendimento |

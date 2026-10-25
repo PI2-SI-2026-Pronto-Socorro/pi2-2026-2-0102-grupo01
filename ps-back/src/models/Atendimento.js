@@ -1,5 +1,5 @@
 class Atendimento {
-  constructor({ id_atendimento = null, id_paciente, status = 'Em espera', data_hora_chegada }) {
+  constructor({ id_atendimento = null, id_paciente, status = 'Aberto', data_hora_chegada }) {
     this.id_atendimento = id_atendimento;
     this.id_paciente = id_paciente;
     this.status = status;

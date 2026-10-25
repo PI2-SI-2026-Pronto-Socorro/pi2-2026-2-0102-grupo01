@@ -90,6 +90,9 @@ paths:
     post:
       tags: [Atendimentos]
       summary: Abre um atendimento para um paciente
+      description: >
+        O atendimento sempre é aberto com status "Aberto". O número (id_atendimento)
+        e a data e hora de chegada são gerados pelo banco.
       requestBody:
         required: true
         content:
@@ -99,7 +102,6 @@ paths:
               required: [id_paciente]
               properties:
                 id_paciente: { type: integer, example: 1 }
-                status: { type: string, maxLength: 30, default: Em espera }
       responses:
         '201':
           description: Atendimento aberto
@@ -110,14 +112,15 @@ paths:
                 properties:
                   id_atendimento: { type: integer, example: 1 }
                   id_paciente: { type: integer, example: 1 }
-                  status: { type: string, example: Em espera }
+                  status: { type: string, example: Aberto }
+                  data_hora_chegada: { type: string, format: date-time, example: '2026-10-25T14:32:10.123Z' }
         '404':
           description: Paciente não existe
           content:
             application/json:
               schema: { $ref: '#/components/schemas/Erro' }
         '422':
-          description: id_paciente ou status inválido
+          description: id_paciente inválido
           content:
             application/json:
               schema: { $ref: '#/components/schemas/Erro' }
