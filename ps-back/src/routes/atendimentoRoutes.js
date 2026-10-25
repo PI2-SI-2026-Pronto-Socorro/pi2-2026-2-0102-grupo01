@@ -4,6 +4,6 @@ const atendimentoController = require('../controllers/atendimentoController');
 
 const router = express.Router();
 
-router.post('/', rota(atendimentoController.criar));
+router.post('/', rota(atendimentoController.create));
 
 module.exports = router;

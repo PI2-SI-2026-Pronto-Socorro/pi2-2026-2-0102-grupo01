@@ -1,12 +1,12 @@
-const pacienteModel = require('../models/pacienteModel');
+const PacienteRepository = require('../repositories/PacienteRepository');
 
 // Operação de teste: confirma a conexão lendo a tabela paciente
-async function verificar(req, res) {
+async function check(req, res) {
   try {
-    res.json({ banco: 'ok', pacientes: await pacienteModel.contar() });
+    res.json({ banco: 'ok', pacientes: await PacienteRepository.count() });
   } catch (erro) {
     res.status(500).json({ banco: 'erro', detail: erro.message });
   }
 }
 
-module.exports = { verificar };
+module.exports = { check };

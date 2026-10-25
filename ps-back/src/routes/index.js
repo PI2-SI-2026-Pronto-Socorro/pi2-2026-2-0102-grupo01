@@ -5,7 +5,7 @@ const atendimentoRoutes = require('./atendimentoRoutes');
 
 const router = express.Router();
 
-router.get('/health', healthController.verificar);
+router.get('/health', healthController.check);
 router.use('/pacientes', pacienteRoutes);
 router.use('/atendimentos', atendimentoRoutes);
 

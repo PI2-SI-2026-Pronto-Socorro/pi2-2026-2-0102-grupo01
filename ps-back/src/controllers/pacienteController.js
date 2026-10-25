@@ -1,5 +1,7 @@
-const pacienteModel = require('../models/pacienteModel');
-const atendimentoModel = require('../models/atendimentoModel');
+const PacienteRepository = require('../repositories/PacienteRepository');
+const AtendimentoRepository = require('../repositories/AtendimentoRepository');
+const Paciente = require('../models/Paciente');
+const { codigoPg } = require('../utils/pgHelpers');
 
 function textoOpcional(valor, max) {
   return valor === undefined || valor === null || (typeof valor === 'string' && valor.length <= max);
@@ -15,34 +17,29 @@ function validarPaciente(p) {
   return null;
 }
 
-async function listar(req, res) {
-  res.json(await pacienteModel.listar());
+async function findAll(req, res) {
+  res.json(await PacienteRepository.findAll());
 }
 
-async function buscarPorCpf(req, res) {
-  const encontrado = await pacienteModel.buscarPorCpf(req.params.cpf);
+async function findOne(req, res) {
+  const encontrado = await PacienteRepository.findByCpf(req.params.cpf);
   if (!encontrado) return res.status(404).json({ detail: 'Paciente não encontrado' });
-  res.json({ ...encontrado, status: await atendimentoModel.statusAtual(encontrado.id_paciente) });
+  encontrado.status = await AtendimentoRepository.findStatusAtual(encontrado.id_paciente);
+  res.json(encontrado);
 }
 
-async function criar(req, res) {
+async function create(req, res) {
   const body = req.body || {};
   const erro = validarPaciente(body);
   if (erro) return res.status(422).json({ detail: erro });
 
   try {
-    const novo = await pacienteModel.criar({
-      nome: body.nome,
-      cpf: body.cpf,
-      data_nascimento: body.data_nascimento,
-      genero: body.genero ?? null,
-      telefone: body.telefone ?? null,
-    });
+    const novo = await PacienteRepository.create(new Paciente(body));
     res.status(201).json(novo);
   } catch (e) {
-    if ((e.cause ?? e).code === '23505') return res.status(409).json({ detail: 'CPF já cadastrado' });
+    if (codigoPg(e) === '23505') return res.status(409).json({ detail: 'CPF já cadastrado' });
     throw e;
   }
 }
 
-module.exports = { listar, buscarPorCpf, criar };
+module.exports = { findAll, findOne, create };

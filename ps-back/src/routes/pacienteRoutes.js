@@ -4,8 +4,8 @@ const pacienteController = require('../controllers/pacienteController');
 
 const router = express.Router();
 
-router.get('/', rota(pacienteController.listar));
-router.get('/:cpf', rota(pacienteController.buscarPorCpf));
-router.post('/', rota(pacienteController.criar));
+router.get('/', rota(pacienteController.findAll));
+router.get('/:cpf', rota(pacienteController.findOne));
+router.post('/', rota(pacienteController.create));
 
 module.exports = router;
