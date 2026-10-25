@@ -1,16 +1,14 @@
 const { eq, count } = require('drizzle-orm');
 const { getConnection } = require('../db');
 const { paciente } = require('../db/schema');
-const Paciente = require('../models/Paciente');
 
 async function findAll() {
-  const linhas = await getConnection().select().from(paciente);
-  return linhas.map((linha) => new Paciente(linha));
+  return getConnection().select().from(paciente);
 }
 
 async function findByCpf(cpf) {
   const [linha] = await getConnection().select().from(paciente).where(eq(paciente.cpf, cpf));
-  return linha ? new Paciente(linha) : null;
+  return linha ?? null;
 }
 
 async function exists(idPaciente) {
@@ -19,14 +17,14 @@ async function exists(idPaciente) {
   return Boolean(linha);
 }
 
-async function count_() {
+async function countAll() {
   const [{ total }] = await getConnection().select({ total: count() }).from(paciente);
   return total;
 }
 
-async function create(novoPaciente) {
-  const [linha] = await getConnection().insert(paciente).values(novoPaciente.paraInsercao()).returning();
-  return new Paciente(linha);
+async function create(dados) {
+  const [linha] = await getConnection().insert(paciente).values(dados).returning();
+  return linha;
 }
 
-module.exports = { findAll, findByCpf, exists, count: count_, create };
+module.exports = { findAll, findByCpf, exists, count: countAll, create };

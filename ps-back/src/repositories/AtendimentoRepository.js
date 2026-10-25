@@ -1,8 +1,6 @@
 const { eq, desc } = require('drizzle-orm');
 const { getConnection } = require('../db');
 const { atendimento } = require('../db/schema');
-const Atendimento = require('../models/Atendimento');
-
 async function findStatusAtual(idPaciente) {
   const [ultimo] = await getConnection()
     .select({ status: atendimento.status })
@@ -13,9 +11,9 @@ async function findStatusAtual(idPaciente) {
   return ultimo ? ultimo.status : null;
 }
 
-async function create(novoAtendimento) {
-  const [linha] = await getConnection().insert(atendimento).values(novoAtendimento.paraInsercao()).returning();
-  return new Atendimento(linha);
+async function create(dados) {
+  const [linha] = await getConnection().insert(atendimento).values(dados).returning();
+  return linha;
 }
 
 module.exports = { findStatusAtual, create };

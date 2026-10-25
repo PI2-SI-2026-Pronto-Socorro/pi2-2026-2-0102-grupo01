@@ -27,12 +27,23 @@ pi2-2026-2-0102-grupo01/
 ├── ps-front/
 │   └── index.html, style.css, app.js           → front-end (a tela)
 └── ps-back/
-    ├── server.js       → API (Node + Express), também entrega o front-end
-    ├── db.js           → conexão com o banco
-    ├── schema.js       → tabelas descritas para o Drizzle ORM
     ├── package.json    → lista de dependências e comandos (npm run dev)
-    └── .env.example    → modelo do .env
+    ├── .env.example    → modelo do .env
+    └── src/
+        ├── server.js       → ponto de entrada: carrega o .env, conecta ao banco e sobe o servidor
+        ├── app.js          → Express, middlewares globais, Swagger e rotas; também entrega o front-end
+        ├── routes/         → URLs da API
+        ├── controllers/    → só HTTP: lê a requisição, chama o service e responde
+        ├── services/       → regras de negócio (validações, CPF repetido, paciente existente)
+        ├── repositories/   → só acesso ao banco (consultas com Drizzle)
+        ├── models/         → classes Paciente e Atendimento
+        ├── db/             → conexão (index.js), tabelas (schema.js) e criação das tabelas (bootstrap.js)
+        ├── middlewares/    → logger de requisições e tratamento de erros
+        ├── utils/          → erros de negócio e mapeamento de erros do PostgreSQL
+        └── docs/           → documentação da API (openapi.yaml), exibida pelo Swagger
 ```
+
+Com o servidor rodando, a documentação da API fica em http://localhost:3000/api-docs.
 
 ## Passo a passo para subir o projeto em uma máquina limpa
 

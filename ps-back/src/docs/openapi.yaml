@@ -1,0 +1,148 @@
+openapi: 3.0.0
+info:
+  title: API Pronto-Socorro
+  version: 1.0.0
+  description: Cadastro de pacientes e atendimentos
+servers:
+  - url: /api
+
+tags:
+  - name: Teste
+  - name: Pacientes
+  - name: Atendimentos
+
+paths:
+  /health:
+    get:
+      tags: [Teste]
+      summary: Confirma a conexão com o banco lendo a tabela paciente
+      responses:
+        '200':
+          description: Banco conectado
+          content:
+            application/json:
+              example: { banco: ok, pacientes: 3 }
+
+  /pacientes:
+    get:
+      tags: [Pacientes]
+      summary: Lista todos os pacientes
+      responses:
+        '200':
+          description: Lista de pacientes
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/Paciente' }
+    post:
+      tags: [Pacientes]
+      summary: Cadastra um paciente
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/NovoPaciente' }
+      responses:
+        '201':
+          description: Paciente cadastrado
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Paciente' }
+        '409':
+          description: CPF já cadastrado
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Erro' }
+        '422':
+          description: Dados obrigatórios ausentes ou inválidos
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Erro' }
+
+  /pacientes/{cpf}:
+    get:
+      tags: [Pacientes]
+      summary: Busca um paciente pelo CPF, com o status do último atendimento
+      parameters:
+        - in: path
+          name: cpf
+          required: true
+          schema: { type: string, example: '12345678900' }
+      responses:
+        '200':
+          description: Paciente encontrado
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Paciente'
+                  - type: object
+                    properties:
+                      status: { type: string, nullable: true, example: Em espera }
+        '404':
+          description: Paciente não encontrado
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Erro' }
+
+  /atendimentos:
+    post:
+      tags: [Atendimentos]
+      summary: Abre um atendimento para um paciente
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [id_paciente]
+              properties:
+                id_paciente: { type: integer, example: 1 }
+                status: { type: string, maxLength: 30, default: Em espera }
+      responses:
+        '201':
+          description: Atendimento aberto
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id_atendimento: { type: integer, example: 1 }
+                  id_paciente: { type: integer, example: 1 }
+                  status: { type: string, example: Em espera }
+        '404':
+          description: Paciente não existe
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Erro' }
+        '422':
+          description: id_paciente ou status inválido
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Erro' }
+
+components:
+  schemas:
+    Paciente:
+      type: object
+      properties:
+        id_paciente: { type: integer, example: 1 }
+        nome: { type: string, example: Maria da Silva }
+        cpf: { type: string, example: '12345678900' }
+        data_nascimento: { type: string, format: date, example: '1990-03-14' }
+        genero: { type: string, nullable: true, example: Feminino }
+        telefone: { type: string, nullable: true, example: (11) 98765-4321 }
+    NovoPaciente:
+      type: object
+      required: [nome, cpf, data_nascimento]
+      properties:
+        nome: { type: string, maxLength: 100, example: Maria da Silva }
+        cpf: { type: string, pattern: '^\d{11}$', example: '12345678900' }
+        data_nascimento: { type: string, format: date, example: '1990-03-14' }
+        genero: { type: string, maxLength: 20, example: Feminino }
+        telefone: { type: string, maxLength: 15, example: (11) 98765-4321 }
+    Erro:
+      type: object
+      properties:
+        detail: { type: string, example: CPF já cadastrado }
