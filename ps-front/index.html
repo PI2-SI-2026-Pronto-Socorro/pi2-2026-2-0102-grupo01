@@ -3,92 +3,67 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Pronto Socorro</title>
-    <link rel="stylesheet" href="./style.css" />
+    <title>Pronto Socorro | Início</title>
+    <link rel="stylesheet" href="./css/global.css" />
+    <link rel="stylesheet" href="./css/pages/inicio.css" />
   </head>
   <body>
-    <main class="conteudo">
-      <section id="inicio" class="pagina ativa">
+    <header class="site-header">
+      <a class="marca" href="./index.html">Pronto Socorro</a>
+      <nav class="navegacao" aria-label="Navegação das histórias">
+        <a href="./h02-buscar-paciente.html">H02 Buscar paciente</a>
+        <a href="./h03-cadastrar-paciente.html">H03 Cadastrar paciente</a>
+        <a href="./h04-abrir-atendimento.html">H04 Abrir atendimento</a>
+        <a href="./h05-consultar-atendimento.html">H05 Consultar atendimento</a>
+        <a href="./h06-fila-triagem.html">H06 Fila de triagem</a>
+      </nav>
+    </header>
+
+    <main class="conteudo pagina-inicio">
+      <section class="pagina">
         <div class="cabecalho">
-          <p class="tag">Pronto Socorro</p>
-          <h1>Selecione a área</h1>
+          <p class="tag">Pronto Socorro · Protótipo</p>
+          <h1>Estrutura das histórias H02–H06</h1>
+          <p>Escolha uma história para abrir sua página de trabalho.</p>
         </div>
 
-        <div class="grid">
-          <button class="cartao" data-pagina="recepcao">
-            <span class="icone">🧾</span>
-            <strong>Recepção</strong>
-            <small>Busca por CPF e cadastro inicial.</small>
-          </button>
+        <section class="grupo-historias" aria-labelledby="titulo-recepcao">
+          <h2 id="titulo-recepcao">Épico: Recepção</h2>
+          <nav class="grid" aria-label="Histórias da Recepção">
+            <a class="cartao" href="./h02-buscar-paciente.html">
+              <span class="icone" aria-hidden="true">H02</span>
+              <strong>Buscar paciente pelo CPF</strong>
+              <small>Busca existente e área para evolução da história.</small>
+            </a>
+            <a class="cartao" href="./h03-cadastrar-paciente.html">
+              <span class="icone" aria-hidden="true">H03</span>
+              <strong>Cadastrar paciente</strong>
+              <small>Estrutura inicial da página.</small>
+            </a>
+            <a class="cartao" href="./h04-abrir-atendimento.html">
+              <span class="icone" aria-hidden="true">H04</span>
+              <strong>Abrir atendimento com número</strong>
+              <small>Estrutura inicial da página.</small>
+            </a>
+            <a class="cartao" href="./h05-consultar-atendimento.html">
+              <span class="icone" aria-hidden="true">H05</span>
+              <strong>Consultar atendimento</strong>
+              <small>Estrutura inicial da página.</small>
+            </a>
+          </nav>
+        </section>
 
-          <button class="cartao" data-pagina="triagem">
-            <span class="icone">🩺</span>
-            <strong>Triagem</strong>
-            <small>Avaliação inicial do paciente.</small>
-          </button>
-
-          <button class="cartao" data-pagina="medico">
-            <span class="icone">👩‍⚕️</span>
-            <strong>Médico</strong>
-            <small>Atendimento clínico e evolução.</small>
-          </button>
-        </div>
-      </section>
-
-      <section id="recepcao" class="pagina">
-        <div class="topo">
-          <button class="botao-voltar" data-pagina="inicio">← Voltar</button>
-        </div>
-
-        <div class="cabecalho pequeno">
-          <p class="tag">Área</p>
-          <h2>Recepção</h2>
-        </div>
-
-        <form id="form-busca" class="busca">
-          <label for="cpf">Buscar paciente por CPF</label>
-          <div class="linha-busca">
-            <input id="cpf" type="text" maxlength="11" placeholder="Digite o CPF" />
-            <button type="submit" class="botao-principal">Buscar</button>
-          </div>
-        </form>
-
-        <div id="resultado" class="resultado">
-          <p>Informe um CPF para iniciar a busca.</p>
-        </div>
-      </section>
-
-      <section id="triagem" class="pagina">
-        <div class="topo">
-          <button class="botao-voltar" data-pagina="inicio">← Voltar</button>
-        </div>
-
-        <div class="cabecalho pequeno">
-          <p class="tag">Área</p>
-          <h2>Triagem</h2>
-        </div>
-
-        <div class="caixa-vazia">
-          <p>Essa tela será implementada depois.</p>
-        </div>
-      </section>
-
-      <section id="medico" class="pagina">
-        <div class="topo">
-          <button class="botao-voltar" data-pagina="inicio">← Voltar</button>
-        </div>
-
-        <div class="cabecalho pequeno">
-          <p class="tag">Área</p>
-          <h2>Médico</h2>
-        </div>
-
-        <div class="caixa-vazia">
-          <p>Essa tela será implementada depois.</p>
-        </div>
+        <section class="grupo-historias" aria-labelledby="titulo-triagem">
+          <h2 id="titulo-triagem">Épico: Triagem</h2>
+          <nav class="grid" aria-label="Histórias da Triagem">
+            <a class="cartao" href="./h06-fila-triagem.html">
+              <span class="icone" aria-hidden="true">H06</span>
+              <strong>Fila de triagem</strong>
+              <small>Estrutura inicial da página.</small>
+            </a>
+          </nav>
+        </section>
       </section>
     </main>
-
-    <script src="./app.js"></script>
   </body>
 </html>
