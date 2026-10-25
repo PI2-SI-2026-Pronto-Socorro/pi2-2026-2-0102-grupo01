@@ -1,7 +1,7 @@
 const PacienteRepository = require('../repositories/PacienteRepository');
 const AtendimentoRepository = require('../repositories/AtendimentoRepository');
 const Paciente = require('../models/Paciente');
-const ErroNegocio = require('../utils/ErroNegocio');
+const ErroHttp = require('../utils/ErroHttp');
 const { codigoPg } = require('../utils/pgHelpers');
 
 function textoOpcional(valor, max) {
@@ -25,20 +25,20 @@ async function listar() {
 
 async function buscarPorCpf(cpf) {
   const linha = await PacienteRepository.findByCpf(cpf);
-  if (!linha) throw new ErroNegocio(404, 'Paciente não encontrado');
+  if (!linha) throw new ErroHttp(404, 'Paciente não encontrado');
   const status = await AtendimentoRepository.findStatusAtual(linha.id_paciente);
   return new Paciente({ ...linha, status });
 }
 
 async function cadastrar(dados) {
   const erro = validar(dados);
-  if (erro) throw new ErroNegocio(422, erro);
+  if (erro) throw new ErroHttp(422, erro);
 
   const novo = new Paciente(dados);
   try {
     return new Paciente(await PacienteRepository.create(novo.paraInsercao()));
   } catch (e) {
-    if (codigoPg(e) === '23505') throw new ErroNegocio(409, 'CPF já cadastrado');
+    if (codigoPg(e) === '23505') throw new ErroHttp(409, 'CPF já cadastrado');
     throw e;
   }
 }

@@ -1,4 +1,4 @@
-class ErroNegocio extends Error {
+class ErroHttp extends Error {
   constructor(status, detail) {
     super(detail);
     this.status = status;
@@ -6,4 +6,4 @@ class ErroNegocio extends Error {
   }
 }
 
-module.exports = ErroNegocio;
+module.exports = ErroHttp;
