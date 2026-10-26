@@ -15,6 +15,10 @@ A solução desenvolvida será um **Sistema de Atendimentos de Pronto Socorro**.
 | Julia Amorim da Silva | [@julia-amorim-silva](https://github.com/julia-amorim-silva) |
 | Vicente Dei Santi | [@VicenteDeiSanti](https://github.com/VicenteDeiSanti) |
 
+## Como contribuir
+
+Antes de criar uma branch ou abrir um Pull Request, leia o [CONTRIBUTING.md](CONTRIBUTING.md): ele explica o padrão de nomes de branch, de mensagens de commit e o fluxo de PR.
+
 ## Estrutura do Projeto
 
 ```
