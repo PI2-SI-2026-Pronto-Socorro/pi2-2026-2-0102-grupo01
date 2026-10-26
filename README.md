@@ -23,28 +23,36 @@ Antes de criar uma branch ou abrir um Pull Request, leia o [CONTRIBUTING.md](CON
 
 ```
 pi2-2026-2-0102-grupo01/
-├── README.md                                   → este arquivo
+├── README.md                                     → este arquivo
+├── CONTRIBUTING.md                                → regras de branches, commits e PR
 ├── docs/
-│   ├── escopo.pdf                              → escopo do projeto
-│   ├── MODELO-LOGICO-ATENDIMENTO-PACIENTE.md   → modelo lógico do banco
-│   └── criar-tabelas-atendimento-paciente.sql  → script de criação das tabelas
+│   ├── escopo.pdf                                 → escopo do projeto
+│   ├── MODELO-LOGICO-ATENDIMENTO-PACIENTE.md      → modelo lógico do banco
+│   └── criar-tabelas-atendimento-paciente.sql     → script de criação das tabelas
 ├── ps-front/
-│   └── index.html, style.css, app.js           → front-end (a tela)
-└── ps-back/
-    ├── package.json    → lista de dependências e comandos (npm run dev)
-    ├── .env.example    → modelo do .env
-    └── src/
-        ├── server.js       → ponto de entrada: carrega o .env, conecta ao banco e sobe o servidor
-        ├── app.js          → Express, middlewares globais, Swagger e rotas; também entrega o front-end
-        ├── routes/         → URLs da API
-        ├── controllers/    → só HTTP: lê a requisição, chama o service e responde
-        ├── services/       → regras de negócio (validações, CPF repetido, paciente existente)
-        ├── repositories/   → só acesso ao banco (consultas com Drizzle)
-        ├── models/         → classes Paciente e Atendimento
-        ├── db/             → conexão (index.js), tabelas (schema.js) e criação das tabelas (bootstrap.js)
-        ├── middlewares/    → logger de requisições e tratamento de erros
-        ├── utils/          → erros de negócio e mapeamento de erros do PostgreSQL
-        └── docs/           → documentação da API (openapi.yaml), exibida pelo Swagger
+│   ├── index.html                                 → página inicial da recepção
+│   ├── app.js                                     → lógica da página H02 de busca por CPF
+│   ├── style.css                                  → estilos globais do front-end
+│   ├── css/
+│   │   └── pages/                                 → estilos específicos das páginas hXX
+│   └── h03-cadastrar-paciente.html                → tela de cadastro do paciente (H03)
+├── ps-back/
+│   ├── package.json                                → lista de dependências e comandos (npm run dev)
+│   ├── .env.example                               → modelo do .env
+│   └── src/
+│       ├── server.js                               → ponto de entrada: carrega o .env, conecta ao banco e sobe o servidor
+│       ├── app.js                                  → Express, middlewares globais, Swagger e rotas; também entrega o front-end
+│       ├── routes/                                 → URLs da API
+│       ├── controllers/                            → só HTTP: lê a requisição, chama o service e responde
+│       ├── services/                               → regras de negócio (validações, CPF repetido, paciente existente)
+│       ├── repositories/                           → só acesso ao banco (consultas com Drizzle)
+│       ├── models/                                 → classes Paciente e Atendimento
+│       ├── db/                                     → conexão (index.js), tabelas (schema.js) e criação das tabelas (bootstrap.js)
+│       ├── middlewares/                            → logger de requisições e tratamento de erros
+│       ├── utils/                                  → erros de negócio e mapeamento de erros do PostgreSQL
+│       └── docs/                                  → documentação da API (openapi.yaml), exibida pelo Swagger
+└── ps-front/
+    └── hXX-*.html                                 → demais páginas do front-end por história
 ```
 
 Com o servidor rodando, a documentação da API fica em http://localhost:3000/api-docs.
