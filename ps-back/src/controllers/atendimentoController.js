@@ -14,4 +14,8 @@ async function findByCpf(req, res) {
   res.json(await AtendimentoService.buscarPorCpf(req.query.cpf ?? ''));
 }
 
-module.exports = { create, findByNumero, findByCpf };
+async function findAbertos(req, res) {
+  res.json(await AtendimentoService.listarAbertos());
+}
+
+module.exports = { create, findByNumero, findByCpf, findAbertos };

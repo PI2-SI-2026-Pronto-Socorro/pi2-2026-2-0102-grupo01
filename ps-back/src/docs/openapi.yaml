@@ -154,6 +154,25 @@ paths:
             application/json:
               schema: { $ref: '#/components/schemas/Erro' }
 
+  /atendimentos/abertos:
+    get:
+      tags: [Atendimentos]
+      summary: Lista os atendimentos em Aberto, por hora de chegada
+      description: Fila de atendimento, de quem chegou primeiro para quem chegou por último. Lista vazia quando não há atendimentos abertos.
+      responses:
+        '200':
+          description: Atendimentos abertos
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  allOf:
+                    - $ref: '#/components/schemas/Atendimento'
+                    - type: object
+                      properties:
+                        nome: { type: string, example: Maria da Silva }
+
   /atendimentos/{numero}:
     get:
       tags: [Atendimentos]

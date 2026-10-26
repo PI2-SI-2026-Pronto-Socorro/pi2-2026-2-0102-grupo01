@@ -40,4 +40,8 @@ async function buscarPorCpf(cpf) {
   return linhas.map((linha) => new Atendimento(linha));
 }
 
-module.exports = { abrir, buscarPorNumero, buscarPorCpf };
+async function listarAbertos() {
+  return AtendimentoRepository.findAbertos();
+}
+
+module.exports = { abrir, buscarPorNumero, buscarPorCpf, listarAbertos };
