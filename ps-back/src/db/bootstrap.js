@@ -21,12 +21,18 @@ async function bootstrap() {
     CREATE TABLE IF NOT EXISTS atendimento (
       id_atendimento    INTEGER GENERATED ALWAYS AS IDENTITY,
       id_paciente       INTEGER NOT NULL,
-      data_hora_chegada TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
+      data_hora_chegada TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP NOT NULL,
       status            VARCHAR(30) NOT NULL,
       CONSTRAINT pk_atendimento PRIMARY KEY (id_atendimento),
       CONSTRAINT fk_atendimento_paciente FOREIGN KEY (id_paciente)
         REFERENCES paciente (id_paciente) ON DELETE CASCADE
     )
+  `);
+
+  await db.execute(sql`
+    CREATE UNIQUE INDEX IF NOT EXISTS uk_atendimento_em_andamento
+      ON atendimento (id_paciente)
+      WHERE status <> 'Finalizado'
   `);
 }
 

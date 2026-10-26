@@ -87,9 +87,35 @@ paths:
               schema: { $ref: '#/components/schemas/Erro' }
 
   /atendimentos:
+    get:
+      tags: [Atendimentos]
+      summary: Busca os atendimentos de um paciente pelo CPF
+      description: Devolve do mais recente para o mais antigo. Lista vazia quando o CPF não tem atendimentos.
+      parameters:
+        - in: query
+          name: cpf
+          required: true
+          schema: { type: string, example: '12345678900' }
+      responses:
+        '200':
+          description: Atendimentos do paciente
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/Atendimento' }
+        '422':
+          description: CPF ausente ou inválido
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Erro' }
     post:
       tags: [Atendimentos]
       summary: Abre um atendimento para um paciente
+      description: >
+        O atendimento sempre é aberto com status "Aberto". O número (id_atendimento)
+        e a data e hora de chegada são gerados pelo banco. Um paciente não pode ter
+        dois atendimentos em andamento (status diferente de "Finalizado").
       requestBody:
         required: true
         content:
@@ -99,7 +125,6 @@ paths:
               required: [id_paciente]
               properties:
                 id_paciente: { type: integer, example: 1 }
-                status: { type: string, maxLength: 30, default: Em espera }
       responses:
         '201':
           description: Atendimento aberto
@@ -110,20 +135,79 @@ paths:
                 properties:
                   id_atendimento: { type: integer, example: 1 }
                   id_paciente: { type: integer, example: 1 }
-                  status: { type: string, example: Em espera }
+                  status: { type: string, example: Aberto }
+                  data_hora_chegada: { type: string, format: date-time, example: '2026-10-25T14:32:10.123Z' }
         '404':
           description: Paciente não existe
           content:
             application/json:
               schema: { $ref: '#/components/schemas/Erro' }
+        '409':
+          description: Paciente já possui atendimento em andamento
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Erro' }
+              example: { detail: Paciente já possui atendimento em andamento (nº 8) }
         '422':
-          description: id_paciente ou status inválido
+          description: id_paciente inválido
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Erro' }
+
+  /atendimentos/abertos:
+    get:
+      tags: [Atendimentos]
+      summary: Lista os atendimentos em Aberto, por hora de chegada
+      description: Fila de atendimento, de quem chegou primeiro para quem chegou por último. Lista vazia quando não há atendimentos abertos.
+      responses:
+        '200':
+          description: Atendimentos abertos
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  allOf:
+                    - $ref: '#/components/schemas/Atendimento'
+                    - type: object
+                      properties:
+                        nome: { type: string, example: Maria da Silva }
+
+  /atendimentos/{numero}:
+    get:
+      tags: [Atendimentos]
+      summary: Busca um atendimento pelo número
+      parameters:
+        - in: path
+          name: numero
+          required: true
+          schema: { type: integer, example: 8 }
+      responses:
+        '200':
+          description: Atendimento encontrado
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Atendimento' }
+        '404':
+          description: Atendimento não encontrado
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Erro' }
+        '422':
+          description: Número do atendimento inválido
           content:
             application/json:
               schema: { $ref: '#/components/schemas/Erro' }
 
 components:
   schemas:
+    Atendimento:
+      type: object
+      properties:
+        id_atendimento: { type: integer, example: 8 }
+        id_paciente: { type: integer, example: 1 }
+        status: { type: string, example: Aberto }
+        data_hora_chegada: { type: string, format: date-time, example: '2026-10-25T21:39:14.490Z' }
     Paciente:
       type: object
       properties:

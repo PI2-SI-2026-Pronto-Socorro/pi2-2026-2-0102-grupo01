@@ -1,6 +1,7 @@
-const { eq, desc } = require('drizzle-orm');
+const { eq, desc, asc, and, ne } = require('drizzle-orm');
 const { getConnection } = require('../db');
-const { atendimento } = require('../db/schema');
+const { atendimento, paciente } = require('../db/schema');
+
 async function findStatusAtual(idPaciente) {
   const [ultimo] = await getConnection()
     .select({ status: atendimento.status })
@@ -16,4 +17,53 @@ async function create(dados) {
   return linha;
 }
 
-module.exports = { findStatusAtual, create };
+async function findEmAndamento(idPaciente) {
+  const [linha] = await getConnection()
+    .select()
+    .from(atendimento)
+    .where(and(
+      eq(atendimento.id_paciente, idPaciente),
+      ne(atendimento.status, 'Finalizado'),
+    ))
+    .limit(1);
+  return linha ?? null;
+}
+
+async function findById(idAtendimento) {
+  const [linha] = await getConnection()
+    .select()
+    .from(atendimento)
+    .where(eq(atendimento.id_atendimento, idAtendimento));
+  return linha ?? null;
+}
+
+async function findByCpf(cpf) {
+  return getConnection()
+    .select({
+      id_atendimento: atendimento.id_atendimento,
+      id_paciente: atendimento.id_paciente,
+      status: atendimento.status,
+      data_hora_chegada: atendimento.data_hora_chegada,
+    })
+    .from(atendimento)
+    .innerJoin(paciente, eq(paciente.id_paciente, atendimento.id_paciente))
+    .where(eq(paciente.cpf, cpf))
+    .orderBy(desc(atendimento.data_hora_chegada));
+}
+
+async function findAbertos() {
+  return getConnection()
+    .select({
+      id_atendimento: atendimento.id_atendimento,
+      id_paciente: atendimento.id_paciente,
+      nome: paciente.nome,
+      status: atendimento.status,
+      data_hora_chegada: atendimento.data_hora_chegada,
+    })
+    .from(atendimento)
+    .innerJoin(paciente, eq(paciente.id_paciente, atendimento.id_paciente))
+    .where(eq(atendimento.status, 'Aberto'))
+    .orderBy(asc(atendimento.data_hora_chegada));
+}
+
+module.exports = { findStatusAtual, findEmAndamento, findById, findByCpf, create, findAbertos };

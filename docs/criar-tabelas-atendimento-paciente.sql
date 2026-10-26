@@ -13,7 +13,7 @@ CREATE TABLE paciente (
 CREATE TABLE atendimento (
     id_atendimento    INTEGER GENERATED ALWAYS AS IDENTITY,
     id_paciente       INTEGER NOT NULL,
-    data_hora_chegada TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    data_hora_chegada TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP NOT NULL,
     status            VARCHAR(30) NOT NULL,
 
     CONSTRAINT pk_atendimento PRIMARY KEY (id_atendimento),
@@ -21,3 +21,7 @@ CREATE TABLE atendimento (
         REFERENCES paciente (id_paciente)
         ON DELETE CASCADE
 );
+
+CREATE UNIQUE INDEX uk_atendimento_em_andamento
+    ON atendimento (id_paciente)
+    WHERE status <> 'Finalizado';
