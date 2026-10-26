@@ -28,6 +28,12 @@ async function bootstrap() {
         REFERENCES paciente (id_paciente) ON DELETE CASCADE
     )
   `);
+
+  await db.execute(sql`
+    CREATE UNIQUE INDEX IF NOT EXISTS uk_atendimento_em_andamento
+      ON atendimento (id_paciente)
+      WHERE status <> 'Finalizado'
+  `);
 }
 
 module.exports = { bootstrap };

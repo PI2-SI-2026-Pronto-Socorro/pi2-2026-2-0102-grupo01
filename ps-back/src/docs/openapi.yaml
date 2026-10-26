@@ -92,7 +92,8 @@ paths:
       summary: Abre um atendimento para um paciente
       description: >
         O atendimento sempre é aberto com status "Aberto". O número (id_atendimento)
-        e a data e hora de chegada são gerados pelo banco.
+        e a data e hora de chegada são gerados pelo banco. Um paciente não pode ter
+        dois atendimentos em andamento (status diferente de "Finalizado").
       requestBody:
         required: true
         content:
@@ -119,6 +120,12 @@ paths:
           content:
             application/json:
               schema: { $ref: '#/components/schemas/Erro' }
+        '409':
+          description: Paciente já possui atendimento em andamento
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Erro' }
+              example: { detail: Paciente já possui atendimento em andamento (nº 8) }
         '422':
           description: id_paciente inválido
           content:

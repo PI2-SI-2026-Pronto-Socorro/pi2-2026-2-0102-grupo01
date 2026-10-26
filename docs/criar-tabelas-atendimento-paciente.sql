@@ -21,3 +21,7 @@ CREATE TABLE atendimento (
         REFERENCES paciente (id_paciente)
         ON DELETE CASCADE
 );
+
+CREATE UNIQUE INDEX uk_atendimento_em_andamento
+    ON atendimento (id_paciente)
+    WHERE status <> 'Finalizado';
