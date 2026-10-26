@@ -87,6 +87,28 @@ paths:
               schema: { $ref: '#/components/schemas/Erro' }
 
   /atendimentos:
+    get:
+      tags: [Atendimentos]
+      summary: Busca os atendimentos de um paciente pelo CPF
+      description: Devolve do mais recente para o mais antigo. Lista vazia quando o CPF não tem atendimentos.
+      parameters:
+        - in: query
+          name: cpf
+          required: true
+          schema: { type: string, example: '12345678900' }
+      responses:
+        '200':
+          description: Atendimentos do paciente
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/Atendimento' }
+        '422':
+          description: CPF ausente ou inválido
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Erro' }
     post:
       tags: [Atendimentos]
       summary: Abre um atendimento para um paciente
@@ -132,8 +154,41 @@ paths:
             application/json:
               schema: { $ref: '#/components/schemas/Erro' }
 
+  /atendimentos/{numero}:
+    get:
+      tags: [Atendimentos]
+      summary: Busca um atendimento pelo número
+      parameters:
+        - in: path
+          name: numero
+          required: true
+          schema: { type: integer, example: 8 }
+      responses:
+        '200':
+          description: Atendimento encontrado
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Atendimento' }
+        '404':
+          description: Atendimento não encontrado
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Erro' }
+        '422':
+          description: Número do atendimento inválido
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Erro' }
+
 components:
   schemas:
+    Atendimento:
+      type: object
+      properties:
+        id_atendimento: { type: integer, example: 8 }
+        id_paciente: { type: integer, example: 1 }
+        status: { type: string, example: Aberto }
+        data_hora_chegada: { type: string, format: date-time, example: '2026-10-25T21:39:14.490Z' }
     Paciente:
       type: object
       properties:

@@ -1,6 +1,6 @@
 const { eq, desc, and, ne } = require('drizzle-orm');
 const { getConnection } = require('../db');
-const { atendimento } = require('../db/schema');
+const { atendimento, paciente } = require('../db/schema');
 
 async function findStatusAtual(idPaciente) {
   const [ultimo] = await getConnection()
@@ -29,4 +29,26 @@ async function findEmAndamento(idPaciente) {
   return linha ?? null;
 }
 
-module.exports = { findStatusAtual, findEmAndamento, create };
+async function findById(idAtendimento) {
+  const [linha] = await getConnection()
+    .select()
+    .from(atendimento)
+    .where(eq(atendimento.id_atendimento, idAtendimento));
+  return linha ?? null;
+}
+
+async function findByCpf(cpf) {
+  return getConnection()
+    .select({
+      id_atendimento: atendimento.id_atendimento,
+      id_paciente: atendimento.id_paciente,
+      status: atendimento.status,
+      data_hora_chegada: atendimento.data_hora_chegada,
+    })
+    .from(atendimento)
+    .innerJoin(paciente, eq(paciente.id_paciente, atendimento.id_paciente))
+    .where(eq(paciente.cpf, cpf))
+    .orderBy(desc(atendimento.data_hora_chegada));
+}
+
+module.exports = { findStatusAtual, findEmAndamento, findById, findByCpf, create };

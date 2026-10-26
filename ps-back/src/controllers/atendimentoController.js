@@ -6,4 +6,12 @@ async function create(req, res) {
   res.status(201).json(novo);
 }
 
-module.exports = { create };
+async function findByNumero(req, res) {
+  res.json(await AtendimentoService.buscarPorNumero(req.params.numero));
+}
+
+async function findByCpf(req, res) {
+  res.json(await AtendimentoService.buscarPorCpf(req.query.cpf ?? ''));
+}
+
+module.exports = { create, findByNumero, findByCpf };
