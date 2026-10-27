@@ -6,10 +6,14 @@ let db = null;
 // Cria (ou reutiliza) o pool de conexões com o Neon.
 function initPool() {
   if (!db) {
+    const connectionString = process.env.DATABASE_URL;
+    const isLocalDatabase = !connectionString || /localhost|127\.0\.0\.1/.test(connectionString);
+
     const pool = new Pool({
-      connectionString: process.env.DATABASE_URL,
-      ssl: { rejectUnauthorized: true }, // o Neon exige SSL
+      connectionString,
+      ssl: isLocalDatabase ? false : { rejectUnauthorized: true },
     });
+
     db = drizzle(pool);
   }
   return db;
