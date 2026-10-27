@@ -1,0 +1,12 @@
+.pagina-inicio {
+  max-width: 960px;
+}
+
+.grupo-historias + .grupo-historias {
+  margin-top: 32px;
+}
+
+.grupo-historias h2 {
+  margin: 0 0 14px;
+  font-size: 1.1rem;
+}

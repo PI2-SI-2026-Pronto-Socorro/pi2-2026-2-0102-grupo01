@@ -1,0 +1,66 @@
+.pagina-h02 .busca {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 22px;
+}
+
+.pagina-h02 .busca label {
+  font-weight: 700;
+}
+
+.pagina-h02 .linha-busca {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.pagina-h02 .linha-busca input {
+  min-width: 220px;
+  flex: 1;
+  padding: 12px 14px;
+  border: 1px solid var(--cor-borda);
+  border-radius: 10px;
+}
+
+.pagina-h02 .resultado {
+  min-height: 120px;
+}
+
+.pagina-h02 .card-paciente {
+  padding: 18px;
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-padrao);
+  background: #f9fbff;
+}
+
+.pagina-h02 .tag-card {
+  display: inline-block;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: #e8f7ee;
+  color: #0f766e;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.pagina-h02 .card-paciente h3 {
+  margin: 16px 0;
+}
+
+.pagina-h02 .dados-paciente {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 14px 18px;
+}
+
+.pagina-h02 .dados-paciente div {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.pagina-h02 .dados-paciente span {
+  color: var(--cor-texto-suave);
+  font-size: 12px;
+}
