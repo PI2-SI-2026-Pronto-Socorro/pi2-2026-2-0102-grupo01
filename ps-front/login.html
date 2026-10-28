@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>PS Madre Theodora | Login</title>
+    <link rel="stylesheet" href="./css/global.css" />
+    <link rel="stylesheet" href="./css/pages/login.css" />
+  </head>
+  <body class="pagina-login">
+    <main class="container-login" aria-label="Tela de login do pronto socorro">
+      <section class="painel-visual" aria-label="Identidade visual do sistema">
+        <div class="figura-visual" aria-hidden="true">
+          <svg class="logo-visual" viewBox="0 0 460 280" xmlns="http://www.w3.org/2000/svg">
+            <g fill="none" stroke="#F4F8F8" stroke-width="6" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M178 96h92v92h-92z" opacity="0.18" />
+              <path d="M202 46v168M106 140h196" opacity="0.18" />
+              <path d="M117 64h44v44h-44z" opacity="0.22" />
+              <path d="M296 64h44v44h-44z" opacity="0.22" />
+              <path d="M117 172h44v44h-44z" opacity="0.22" />
+              <path d="M296 172h44v44h-44z" opacity="0.22" />
+              <path d="M230 18v74M178 70h104" opacity="0.28" />
+              <path d="M140 116h180" opacity="0.26" />
+              <path d="M180 140l34 40 22-34 24 36 34-62 25 35 22-41" />
+              <circle cx="315" cy="120" r="9" fill="#F4F8F8" stroke="none" />
+              <circle cx="85" cy="120" r="9" fill="#F4F8F8" stroke="none" />
+              <g transform="translate(180 40)">
+                <path d="M26 0h16v28H26zM0 26h68v16H0z" fill="#F4F8F8" />
+              </g>
+            </g>
+          </svg>
+        </div>
+
+        <div class="rodape-visual">
+          <div class="icone-sistema"></div>
+          <div class="texto-sistema">
+            <strong>PS Madre Theodora</strong>
+            <span>Pronto-socorro 24 horas</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="painel-formulario">
+        <div class="caixa-formulario">
+          <h1>Login</h1>
+
+          <form class="formulario-login">
+            <div class="campo">
+              <label for="email">E-mail</label>
+              <div class="campo-input">
+                <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M4 7.5A2.5 2.5 0 0 1 6.5 5h11A2.5 2.5 0 0 1 20 7.5v9A2.5 2.5 0 0 1 17.5 19h-11A2.5 2.5 0 0 1 4 16.5v-9Zm2.2 0 5.8 4.5L17.8 7.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                <input id="email" type="email" placeholder="example@email.com" />
+              </div>
+            </div>
+
+            <div class="campo">
+              <label for="senha">Senha</label>
+              <div class="campo-input">
+                <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M7 10V8.5A5 5 0 0 1 17 8.5V10M6 10h12a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2Z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                <input id="senha" type="password" placeholder="Digite sua senha" />
+              </div>
+            </div>
+
+            <a href="#" class="link-ajuda">Esqueci minha senha</a>
+
+            <button type="button" class="botao-login" onclick="window.location.href='./h03-cadastrar-paciente.html'">Entrar</button>
+          </form>
+        </div>
+      </section>
+    </main>
+  </body>
+</html>

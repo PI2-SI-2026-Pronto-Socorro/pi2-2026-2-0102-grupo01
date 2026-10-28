@@ -3,66 +3,47 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Pronto Socorro | Início</title>
-    <link rel="stylesheet" href="./css/global.css" />
-    <link rel="stylesheet" href="./css/pages/inicio.css" />
+    <title>PS Madre Theodora | Acesso</title>
+    <link rel="stylesheet" href="./css/pages/landing.css" />
   </head>
-  <body>
-    <header class="site-header">
-      <a class="marca" href="./index.html">Pronto Socorro</a>
-      <nav class="navegacao" aria-label="Navegação das histórias">
-        <a href="./h02-buscar-paciente.html">H02 Buscar paciente</a>
-        <a href="./h03-cadastrar-paciente.html">H03 Cadastrar paciente</a>
-        <a href="./h04-abrir-atendimento.html">H04 Abrir atendimento</a>
-        <a href="./h05-consultar-atendimento.html">H05 Consultar atendimento</a>
-        <a href="./h06-fila-triagem.html">H06 Fila de triagem</a>
-      </nav>
-    </header>
+  <body class="pagina-principal">
+    <main class="container-acesso" aria-label="Tela inicial de acesso">
+      <section class="conteudo-acesso">
+        <div class="cartao-acesso">
+          <span class="etiqueta">PS Madre Theodora</span>
+          <h1>Bem-vindo</h1>
+          <p>
+            Acesse sua conta ou cadastre-se para continuar.
+          </p>
 
-    <main class="conteudo pagina-inicio">
-      <section class="pagina">
-        <div class="cabecalho">
-          <p class="tag">Pronto Socorro · Protótipo</p>
-          <h1>Estrutura das histórias H02–H06</h1>
-          <p>Escolha uma história para abrir sua página de trabalho.</p>
+          <div class="grupo-botoes">
+            <a class="botao-acao principal" href="./login.html">Fazer login</a>
+            <a class="botao-acao secundario" href="./cadastro.html">Cadastrar</a>
+          </div>
         </div>
+      </section>
 
-        <section class="grupo-historias" aria-labelledby="titulo-recepcao">
-          <h2 id="titulo-recepcao">Épico: Recepção</h2>
-          <nav class="grid" aria-label="Histórias da Recepção">
-            <a class="cartao" href="./h02-buscar-paciente.html">
-              <span class="icone" aria-hidden="true">H02</span>
-              <strong>Buscar paciente pelo CPF</strong>
-              <small>Busca existente e área para evolução da história.</small>
-            </a>
-            <a class="cartao" href="./h03-cadastrar-paciente.html">
-              <span class="icone" aria-hidden="true">H03</span>
-              <strong>Cadastrar paciente</strong>
-              <small>Estrutura inicial da página.</small>
-            </a>
-            <a class="cartao" href="./h04-abrir-atendimento.html">
-              <span class="icone" aria-hidden="true">H04</span>
-              <strong>Abrir atendimento com número</strong>
-              <small>Estrutura inicial da página.</small>
-            </a>
-            <a class="cartao" href="./h05-consultar-atendimento.html">
-              <span class="icone" aria-hidden="true">H05</span>
-              <strong>Consultar atendimento</strong>
-              <small>Estrutura inicial da página.</small>
-            </a>
-          </nav>
-        </section>
-
-        <section class="grupo-historias" aria-labelledby="titulo-triagem">
-          <h2 id="titulo-triagem">Épico: Triagem</h2>
-          <nav class="grid" aria-label="Histórias da Triagem">
-            <a class="cartao" href="./h06-fila-triagem.html">
-              <span class="icone" aria-hidden="true">H06</span>
-              <strong>Fila de triagem</strong>
-              <small>Estrutura inicial da página.</small>
-            </a>
-          </nav>
-        </section>
+      <section class="painel-visual" aria-hidden="true">
+        <div class="figura-visual">
+          <svg viewBox="0 0 420 280" xmlns="http://www.w3.org/2000/svg">
+            <g fill="none" stroke="#F4F8F8" stroke-width="6" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M178 96h92v92h-92z" opacity="0.18" />
+              <path d="M202 46v168M106 140h196" opacity="0.18" />
+              <path d="M117 64h44v44h-44z" opacity="0.22" />
+              <path d="M296 64h44v44h-44z" opacity="0.22" />
+              <path d="M117 172h44v44h-44z" opacity="0.22" />
+              <path d="M296 172h44v44h-44z" opacity="0.22" />
+              <path d="M230 18v74M178 70h104" opacity="0.28" />
+              <path d="M140 116h180" opacity="0.26" />
+              <path d="M180 140l34 40 22-34 24 36 34-62 25 35 22-41" />
+              <circle cx="315" cy="120" r="9" fill="#F4F8F8" stroke="none" />
+              <circle cx="85" cy="120" r="9" fill="#F4F8F8" stroke="none" />
+              <g transform="translate(180 40)">
+                <path d="M26 0h16v28H26zM0 26h68v16H0z" fill="#F4F8F8" />
+              </g>
+            </g>
+          </svg>
+        </div>
       </section>
     </main>
   </body>
