@@ -3,48 +3,76 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>PS Madre Theodora | Acesso</title>
-    <link rel="stylesheet" href="./css/pages/landing.css" />
+    <title>Painel de atendimentos</title>
+    <link rel="stylesheet" href="./css/pages/inicio.css" />
   </head>
-  <body class="pagina-principal">
-    <main class="container-acesso" aria-label="Tela inicial de acesso">
-      <section class="conteudo-acesso">
-        <div class="cartao-acesso">
-          <span class="etiqueta">PS Madre Theodora</span>
-          <h1>Bem-vindo</h1>
-          <p>
-            Acesse sua conta ou cadastre-se para continuar.
-          </p>
+  <body>
+    <header class="topbar" aria-label="Cabeçalho principal"></header>
 
-          <div class="grupo-botoes">
-            <a class="botao-acao principal" href="./login.html">Fazer login</a>
-            <a class="botao-acao secundario" href="./cadastro.html">Cadastrar</a>
+    <div class="dashboard-shell">
+      <aside class="sidebar" aria-label="Menu lateral">
+        <button class="menu-item active" type="button">Painel de Atendimentos</button>
+        <button class="menu-item" type="button" onclick="window.location.href='./h02-buscar-paciente.html'">Buscar e Cadastrar<br />Paciente</button>
+        <button class="menu-item" type="button">Histórico Geral</button>
+      </aside>
+
+      <main class="main-panel" aria-label="Painel principal">
+        <div class="header-panel">
+          <div class="title-wrap">
+            <h1>Painel de atendimentos</h1>
+            <p>Gestão de pacientes e fluxo de entrada do dia</p>
           </div>
-        </div>
-      </section>
 
-      <section class="painel-visual" aria-hidden="true">
-        <div class="figura-visual">
-          <svg viewBox="0 0 420 280" xmlns="http://www.w3.org/2000/svg">
-            <g fill="none" stroke="#F4F8F8" stroke-width="6" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M178 96h92v92h-92z" opacity="0.18" />
-              <path d="M202 46v168M106 140h196" opacity="0.18" />
-              <path d="M117 64h44v44h-44z" opacity="0.22" />
-              <path d="M296 64h44v44h-44z" opacity="0.22" />
-              <path d="M117 172h44v44h-44z" opacity="0.22" />
-              <path d="M296 172h44v44h-44z" opacity="0.22" />
-              <path d="M230 18v74M178 70h104" opacity="0.28" />
-              <path d="M140 116h180" opacity="0.26" />
-              <path d="M180 140l34 40 22-34 24 36 34-62 25 35 22-41" />
-              <circle cx="315" cy="120" r="9" fill="#F4F8F8" stroke="none" />
-              <circle cx="85" cy="120" r="9" fill="#F4F8F8" stroke="none" />
-              <g transform="translate(180 40)">
-                <path d="M26 0h16v28H26zM0 26h68v16H0z" fill="#F4F8F8" />
-              </g>
-            </g>
-          </svg>
+          <button class="primary-button" type="button">Novo Atendimento</button>
         </div>
-      </section>
-    </main>
+
+        <section class="stats" aria-label="Estatísticas de atendimento">
+          <article class="stat-card">
+            <span>Abertos</span>
+            <strong>13</strong>
+          </article>
+
+          <article class="stat-card">
+            <span>Triados</span>
+            <strong>22</strong>
+          </article>
+
+          <article class="stat-card">
+            <span>Confirmados</span>
+            <strong>14</strong>
+          </article>
+
+          <article class="stat-card">
+            <span>Encerrados</span>
+            <strong>67</strong>
+          </article>
+        </section>
+
+        <section class="table-panel" aria-label="Lista de atendimentos">
+          <table>
+            <thead>
+              <tr>
+                <th>N° Atendimento</th>
+                <th>N° Atendimento</th>
+                <th>N° Atendimento</th>
+                <th>N° Atendimento</th>
+                <th>N° Atendimento</th>
+                <th>N° Atendimento</th>
+                <th>N° Atendimento</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+              <tr><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+              <tr><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+              <tr><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+              <tr><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+              <tr><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+              <tr><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+            </tbody>
+          </table>
+        </section>
+      </main>
+    </div>
   </body>
 </html>

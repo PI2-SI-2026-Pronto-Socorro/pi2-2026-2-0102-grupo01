@@ -1,40 +1,82 @@
-.pagina-h02 .busca {
+.page-dashboard {
+  background: #f3f3f3;
+}
+
+.page-card {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid #b8b8b8;
+  border-radius: 12px;
+  padding: 24px 22px;
+}
+
+.search-card {
+  max-width: 900px;
+}
+
+.busca-form {
   display: flex;
   flex-direction: column;
   gap: 12px;
   margin-bottom: 22px;
 }
 
-.pagina-h02 .busca label {
-  font-weight: 700;
+.busca-form label {
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: #1f1f1f;
 }
 
-.pagina-h02 .linha-busca {
+.linha-busca {
   display: flex;
   flex-wrap: wrap;
   gap: 12px;
 }
 
-.pagina-h02 .linha-busca input {
+.linha-busca input {
   min-width: 220px;
   flex: 1;
   padding: 12px 14px;
-  border: 1px solid var(--cor-borda);
+  border: 1px solid #bdbdbd;
   border-radius: 10px;
+  background: #f7f7f7;
+  font-size: 1rem;
 }
 
-.pagina-h02 .resultado {
+.botao-principal {
+  border: none;
+  border-radius: 10px;
+  background: #1d8a8a;
+  color: white;
+  padding: 12px 24px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.resultado {
   min-height: 120px;
+  border: 1px solid #d7d7d7;
+  border-radius: 10px;
+  background: #f7f7f7;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #555;
+  font-size: 1rem;
 }
 
-.pagina-h02 .card-paciente {
+.resultado p {
+  margin: 0;
+}
+
+.card-paciente {
   padding: 18px;
-  border: 1px solid var(--cor-borda);
-  border-radius: var(--raio-padrao);
-  background: #f9fbff;
+  border: 1px solid #d4d4d4;
+  border-radius: 12px;
+  background: #fff;
 }
 
-.pagina-h02 .tag-card {
+.tag-card {
   display: inline-block;
   padding: 6px 10px;
   border-radius: 999px;
@@ -44,23 +86,23 @@
   font-weight: 700;
 }
 
-.pagina-h02 .card-paciente h3 {
+.card-paciente h3 {
   margin: 16px 0;
 }
 
-.pagina-h02 .dados-paciente {
+.dados-paciente {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
   gap: 14px 18px;
 }
 
-.pagina-h02 .dados-paciente div {
+.dados-paciente div {
   display: flex;
   flex-direction: column;
   gap: 6px;
 }
 
-.pagina-h02 .dados-paciente span {
-  color: var(--cor-texto-suave);
+.dados-paciente span {
+  color: #666;
   font-size: 12px;
 }
