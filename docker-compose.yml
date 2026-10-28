@@ -13,6 +13,28 @@ services:
       - "5432:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d prontosocorro"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  api:
+    image: node:20-alpine
+    container_name: pronto-socorro-api
+    working_dir: /app
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      PORT: 3000
+      DATABASE_URL: postgresql://postgres:postgres@db:5432/prontosocorro
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./ps-back:/app
+    command: sh -c "npm install && npm run dev"
+    restart: unless-stopped
 
 volumes:
   pgdata:
