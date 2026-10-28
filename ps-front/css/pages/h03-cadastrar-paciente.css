@@ -1,3 +1,258 @@
-.pagina-h03 .area-reservada {
-  min-height: 220px;
+/* estrutura da tela de cadastro do paciente */
+:root {
+  --fundo-externo: #e8e8e8;
+  --fundo-lateral: #efefef;
+  --linha: #dfe1df;
+  --verde-principal: #0d6f6d;
+  --verde-escuro: #0a5f5d;
+  --texto-principal: #202b2b;
+  --texto-secundario: #6d7875;
+  --placeholder: #8f9a97;
+  --branco: #ffffff;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  min-height: 100%;
+}
+
+body {
+  min-height: 100vh;
+  background: var(--fundo-externo);
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  color: var(--texto-principal);
+}
+
+/* layout principal */
+.pagina-paciente {
+  display: flex;
+  min-height: 100vh;
+}
+
+.barra-lateral {
+  width: 260px;
+  background: var(--fundo-lateral);
+  border-right: 1px solid var(--linha);
+  display: flex;
+  flex-direction: column;
+  padding: 18px 14px 14px;
+}
+
+.marca-sistema {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px 18px;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--texto-principal);
+}
+
+.icone-marca {
+  width: 24px;
+  height: 24px;
+  border-radius: 8px;
+  background: var(--verde-principal);
+}
+
+.menu {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.titulo-menu {
+  margin: 18px 10px 6px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--texto-secundario);
+}
+
+.item-menu {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  color: #495a59;
+  text-decoration: none;
+  font-size: 0.98rem;
+}
+
+.item-menu.ativo {
+  background: rgba(13, 111, 109, 0.12);
+  color: var(--verde-escuro);
+  font-weight: 600;
+}
+
+.usuario-box {
+  margin-top: auto;
+  border-top: 1px solid var(--linha);
+  padding: 14px 10px 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  color: var(--texto-principal);
+  font-size: 0.9rem;
+}
+
+.usuario-box button {
+  border: 1px solid var(--linha);
+  background: var(--branco);
+  border-radius: 8px;
+  width: 26px;
+  height: 26px;
+  cursor: pointer;
+}
+
+/* conteudo principal */
+.conteudo-principal {
+  flex: 1;
+  padding: 18px 22px 0 22px;
+}
+
+.cabecalho-topo {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 6px 4px 10px;
+  color: var(--texto-secundario);
+  font-size: 0.95rem;
+}
+
+.indicador {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 500;
+}
+
+.data-hora {
+  font-weight: 500;
+}
+
+.cartao-pagina {
+  border-radius: 18px;
+  padding: 0 0 30px;
+}
+
+.cartao-pagina h1 {
+  margin: 8px 0 18px;
+  font-size: clamp(2rem, 2vw, 2.6rem);
+  letter-spacing: -0.04em;
+  color: #1f2f2d;
+}
+
+.formulario-paciente {
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid var(--linha);
+  border-radius: 16px;
+  padding: 18px 18px 12px;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(200px, 1fr));
+  gap: 18px 22px;
+}
+
+.campo {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.campo.largura-total {
+  grid-column: 1 / -1;
+}
+
+.campo label {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #243936;
+}
+
+.obrigatorio {
+  color: #de4a4a;
+}
+
+.campo input,
+.campo select {
+  width: 100%;
+  height: 40px;
+  border: 1px solid #d7dad7;
+  border-radius: 8px;
+  background: #f4f5f4;
+  padding: 8px 12px;
+  font-size: 1rem;
+  color: var(--texto-principal);
+}
+
+.campo input::placeholder {
+  color: var(--placeholder);
+}
+
+.campo select {
+  appearance: none;
+  background-image: linear-gradient(45deg, transparent 50%, #5b6765 50%), linear-gradient(135deg, #5b6765 50%, transparent 50%);
+  background-position: calc(100% - 18px) calc(50% - 2px), calc(100% - 12px) calc(50% - 2px);
+  background-size: 6px 6px, 6px 6px;
+  background-repeat: no-repeat;
+}
+
+.botoes-acoes {
+  grid-column: 1 / -1;
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 10px;
+}
+
+.botao {
+  min-width: 120px;
+  height: 40px;
+  border: none;
+  border-radius: 10px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.botao-secundario {
+  background: #f1f2f1;
+  color: #2a3837;
+  border: 1px solid #d6d9d7;
+}
+
+.botao-principal {
+  background: var(--verde-principal);
+  color: var(--branco);
+  box-shadow: 0 8px 16px rgba(13, 111, 109, 0.15);
+}
+
+@media (max-width: 900px) {
+  .pagina-paciente {
+    flex-direction: column;
+  }
+
+  .barra-lateral {
+    width: 100%;
+    border-right: none;
+    border-bottom: 1px solid var(--linha);
+  }
+
+  .formulario-paciente {
+    grid-template-columns: 1fr;
+  }
+
+  .botoes-acoes {
+    justify-content: stretch;
+  }
+
+  .botao {
+    flex: 1;
+  }
 }

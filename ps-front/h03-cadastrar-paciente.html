@@ -3,32 +3,89 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>H03 | Cadastrar paciente</title>
+    <title>PS Madre Theodora | Novo paciente</title>
     <link rel="stylesheet" href="./css/global.css" />
     <link rel="stylesheet" href="./css/pages/h03-cadastrar-paciente.css" />
   </head>
-  <body>
-    <header class="site-header">
-      <a class="marca" href="./index.html">Pronto Socorro</a>
-      <nav class="navegacao" aria-label="Navegação das histórias">
-        <a href="./h02-buscar-paciente.html">H02 Buscar paciente</a>
-        <a href="./h03-cadastrar-paciente.html" aria-current="page">H03 Cadastrar paciente</a>
-        <a href="./h04-abrir-atendimento.html">H04 Abrir atendimento</a>
-        <a href="./h05-consultar-atendimento.html">H05 Consultar atendimento</a>
-        <a href="./h06-fila-triagem.html">H06 Fila de triagem</a>
-      </nav>
-    </header>
+  <body class="pagina-paciente">
+    <aside class="barra-lateral" aria-label="Menu lateral">
+      <div class="marca-sistema">
+        <div class="icone-marca"></div>
+        <span>PS Madre Theodora</span>
+      </div>
 
-    <main class="conteudo pagina pagina-h03">
-      <div class="topo">
-        <a class="botao-voltar" href="./index.html">← Início</a>
+      <nav class="menu" aria-label="Menu principal">
+        <div class="titulo-menu">Recepção</div>
+        <a href="#" class="item-menu"><span>Painel de atendimentos</span></a>
+        <a href="#" class="item-menu ativo"><span>Pacientes</span></a>
+        <a href="#" class="item-menu"><span>Consultar atendimento</span></a>
+
+        <div class="titulo-menu">Triagem</div>
+        <a href="#" class="item-menu"><span>Fila de triagem</span></a>
+        <a href="#" class="item-menu"><span>Histórico</span></a>
+      </nav>
+
+      <div class="usuario-box">
+        <span>Ana Paula Ribeiro</span>
+        <button type="button" aria-label="sair"></button>
       </div>
-      <div class="cabecalho pequeno">
-        <p class="tag">H03 · Recepção</p>
-        <h1>Cadastrar paciente</h1>
-      </div>
-      <section class="caixa-vazia area-reservada" aria-label="Área de trabalho da história">
-        <p>Espaço reservado para implementar esta história.</p>
+    </aside>
+
+    <main class="conteudo-principal">
+      <header class="cabecalho-topo" aria-label="Topo da página">
+        <div class="indicador">Pacientes / <strong>Novo cadastro</strong></div>
+        <div class="data-hora">Qua 28/10 · 14:49</div>
+      </header>
+
+      <section class="cartao-pagina">
+        <h1>Novo paciente</h1>
+
+        <form class="formulario-paciente">
+          <div class="campo">
+            <label for="nome-completo">Nome completo <span class="obrigatorio">*</span></label>
+            <input id="nome-completo" type="text" value="Raimunda Ferreira de Souza Lima" />
+          </div>
+
+          <div class="campo">
+            <label for="cpf">CPF <span class="obrigatorio">*</span></label>
+            <input id="cpf" type="text" value="" placeholder="" />
+          </div>
+
+          <div class="campo">
+            <label for="data-nascimento">Data de nascimento <span class="obrigatorio">*</span></label>
+            <input id="data-nascimento" type="text" value="14/06/1958" />
+          </div>
+
+          <div class="campo">
+            <label for="sexo">Sexo <span class="obrigatorio">*</span></label>
+            <select id="sexo">
+              <option selected>Feminino</option>
+              <option>Masculino</option>
+              <option>Outro</option>
+              <option>Prefiro não informar</option>
+            </select>
+          </div>
+
+          <div class="campo">
+            <label for="telefone">Telefone</label>
+            <input id="telefone" type="text" value="(61) 98412-3307" />
+          </div>
+
+          <div class="campo largura-total">
+            <label for="nome-mae">Nome da mãe</label>
+            <input id="nome-mae" type="text" value="Francisca Ferreira de Souza" />
+          </div>
+
+          <div class="campo largura-total">
+            <label for="endereco">Endereço</label>
+            <input id="endereco" type="text" value="QNM 18 Conjunto F Casa 22, Ceilândia Sul" />
+          </div>
+
+          <div class="botoes-acoes">
+            <button type="button" class="botao botao-secundario">Cancelar</button>
+            <button type="button" class="botao botao-principal" onclick="window.location.href='./index.html'">Cadastrar</button>
+          </div>
+        </form>
       </section>
     </main>
   </body>

@@ -1,0 +1,264 @@
+/* base da tela de login */
+:root {
+  --fundo-externo: #dfe1df;
+  --fundo-cartao: #f2f2f2;
+  --fundo-input: #f4f5f4;
+  --cor-borda: #dfe5e2;
+  --verde-principal: #0d6f6d;
+  --verde-escuro: #0a5b5d;
+  --texto-principal: #1b2f2d;
+  --texto-secundario: #6d7875;
+  --verde-link: #0c7d78;
+  --branco: #ffffff;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  min-height: 100%;
+}
+
+body {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  background: var(--fundo-externo);
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  color: var(--texto-principal);
+}
+
+/* estrutura do card de login */
+.pagina-login {
+  padding: 32px;
+}
+
+.container-login {
+  width: min(1100px, 92vw);
+  min-height: 620px;
+  display: flex;
+  align-items: stretch;
+  background: var(--fundo-cartao);
+  border-radius: 34px;
+  padding: 24px 28px;
+  box-shadow: 0 18px 30px rgba(26, 38, 39, 0.06);
+}
+
+/* lado visual */
+.painel-visual {
+  position: relative;
+  flex: 1.1;
+  min-height: 560px;
+  background: linear-gradient(180deg, #0d6a69 0%, #0d5d5b 100%);
+  border-radius: 28px;
+  overflow: hidden;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding: 36px 26px 28px;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.05);
+}
+
+.painel-visual::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(circle, rgba(255, 255, 255, 0.18) 1.2px, transparent 1.4px);
+  background-size: 20px 20px;
+  opacity: 0.45;
+}
+
+.figura-visual {
+  position: relative;
+  z-index: 1;
+  width: min(100%, 460px);
+  height: 300px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.logo-visual {
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.rodape-visual {
+  position: absolute;
+  left: 28px;
+  bottom: 20px;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: rgba(255, 255, 255, 0.92);
+}
+
+.icone-sistema {
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.22);
+}
+
+.texto-sistema {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.2;
+}
+
+.texto-sistema strong {
+  font-size: 1.05rem;
+  font-weight: 700;
+}
+
+.texto-sistema span {
+  font-size: 0.82rem;
+  opacity: 0.9;
+}
+
+/* lado do formulario */
+.painel-formulario {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 28px 32px 20px 46px;
+}
+
+.caixa-formulario {
+  width: min(100%, 440px);
+}
+
+.caixa-formulario h1 {
+  margin: 0 0 28px;
+  font-size: clamp(2rem, 3vw, 3rem);
+  font-weight: 700;
+  color: #1f2f2d;
+  letter-spacing: -0.04em;
+}
+
+.formulario-login {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.campo {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.campo label {
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: #223a39;
+}
+
+.campo-input {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  height: 54px;
+  padding: 0 14px;
+  background: var(--fundo-input);
+  border: 1px solid var(--cor-borda);
+  border-radius: 12px;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.6);
+}
+
+.campo-input svg {
+  width: 16px;
+  height: 16px;
+  color: #6d7b78;
+  flex-shrink: 0;
+}
+
+.campo-input input {
+  border: 0;
+  outline: 0;
+  background: transparent;
+  width: 100%;
+  font-size: 1rem;
+  color: var(--texto-principal);
+}
+
+.campo-input input::placeholder {
+  color: #818b87;
+}
+
+.link-ajuda {
+  align-self: flex-start;
+  margin-top: 2px;
+  font-size: 0.95rem;
+  color: var(--verde-link);
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.botao-login {
+  margin-top: 6px;
+  width: 100%;
+  height: 52px;
+  border: none;
+  border-radius: 14px;
+  background: linear-gradient(180deg, #0c6868 0%, #0a5a5a 100%);
+  color: var(--branco);
+  font-size: 1.1rem;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 8px 18px rgba(11, 90, 92, 0.18);
+  transition: transform 0.15s ease, filter 0.15s ease;
+}
+
+.botao-login:hover {
+  transform: translateY(-1px);
+  filter: brightness(1.02);
+}
+
+@media (max-width: 900px) {
+  .container-login {
+    flex-direction: column;
+    padding: 18px;
+  }
+
+  .painel-visual {
+    min-height: 420px;
+  }
+
+  .painel-formulario {
+    padding: 20px 12px 8px;
+  }
+}
+
+@media (max-width: 560px) {
+  .pagina-login {
+    padding: 14px;
+  }
+
+  .container-login {
+    width: 100%;
+    border-radius: 22px;
+    padding: 10px;
+  }
+
+  .painel-visual {
+    min-height: 320px;
+    border-radius: 20px;
+  }
+
+  .caixa-formulario h1 {
+    margin-bottom: 20px;
+  }
+
+  .rodape-visual {
+    left: 18px;
+    bottom: 16px;
+  }
+}
