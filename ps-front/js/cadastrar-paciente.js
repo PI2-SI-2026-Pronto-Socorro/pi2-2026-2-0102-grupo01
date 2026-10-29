@@ -2,7 +2,7 @@ const formulario = document.getElementById('form-paciente');
 const mensagem = document.getElementById('mensagem');
 const botaoCadastrar = document.getElementById('botao-cadastrar');
 
-document.getElementById('cpf').value = new URLSearchParams(location.search).get('cpf') ?? '';
+document.getElementById('cpf').value = mascaras.cpf(new URLSearchParams(location.search).get('cpf') ?? '');
 
 formulario.addEventListener('submit', async (evento) => {
   evento.preventDefault();

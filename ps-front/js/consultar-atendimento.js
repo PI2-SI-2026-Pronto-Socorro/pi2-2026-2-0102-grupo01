@@ -13,6 +13,7 @@ document.querySelectorAll('[name="tipo-busca"]').forEach((opcao) => {
     rotulo.textContent = porCpf() ? 'CPF do paciente' : 'Número do atendimento';
     campo.placeholder = porCpf() ? '000.000.000-00' : 'AT0001/2026';
     campo.value = '';
+    campo.dataset.mascara = porCpf() ? 'cpf' : '';
     resultado.innerHTML = '';
   });
 });

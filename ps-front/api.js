@@ -58,3 +58,21 @@ if (contadoresFila.length) {
     .then((abertos) => contadoresFila.forEach((elemento) => { elemento.textContent = abertos.length; }))
     .catch(() => contadoresFila.forEach((elemento) => { elemento.textContent = ''; }));
 }
+
+const mascaras = {
+  cpf: (digitos) => digitos.slice(0, 11)
+    .replace(/(\d{3})(\d)/, '$1.$2')
+    .replace(/(\d{3})(\d)/, '$1.$2')
+    .replace(/(\d{3})(\d{1,2})$/, '$1-$2'),
+  telefone: (digitos) => {
+    const numero = digitos.slice(0, 11);
+    if (numero.length <= 2) return numero.replace(/(\d+)/, '($1');
+    const meio = numero.length === 11 ? 5 : 4;
+    return `(${numero.slice(0, 2)}) ${numero.slice(2, 2 + meio)}${numero.length > 2 + meio ? `-${numero.slice(2 + meio)}` : ''}`;
+  },
+};
+
+document.addEventListener('input', (evento) => {
+  const mascara = mascaras[evento.target.dataset?.mascara];
+  if (mascara) evento.target.value = mascara(evento.target.value.replace(/\D/g, ''));
+});
