@@ -27,19 +27,24 @@ function formatarData(iso) {
 
 function montarCardPaciente(paciente) {
   const card = document.createElement('div');
-  card.className = 'card-paciente';
+  card.className = 'card border-success-subtle';
+
+  const corpo = document.createElement('div');
+  corpo.className = 'card-body';
+  card.appendChild(corpo);
 
   const tag = document.createElement('span');
-  tag.className = 'tag-card';
+  tag.className = 'badge text-bg-success';
   tag.textContent = 'Paciente encontrado';
-  card.appendChild(tag);
+  corpo.appendChild(tag);
 
-  const titulo = document.createElement('h3');
+  const titulo = document.createElement('h2');
+  titulo.className = 'h5 mt-3 mb-3';
   titulo.textContent = paciente.nome;
-  card.appendChild(titulo);
+  corpo.appendChild(titulo);
 
   const dados = document.createElement('div');
-  dados.className = 'dados-paciente';
+  dados.className = 'row row-cols-2 row-cols-md-3 g-3';
 
   const campos = [
     ['CPF', paciente.cpf],
@@ -51,8 +56,10 @@ function montarCardPaciente(paciente) {
 
   campos.forEach(([label, valor]) => {
     const item = document.createElement('div');
+    item.className = 'col';
 
     const legenda = document.createElement('span');
+    legenda.className = 'd-block small text-body-secondary';
     legenda.textContent = label;
 
     const valorElemento = document.createElement('strong');
@@ -63,7 +70,7 @@ function montarCardPaciente(paciente) {
     dados.appendChild(item);
   });
 
-  card.appendChild(dados);
+  corpo.appendChild(dados);
   return card;
 }
 
@@ -74,17 +81,17 @@ if (formulario && resultado) {
     const cpfDigitado = document.getElementById('cpf').value.replace(/\D/g, '');
 
     if (cpfDigitado.length !== 11) {
-      resultado.innerHTML = '<p>Digite um CPF válido.</p>';
+      resultado.innerHTML = '<div class="alert alert-warning mb-0">Digite um CPF válido.</div>';
       return;
     }
 
-    resultado.innerHTML = '<p>Buscando...</p>';
+    resultado.innerHTML = '<div class="d-flex align-items-center gap-2 text-body-secondary"><span class="spinner-border spinner-border-sm" aria-hidden="true"></span>Buscando...</div>';
 
     let resposta;
     try {
       resposta = await fetch(`${API_URL}/pacientes/${cpfDigitado}`);
     } catch {
-      resultado.innerHTML = '<p>Não foi possível conectar à API.</p>';
+      resultado.innerHTML = '<div class="alert alert-danger mb-0">Não foi possível conectar à API.</div>';
       return;
     }
 
@@ -96,14 +103,14 @@ if (formulario && resultado) {
     }
 
     if (resposta.status !== 404) {
-      resultado.innerHTML = '<p>Erro ao buscar paciente.</p>';
+      resultado.innerHTML = '<div class="alert alert-danger mb-0">Erro ao buscar paciente.</div>';
       return;
     }
 
     resultado.innerHTML = `
-      <div class="caixa-vazia">
-        <p>CPF não encontrado na base atual.</p>
-        <button type="button" class="botao-principal" id="botao-cadastrar">Cadastrar</button>
+      <div class="alert alert-light border d-flex flex-wrap align-items-center justify-content-between gap-2 mb-0">
+        <span>CPF não encontrado na base atual.</span>
+        <button type="button" class="btn btn-primary" id="botao-cadastrar">Cadastrar paciente</button>
       </div>
     `;
 
