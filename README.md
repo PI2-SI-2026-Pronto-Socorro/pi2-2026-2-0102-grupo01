@@ -47,7 +47,7 @@ pi2-2026-2-0102-grupo01/
 │       ├── services/                               → regras de negócio (validações, CPF repetido, paciente existente)
 │       ├── repositories/                           → só acesso ao banco (consultas com Drizzle)
 │       ├── models/                                 → classes Paciente e Atendimento
-│       ├── db/                                     → conexão (index.js), tabelas (schema.js) e criação das tabelas (bootstrap.js)
+│       ├── db/                                     → conexão (index.js), tabelas (schema.js)
 │       ├── middlewares/                            → logger de requisições e tratamento de erros
 │       ├── utils/                                  → erros de negócio e mapeamento de erros do PostgreSQL
 │       └── docs/                                  → documentação da API (openapi.yaml), exibida pelo Swagger
@@ -82,10 +82,10 @@ Para criar um banco novo:
 
 1. Crie uma conta no Neon e clique em **New Project**.
 2. Em **Region**, escolha **AWS South America East 1 (São Paulo)**.
-3. Abra o **SQL Editor**, cole o conteúdo de `docs/criar-tabelas-atendimento-paciente.sql` e clique em **Run**.
-4. Clique em **Connect**, deixe **Connection pooling** ligado e copie a URL de conexão.
+3. Clique em **Connect**, deixe **Connection pooling** ligado e copie a URL de conexão.
+4. Depois de criar o `.env` (etapa 3.2) e instalar as dependências (etapa 3.4), crie as tabelas com `npm run db:push` dentro de `ps-back`.
 
-O projeto não usa migrations: qualquer alteração em tabela deve ser feita em **três lugares**: no banco (pelo SQL Editor), no script em `docs/` e no `ps-back/schema.js`.
+As tabelas são definidas só em `ps-back/src/db/schema.js`. Para alterar uma tabela, edite esse arquivo e rode `npm run db:push`: o drizzle-kit compara o schema com o banco e aplica a diferença.
 
 ## 3. Execução da Aplicação
 
@@ -161,4 +161,4 @@ Abra http://localhost:3000/api/pacientes. A página deve mostrar a lista de paci
 | `'nodemon' não é reconhecido` | As dependências não estão instaladas. | Rode `npm install` dentro de `ps-back`. |
 | `Cannot find module '...'` | As dependências não estão instaladas ou estão incompletas. | Rode `npm install` dentro de `ps-back`. |
 | Rotas respondendo `500` | A `DATABASE_URL` do `.env` está errada ou vazia. | Confira o `.env` e reinicie o servidor. |
-| `relation "paciente" does not exist` | As tabelas não foram criadas no banco. | Rode o script de `docs/` no SQL Editor do Neon. |
+| `relation "paciente" does not exist` | As tabelas não foram criadas no banco. | Rode `npm run db:push` dentro de `ps-back`. |
