@@ -2,6 +2,15 @@ const { eq, desc, asc, and, ne } = require('drizzle-orm');
 const { getConnection } = require('../db');
 const { atendimento, paciente } = require('../db/schema');
 
+const comPaciente = {
+  id_atendimento: atendimento.id_atendimento,
+  id_paciente: atendimento.id_paciente,
+  status: atendimento.status,
+  data_hora_chegada: atendimento.data_hora_chegada,
+  nome: paciente.nome,
+  cpf: paciente.cpf,
+};
+
 async function findStatusAtual(idPaciente) {
   const [ultimo] = await getConnection()
     .select({ status: atendimento.status })
@@ -31,20 +40,16 @@ async function findEmAndamento(idPaciente) {
 
 async function findById(idAtendimento) {
   const [linha] = await getConnection()
-    .select()
+    .select(comPaciente)
     .from(atendimento)
+    .innerJoin(paciente, eq(paciente.id_paciente, atendimento.id_paciente))
     .where(eq(atendimento.id_atendimento, idAtendimento));
   return linha ?? null;
 }
 
 async function findByCpf(cpf) {
   return getConnection()
-    .select({
-      id_atendimento: atendimento.id_atendimento,
-      id_paciente: atendimento.id_paciente,
-      status: atendimento.status,
-      data_hora_chegada: atendimento.data_hora_chegada,
-    })
+    .select(comPaciente)
     .from(atendimento)
     .innerJoin(paciente, eq(paciente.id_paciente, atendimento.id_paciente))
     .where(eq(paciente.cpf, cpf))
@@ -53,13 +58,7 @@ async function findByCpf(cpf) {
 
 async function findAbertos() {
   return getConnection()
-    .select({
-      id_atendimento: atendimento.id_atendimento,
-      id_paciente: atendimento.id_paciente,
-      nome: paciente.nome,
-      status: atendimento.status,
-      data_hora_chegada: atendimento.data_hora_chegada,
-    })
+    .select(comPaciente)
     .from(atendimento)
     .innerJoin(paciente, eq(paciente.id_paciente, atendimento.id_paciente))
     .where(eq(atendimento.status, 'Aberto'))

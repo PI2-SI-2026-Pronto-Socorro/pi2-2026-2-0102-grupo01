@@ -71,6 +71,13 @@ function montarCardPaciente(paciente) {
   });
 
   corpo.appendChild(dados);
+
+  const linkFicha = document.createElement('a');
+  linkFicha.className = 'btn btn-primary mt-3';
+  linkFicha.href = `./h04-abrir-atendimento.html?cpf=${paciente.cpf}`;
+  linkFicha.textContent = 'Abrir ficha';
+  corpo.appendChild(linkFicha);
+
   return card;
 }
 
