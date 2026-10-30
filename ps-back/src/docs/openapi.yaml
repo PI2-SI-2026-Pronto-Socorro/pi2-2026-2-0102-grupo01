@@ -79,7 +79,7 @@ paths:
                   - $ref: '#/components/schemas/Paciente'
                   - type: object
                     properties:
-                      status: { type: string, nullable: true, example: Em espera }
+                      status: { type: string, nullable: true, example: Aberto, description: Status do último atendimento }
         '404':
           description: Paciente não encontrado
           content:
@@ -113,9 +113,9 @@ paths:
       tags: [Atendimentos]
       summary: Abre um atendimento para um paciente
       description: >
-        O atendimento sempre é aberto com status "Aberto". O número (id_atendimento)
-        e a data e hora de chegada são gerados pelo banco. Um paciente não pode ter
-        dois atendimentos em andamento (status diferente de "Finalizado").
+        O atendimento sempre é aberto com status "Aberto". O número (numero_atendimento,
+        no formato AT0001) e a data e hora de chegada são gerados pelo banco. Um paciente
+        não pode ter dois atendimentos em andamento (status diferente de "Encerrado" e "Cancelado").
       requestBody:
         required: true
         content:
@@ -124,19 +124,13 @@ paths:
               type: object
               required: [id_paciente]
               properties:
-                id_paciente: { type: integer, example: 1 }
+                id_paciente: { type: string, format: uuid, example: 3f2b8c1e-9a4d-4e7b-8c21-5d6f7a8b9c0d }
       responses:
         '201':
           description: Atendimento aberto
           content:
             application/json:
-              schema:
-                type: object
-                properties:
-                  id_atendimento: { type: integer, example: 1 }
-                  id_paciente: { type: integer, example: 1 }
-                  status: { type: string, example: Aberto }
-                  data_hora_chegada: { type: string, format: date-time, example: '2026-10-25T14:32:10.123Z' }
+              schema: { $ref: '#/components/schemas/Atendimento' }
         '404':
           description: Paciente não existe
           content:
@@ -147,7 +141,7 @@ paths:
           content:
             application/json:
               schema: { $ref: '#/components/schemas/Erro' }
-              example: { detail: Paciente já possui atendimento em andamento (nº 8) }
+              example: { detail: Paciente já possui atendimento em andamento (nº AT0008) }
         '422':
           description: id_paciente inválido
           content:
@@ -181,7 +175,7 @@ paths:
         - in: path
           name: numero
           required: true
-          schema: { type: integer, example: 8 }
+          schema: { type: string, pattern: '^AT\d{4,9}$', example: AT0008 }
       responses:
         '200':
           description: Atendimento encontrado
@@ -204,17 +198,19 @@ components:
     Atendimento:
       type: object
       properties:
-        id_atendimento: { type: integer, example: 8 }
-        id_paciente: { type: integer, example: 1 }
-        status: { type: string, example: Aberto }
+        id_atendimento: { type: string, format: uuid, example: 7c1d2e3f-4a5b-4c6d-8e7f-9a0b1c2d3e4f }
+        numero_atendimento: { type: string, example: AT0008 }
+        id_paciente: { type: string, format: uuid, example: 3f2b8c1e-9a4d-4e7b-8c21-5d6f7a8b9c0d }
+        status_atendimento: { type: string, enum: [Aberto, Triado, Confirmado, Encerrado, Cancelado], example: Aberto }
         data_hora_chegada: { type: string, format: date-time, example: '2026-10-25T21:39:14.490Z' }
     Paciente:
       type: object
       properties:
-        id_paciente: { type: integer, example: 1 }
+        id_paciente: { type: string, format: uuid, example: 3f2b8c1e-9a4d-4e7b-8c21-5d6f7a8b9c0d }
         nome: { type: string, example: Maria da Silva }
-        cpf: { type: string, example: '12345678900' }
-        data_nascimento: { type: string, format: date, example: '1990-03-14' }
+        cpf: { type: string, nullable: true, example: '12345678900' }
+        rg: { type: string, nullable: true, example: '123456789' }
+        data_nascimento: { type: string, format: date, nullable: true, example: '1990-03-14' }
         genero: { type: string, nullable: true, example: Feminino }
         telefone: { type: string, nullable: true, example: (11) 98765-4321 }
     NovoPaciente:
@@ -223,6 +219,7 @@ components:
       properties:
         nome: { type: string, maxLength: 100, example: Maria da Silva }
         cpf: { type: string, pattern: '^\d{11}$', example: '12345678900' }
+        rg: { type: string, maxLength: 15, example: '123456789' }
         data_nascimento: { type: string, format: date, example: '1990-03-14' }
         genero: { type: string, maxLength: 20, example: Feminino }
         telefone: { type: string, maxLength: 15, example: (11) 98765-4321 }

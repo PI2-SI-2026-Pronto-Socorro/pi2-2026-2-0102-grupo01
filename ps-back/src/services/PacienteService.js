@@ -13,6 +13,7 @@ function validar(p) {
   if (typeof p.cpf !== 'string' || !/^\d{11}$/.test(p.cpf)) return 'CPF deve ter 11 números';
   if (typeof p.data_nascimento !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(p.data_nascimento)
       || isNaN(new Date(p.data_nascimento))) return 'Data de nascimento inválida (use AAAA-MM-DD)';
+  if (!textoOpcional(p.rg, 15)) return 'RG inválido';
   if (!textoOpcional(p.genero, 20)) return 'Gênero inválido';
   if (!textoOpcional(p.telefone, 15)) return 'Telefone inválido';
   return null;
