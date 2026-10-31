@@ -3,78 +3,198 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Painel de atendimentos</title>
+    <title>Painel de atendimentos | PS Madre Theodora</title>
     <link rel="stylesheet" href="/vendor/bootstrap/css/bootstrap.min.css" />
     <link rel="stylesheet" href="./css/pages/inicio.css" />
   </head>
   <body>
-    <header class="topbar" aria-label="Cabeçalho principal"></header>
+    <div data-componente="cabecalho"></div>
 
     <div class="dashboard-shell">
-      <aside class="sidebar" aria-label="Menu lateral">
-        <button class="menu-item active" type="button">Painel de Atendimentos</button>
-        <button class="menu-item" type="button" onclick="window.location.href='./h02-buscar-paciente.html'">Buscar e Cadastrar<br />Paciente</button>
-        <button class="menu-item" type="button">Histórico Geral</button>
-      </aside>
+      <div data-componente="menu-lateral"></div>
 
       <main class="main-panel" aria-label="Painel principal">
         <div class="header-panel">
           <div class="title-wrap">
-            <h1>Painel de atendimentos</h1>
+            <h1>Painel de Atendimentos</h1>
             <p>Gestão de pacientes e fluxo de entrada do dia</p>
           </div>
-
-          <button class="primary-button" type="button">Novo Atendimento</button>
+          <a class="primary-button" href="./h04-abrir-atendimento.html">
+            <span aria-hidden="true">⊕</span>
+            Novo Atendimento
+          </a>
         </div>
 
         <section class="stats" aria-label="Estatísticas de atendimento">
-          <article class="stat-card">
-            <span>Abertos</span>
-            <strong>13</strong>
+          <article class="stat-card stat-open">
+            <div><span>Abertos</span><strong>12</strong></div>
+            <span class="stat-dot" aria-hidden="true"></span>
           </article>
-
-          <article class="stat-card">
-            <span>Triados</span>
-            <strong>22</strong>
+          <article class="stat-card stat-triaged">
+            <div><span>Triados</span><strong>5</strong></div>
+            <span class="stat-dot" aria-hidden="true"></span>
           </article>
-
-          <article class="stat-card">
-            <span>Confirmados</span>
-            <strong>14</strong>
+          <article class="stat-card stat-confirmed">
+            <div><span>Confirmados</span><strong>3</strong></div>
+            <span class="stat-dot" aria-hidden="true"></span>
           </article>
-
-          <article class="stat-card">
-            <span>Encerrados</span>
-            <strong>67</strong>
+          <article class="stat-card stat-closed">
+            <div><span>Encerrados</span><strong>28</strong></div>
+            <span class="stat-dot" aria-hidden="true"></span>
           </article>
         </section>
 
         <section class="table-panel" aria-label="Lista de atendimentos">
-          <table>
-            <thead>
-              <tr>
-                <th>N° Atendimento</th>
-                <th>N° Atendimento</th>
-                <th>N° Atendimento</th>
-                <th>N° Atendimento</th>
-                <th>N° Atendimento</th>
-                <th>N° Atendimento</th>
-                <th>N° Atendimento</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
-              <tr><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
-              <tr><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
-              <tr><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
-              <tr><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
-              <tr><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
-              <tr><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
-            </tbody>
-          </table>
+          <div class="table-scroll">
+            <table>
+              <thead>
+                <tr>
+                  <th scope="col">Nº Atendimento</th>
+                  <th scope="col">Paciente</th>
+                  <th scope="col">CPF</th>
+                  <th scope="col">Status</th>
+                  <th scope="col">Hora Chegada</th>
+                  <th scope="col">Ações</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><a class="appointment-number" href="./h05-consultar-atendimento.html">AT0006/2026</a></td>
+                  <td>Carlos Eduardo da Silva</td>
+                  <td>111.222.333-44</td>
+                  <td><span class="status-badge status-open"><span></span>Aberto</span></td>
+                  <td>14:32</td>
+                  <td class="table-actions">
+                    <a class="icon-button view-button" href="./h05-consultar-atendimento.html" aria-label="Visualizar atendimento AT0006/2026">
+                      <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                        <path d="M2.5 12s3.5-6 9.5-6 9.5 6 9.5 6-3.5 6-9.5 6-9.5-6-9.5-6Z" stroke="currentColor" stroke-width="2" />
+                        <circle cx="12" cy="12" r="2.5" stroke="currentColor" stroke-width="2" />
+                      </svg>
+                    </a>
+                    <a class="icon-button edit-button" href="./h04-abrir-atendimento.html" aria-label="Editar atendimento AT0006/2026">
+                      <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                        <path d="m14 5 5 5M4 20l4.5-1 10-10a2.1 2.1 0 0 0-3-3l-10 10L4 20Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                      </svg>
+                    </a>
+                  </td>
+                </tr>
+                <tr>
+                  <td><a class="appointment-number" href="./h05-consultar-atendimento.html">AT0005/2026</a></td>
+                  <td>Maria das Dores Souza</td>
+                  <td>555.666.777-88</td>
+                  <td><span class="status-badge status-triaged"><span></span>Triado</span></td>
+                  <td>14:15</td>
+                  <td class="table-actions">
+                    <a class="icon-button view-button" href="./h05-consultar-atendimento.html" aria-label="Visualizar atendimento AT0005/2026">
+                      <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                        <path d="M2.5 12s3.5-6 9.5-6 9.5 6 9.5 6-3.5 6-9.5 6-9.5-6-9.5-6Z" stroke="currentColor" stroke-width="2" />
+                        <circle cx="12" cy="12" r="2.5" stroke="currentColor" stroke-width="2" />
+                      </svg>
+                    </a>
+                    <a class="icon-button edit-button" href="./h04-abrir-atendimento.html" aria-label="Editar atendimento AT0005/2026">
+                      <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                        <path d="m14 5 5 5M4 20l4.5-1 10-10a2.1 2.1 0 0 0-3-3l-10 10L4 20Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                      </svg>
+                    </a>
+                  </td>
+                </tr>
+                <tr>
+                  <td><a class="appointment-number" href="./h05-consultar-atendimento.html">AT0004/2026</a></td>
+                  <td>João Batista Rodrigues</td>
+                  <td>999.888.777-66</td>
+                  <td><span class="status-badge status-confirmed"><span></span>Confirmado</span></td>
+                  <td>13:58</td>
+                  <td class="table-actions">
+                    <a class="icon-button view-button" href="./h05-consultar-atendimento.html" aria-label="Visualizar atendimento AT0004/2026">
+                      <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                        <path d="M2.5 12s3.5-6 9.5-6 9.5 6 9.5 6-3.5 6-9.5 6-9.5-6-9.5-6Z" stroke="currentColor" stroke-width="2" />
+                        <circle cx="12" cy="12" r="2.5" stroke="currentColor" stroke-width="2" />
+                      </svg>
+                    </a>
+                    <a class="icon-button edit-button" href="./h04-abrir-atendimento.html" aria-label="Editar atendimento AT0004/2026">
+                      <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                        <path d="m14 5 5 5M4 20l4.5-1 10-10a2.1 2.1 0 0 0-3-3l-10 10L4 20Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                      </svg>
+                    </a>
+                  </td>
+                </tr>
+                <tr>
+                  <td><a class="appointment-number" href="./h05-consultar-atendimento.html">AT0003/2026</a></td>
+                  <td>Ana Beatriz de Oliveira</td>
+                  <td>444.333.222-11</td>
+                  <td><span class="status-badge status-open"><span></span>Aberto</span></td>
+                  <td>13:45</td>
+                  <td class="table-actions">
+                    <a class="icon-button view-button" href="./h05-consultar-atendimento.html" aria-label="Visualizar atendimento AT0003/2026">
+                      <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                        <path d="M2.5 12s3.5-6 9.5-6 9.5 6 9.5 6-3.5 6-9.5 6-9.5-6-9.5-6Z" stroke="currentColor" stroke-width="2" />
+                        <circle cx="12" cy="12" r="2.5" stroke="currentColor" stroke-width="2" />
+                      </svg>
+                    </a>
+                    <a class="icon-button edit-button" href="./h04-abrir-atendimento.html" aria-label="Editar atendimento AT0003/2026">
+                      <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                        <path d="m14 5 5 5M4 20l4.5-1 10-10a2.1 2.1 0 0 0-3-3l-10 10L4 20Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                      </svg>
+                    </a>
+                  </td>
+                </tr>
+                <tr>
+                  <td><a class="appointment-number" href="./h05-consultar-atendimento.html">AT0002/2026</a></td>
+                  <td>Francisco José dos Santos</td>
+                  <td>222.444.666-88</td>
+                  <td><span class="status-badge status-closed"><span></span>Encerrado</span></td>
+                  <td>12:10</td>
+                  <td class="table-actions">
+                    <a class="icon-button view-button" href="./h05-consultar-atendimento.html" aria-label="Visualizar atendimento AT0002/2026">
+                      <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                        <path d="M2.5 12s3.5-6 9.5-6 9.5 6 9.5 6-3.5 6-9.5 6-9.5-6-9.5-6Z" stroke="currentColor" stroke-width="2" />
+                        <circle cx="12" cy="12" r="2.5" stroke="currentColor" stroke-width="2" />
+                      </svg>
+                    </a>
+                    <a class="icon-button edit-button" href="./h04-abrir-atendimento.html" aria-label="Editar atendimento AT0002/2026">
+                      <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                        <path d="m14 5 5 5M4 20l4.5-1 10-10a2.1 2.1 0 0 0-3-3l-10 10L4 20Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                      </svg>
+                    </a>
+                  </td>
+                </tr>
+                <tr>
+                  <td><a class="appointment-number" href="./h05-consultar-atendimento.html">AT0001/2026</a></td>
+                  <td>Maria Aparecida dos Santos</td>
+                  <td>123.456.789-00</td>
+                  <td><span class="status-badge status-cancelled"><span></span>Cancelado</span></td>
+                  <td>11:30</td>
+                  <td class="table-actions">
+                    <a class="icon-button view-button" href="./h05-consultar-atendimento.html" aria-label="Visualizar atendimento AT0001/2026">
+                      <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                        <path d="M2.5 12s3.5-6 9.5-6 9.5 6 9.5 6-3.5 6-9.5 6-9.5-6-9.5-6Z" stroke="currentColor" stroke-width="2" />
+                        <circle cx="12" cy="12" r="2.5" stroke="currentColor" stroke-width="2" />
+                      </svg>
+                    </a>
+                    <a class="icon-button edit-button" href="./h04-abrir-atendimento.html" aria-label="Editar atendimento AT0001/2026">
+                      <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                        <path d="m14 5 5 5M4 20l4.5-1 10-10a2.1 2.1 0 0 0-3-3l-10 10L4 20Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                      </svg>
+                    </a>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <footer class="table-footer">
+            <p>Mostrando 1-6 de 28 atendimentos do dia</p>
+            <nav class="pagination" aria-label="Paginação dos atendimentos">
+              <button class="page-button" type="button" aria-label="Página anterior" disabled>‹</button>
+              <button class="page-button active" type="button" aria-current="page">1</button>
+              <button class="page-button" type="button" disabled>2</button>
+              <button class="page-button" type="button" disabled>3</button>
+              <button class="page-button" type="button" aria-label="Próxima página" disabled>›</button>
+            </nav>
+          </footer>
         </section>
       </main>
     </div>
+    <script src="./components/layout.js"></script>
     <script src="/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
   </body>
 </html>

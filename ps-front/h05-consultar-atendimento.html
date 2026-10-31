@@ -5,33 +5,37 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>H05 | Consultar atendimento</title>
     <link rel="stylesheet" href="/vendor/bootstrap/css/bootstrap.min.css" />
-    <link rel="stylesheet" href="./css/global.css" />
+    <link rel="stylesheet" href="./css/pages/inicio.css" />
     <link rel="stylesheet" href="./css/pages/h05-consultar-atendimento.css" />
   </head>
   <body>
-    <header class="site-header">
-      <a class="marca" href="./index.html">PS Madre Theodora</a>
-      <nav class="navegacao" aria-label="Navegação das histórias">
-        <a href="./h02-buscar-paciente.html">H02 Buscar paciente</a>
-        <a href="./h03-cadastrar-paciente.html">H03 Cadastrar paciente</a>
-        <a href="./h04-abrir-atendimento.html">H04 Abrir atendimento</a>
-        <a href="./h05-consultar-atendimento.html" aria-current="page">H05 Consultar atendimento</a>
-        <a href="./h06-fila-triagem.html">H06 Fila de triagem</a>
-      </nav>
-    </header>
+    <div data-componente="cabecalho"></div>
 
-    <main class="conteudo pagina pagina-h05">
-      <div class="topo">
-        <a class="botao-voltar" href="./index.html">← Início</a>
-      </div>
-      <div class="cabecalho pequeno">
-        <p class="tag">H05 · Recepção</p>
-        <h1>Consultar atendimento</h1>
-      </div>
-      <section class="caixa-vazia area-reservada" aria-label="Área de trabalho da história">
-        <p>Espaço reservado para implementar esta história.</p>
-      </section>
-    </main>
+    <div class="dashboard-shell">
+      <div data-componente="menu-lateral"></div>
+      <main class="main-panel pagina-h05">
+        <div class="header-panel">
+          <div class="title-wrap">
+            <h1>Consultar atendimento</h1>
+            <p>Consulte a situação e os dados de um atendimento</p>
+          </div>
+        </div>
+          <section class="page-card consulta-card" aria-label="Consulta de atendimento">
+            <form id="form-consulta-atendimento" class="busca-form">
+              <label for="identificador-atendimento">Número do atendimento ou CPF do paciente</label>
+              <div class="linha-busca">
+                <input id="identificador-atendimento" type="text" autocomplete="off" placeholder="Ex.: AT0001 ou 000.000.000-00" required />
+                <button type="submit" class="botao-principal">Consultar</button>
+              </div>
+            </form>
+            <div id="resultado-consulta" class="resultado-consulta" aria-live="polite">
+              <p>Informe o número do atendimento ou o CPF do paciente.</p>
+            </div>
+          </section>
+      </main>
+    </div>
+    <script src="./components/layout.js"></script>
+    <script src="./components/consultar-atendimento.js"></script>
     <script src="/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
   </body>
 </html>

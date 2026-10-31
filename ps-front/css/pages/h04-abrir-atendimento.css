@@ -1,3 +1,92 @@
 .pagina-h04 .area-reservada {
   min-height: 220px;
 }
+
+.atendimento-card {
+  max-width: 900px;
+  padding: 24px 22px;
+  border: 1px solid #dce3eb;
+  border-radius: 12px;
+  background: #fff;
+}
+
+.atendimento-card .busca-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 22px;
+}
+
+.atendimento-card .busca-form label {
+  font-size: 1.05rem;
+  font-weight: 600;
+}
+
+.atendimento-card .linha-busca {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.atendimento-card input {
+  min-width: 220px;
+  flex: 1;
+  padding: 12px 14px;
+  border: 1px solid #bdbdbd;
+  border-radius: 10px;
+  background: #fff;
+}
+
+.atendimento-card .botao-principal,
+.fila-triagem-panel .botao-principal {
+  border: 0;
+  border-radius: 8px;
+  padding: 10px 16px;
+  background: #0c7d78;
+  color: #fff;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.resultado-atendimento {
+  display: grid;
+  gap: 12px;
+}
+
+.resultado-atendimento > p {
+  margin: 0;
+  color: #405365;
+}
+
+.resultado-atendimento .card-paciente {
+  display: grid;
+  justify-items: start;
+  gap: 12px;
+  padding: 18px;
+  border: 1px solid #dce3eb;
+  border-radius: 10px;
+  background: #fff;
+}
+
+.resultado-atendimento .card-paciente h2,
+.resultado-atendimento .card-paciente p {
+  margin: 0;
+}
+
+.resultado-atendimento .mensagem-atendimento {
+  margin: 0;
+}
+
+.resultado-atendimento .mensagem-erro {
+  color: #b42318;
+}
+
+.resultado-atendimento .mensagem-atendimento.sucesso {
+  color: #176b3a;
+}
+
+@media (max-width: 560px) {
+  .atendimento-card {
+    padding: 18px 14px;
+  }
+}

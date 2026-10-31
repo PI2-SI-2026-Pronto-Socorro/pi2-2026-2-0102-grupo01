@@ -244,6 +244,47 @@ body {
   box-shadow: 0 8px 16px rgba(13, 111, 109, 0.15);
 }
 
+.botao {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+}
+
+.erro-campo {
+  min-height: 1em;
+  color: #b42318;
+  font-size: 0.85rem;
+}
+
+.campo input[aria-invalid="true"] {
+  border-color: #b42318;
+}
+
+#mensagem-cadastro {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+}
+
+.mensagem-erro {
+  color: #b42318;
+}
+
+.mensagem-sucesso {
+  color: #176b3a;
+}
+
+.mensagem-aviso {
+  color: #7a4b00;
+}
+
+.botao:disabled {
+  cursor: wait;
+  opacity: 0.7;
+}
+
 @media (max-width: 900px) {
   .pagina-paciente {
     flex-direction: column;

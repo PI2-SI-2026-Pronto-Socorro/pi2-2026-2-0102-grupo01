@@ -9,14 +9,10 @@
     <link rel="stylesheet" href="./css/pages/h03-cadastrar-paciente.css" />
   </head>
   <body class="page-dashboard">
-    <header class="topbar" aria-label="Cabeçalho principal"></header>
+    <div data-componente="cabecalho"></div>
 
     <div class="dashboard-shell">
-      <aside class="sidebar" aria-label="Menu lateral">
-        <button class="menu-item" type="button" onclick="window.location.href='./index.html'">Painel de Atendimentos</button>
-        <button class="menu-item active" type="button" onclick="window.location.href='./h02-buscar-paciente.html'">Buscar e Cadastrar<br />Paciente</button>
-        <button class="menu-item" type="button" onclick="window.location.href='./index.html'">Histórico Geral</button>
-      </aside>
+      <div data-componente="menu-lateral"></div>
 
       <main class="main-panel">
         <div class="header-panel">
@@ -29,26 +25,30 @@
         </div>
 
         <section class="page-card form-card" aria-label="Formulário de cadastro do paciente">
-          <form class="formulario-paciente">
+          <form class="formulario-paciente" id="form-cadastro-paciente" novalidate>
             <div class="campo">
               <label for="nome-completo">Nome completo <span class="obrigatorio">*</span></label>
-              <input id="nome-completo" type="text" value="Raimunda Ferreira de Souza Lima" />
+              <input id="nome-completo" name="nome" type="text" maxlength="100" autocomplete="name" required />
+              <small class="erro-campo" data-erro="nome"></small>
             </div>
 
             <div class="campo">
               <label for="cpf">CPF <span class="obrigatorio">*</span></label>
-              <input id="cpf" type="text" value="" placeholder="" />
+              <input id="cpf" name="cpf" type="text" inputmode="numeric" maxlength="14" placeholder="000.000.000-00" autocomplete="off" required />
+              <small class="erro-campo" data-erro="cpf"></small>
             </div>
 
             <div class="campo">
               <label for="data-nascimento">Data de nascimento <span class="obrigatorio">*</span></label>
-              <input id="data-nascimento" type="text" value="14/06/1958" />
+              <input id="data-nascimento" name="data_nascimento" type="date" autocomplete="bday" required />
+              <small class="erro-campo" data-erro="data_nascimento"></small>
             </div>
 
             <div class="campo">
-              <label for="sexo">Sexo <span class="obrigatorio">*</span></label>
-              <select id="sexo">
-                <option selected>Feminino</option>
+              <label for="genero">Gênero</label>
+              <select id="genero" name="genero">
+                <option value="">Selecione</option>
+                <option>Feminino</option>
                 <option>Masculino</option>
                 <option>Outro</option>
                 <option>Prefiro não informar</option>
@@ -57,27 +57,26 @@
 
             <div class="campo">
               <label for="telefone">Telefone</label>
-              <input id="telefone" type="text" value="(61) 98412-3307" />
+              <input id="telefone" name="telefone" type="tel" maxlength="15" autocomplete="tel" placeholder="(00) 00000-0000" />
             </div>
 
-            <div class="campo largura-total">
-              <label for="nome-mae">Nome da mãe</label>
-              <input id="nome-mae" type="text" value="Francisca Ferreira de Souza" />
+            <div class="campo">
+              <label for="rg">RG</label>
+              <input id="rg" name="rg" type="text" maxlength="15" autocomplete="off" />
             </div>
 
-            <div class="campo largura-total">
-              <label for="endereco">Endereço</label>
-              <input id="endereco" type="text" value="QNM 18 Conjunto F Casa 22, Ceilândia Sul" />
-            </div>
+            <div class="campo largura-total" id="mensagem-cadastro" role="status" aria-live="polite"></div>
 
             <div class="botoes-acoes">
-              <button type="button" class="botao botao-secundario" onclick="window.location.href='./index.html'">Cancelar</button>
-              <button type="button" class="botao botao-principal" onclick="window.location.href='./index.html'">Cadastrar</button>
+              <a class="botao botao-secundario" href="./h02-buscar-paciente.html">Cancelar</a>
+              <button type="submit" class="botao botao-principal">Cadastrar paciente</button>
             </div>
           </form>
         </section>
       </main>
     </div>
+    <script src="./components/layout.js"></script>
+    <script src="./components/cadastro-paciente.js"></script>
     <script src="/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
   </body>
 </html>

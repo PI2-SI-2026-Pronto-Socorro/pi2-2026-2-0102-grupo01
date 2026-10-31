@@ -9,41 +9,36 @@
     <link rel="stylesheet" href="./css/pages/h02-buscar-paciente.css" />
   </head>
   <body class="page-dashboard">
-    <header class="topbar" aria-label="Cabeçalho principal"></header>
+    <div data-componente="cabecalho"></div>
 
     <div class="dashboard-shell">
-      <aside class="sidebar" aria-label="Menu lateral">
-        <button class="menu-item" type="button" onclick="window.location.href='./index.html'">Painel de Atendimentos</button>
-        <button class="menu-item active" type="button" onclick="window.location.href='./h02-buscar-paciente.html'">Buscar e Cadastrar<br />Paciente</button>
-        <button class="menu-item" type="button" onclick="window.location.href='./index.html'">Histórico Geral</button>
-      </aside>
+      <div data-componente="menu-lateral"></div>
 
       <main class="main-panel">
         <div class="header-panel">
           <div class="title-wrap">
-            <h1>Buscar paciente</h1>
-            <p>Consulta por CPF e acesso ao cadastro do paciente</p>
+            <h1>Buscar e cadastrar paciente</h1>
+            <p>Localize o paciente pelo CPF para consultar seus dados ou iniciar um cadastro</p>
           </div>
-
-          <button class="primary-button" type="button" onclick="window.location.href='./h03-cadastrar-paciente.html'">Novo Cadastro</button>
         </div>
 
         <section class="page-card search-card" aria-label="Busca de paciente">
           <form id="form-busca" class="busca-form">
             <label for="cpf">Buscar paciente por CPF</label>
             <div class="linha-busca">
-              <input id="cpf" type="text" maxlength="14" placeholder="Digite o CPF" />
-              <button type="submit" class="botao-principal">Buscar</button>
+              <input id="cpf" type="text" inputmode="numeric" maxlength="14" placeholder="000.000.000-00" autocomplete="off" />
+              <button type="submit" class="botao-principal">Buscar paciente</button>
             </div>
           </form>
 
-          <div id="resultado" class="resultado">
-            <p>Informe um CPF para iniciar a busca.</p>
+          <div id="resultado" class="resultado" aria-live="polite">
+            <p>Informe o CPF do paciente para iniciar a busca.</p>
           </div>
         </section>
       </main>
     </div>
 
+    <script src="./components/layout.js"></script>
     <script src="./app.js"></script>
     <script src="/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
   </body>
