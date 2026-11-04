@@ -20,6 +20,7 @@ document.getElementById('visualizar-formulario-triagem').addEventListener('click
 formTriagem.addEventListener('submit', (event) => {
   event.preventDefault();
   mensagemTriagem.className = 'mensagem-triagem';
+  mensagemTriagem.textContent = '';
 
   if (!formTriagem.reportValidity()) return;
 

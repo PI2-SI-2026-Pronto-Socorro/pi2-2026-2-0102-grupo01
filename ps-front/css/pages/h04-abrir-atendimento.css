@@ -48,6 +48,12 @@
   cursor: pointer;
 }
 
+.atendimento-card .botao-principal:disabled,
+.fila-triagem-panel .botao-principal:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
 .resultado-atendimento {
   display: grid;
   gap: 12px;
