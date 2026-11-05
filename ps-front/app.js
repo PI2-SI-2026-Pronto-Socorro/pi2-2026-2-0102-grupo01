@@ -95,5 +95,11 @@ const API_URL = '/api';
         window.location.href = `./h03-cadastrar-paciente.html?cpf=${cpfDigitado}`;
       });
     });
+
+    const cpfInicial = new URLSearchParams(window.location.search).get('cpf');
+    if (cpfInicial) {
+      document.getElementById('cpf').value = cpfInicial;
+      formulario.requestSubmit();
+    }
   }
 })();

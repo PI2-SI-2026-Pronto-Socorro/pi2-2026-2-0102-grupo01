@@ -45,11 +45,11 @@ function validarCadastro(dados) {
   return valido;
 }
 
-formularioCadastro.addEventListener('submit', (event) => {
+formularioCadastro.addEventListener('submit', async (event) => {
   event.preventDefault();
   mensagemCadastro.textContent = '';
   mensagemCadastro.className = 'campo largura-total';
-
+  
   const dados = {
     nome: camposCadastro.nome.value.trim(),
     cpf: camposCadastro.cpf.value.replace(/\D/g, ''),
@@ -65,6 +65,35 @@ formularioCadastro.addEventListener('submit', (event) => {
     return;
   }
 
-  mensagemCadastro.textContent = 'Dados validados no navegador. O envio e a confirmação do cadastro serão conectados ao back-end.';
-  mensagemCadastro.classList.add('mensagem-aviso');
+  const botaoCadastrar = formularioCadastro.querySelector('[type="submit"]');
+  botaoCadastrar.disabled = true;
+  mensagemCadastro.textContent = 'Cadastrando paciente...';
+
+  let resposta;
+  try {
+    resposta = await fetch('/api/pacientes', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(dados),
+    });
+  } catch {
+    mensagemCadastro.textContent = 'Não foi possível conectar à API.';
+    mensagemCadastro.classList.add('mensagem-erro');
+    botaoCadastrar.disabled = false;
+    return;
+  }
+
+  if (resposta.ok) {
+    mensagemCadastro.textContent = 'Paciente cadastrado com sucesso.';
+    mensagemCadastro.classList.add('mensagem-sucesso');
+    window.location.href = `./h02-buscar-paciente.html?cpf=${dados.cpf}`;
+    return;
+  }
+
+  const erro = await resposta.json().catch(() => null);
+  const detalhe = erro?.detail ?? 'Erro ao cadastrar paciente.';
+  if (resposta.status === 409) mostrarErroCampo('cpf', detalhe);
+  mensagemCadastro.textContent = detalhe;
+  mensagemCadastro.classList.add('mensagem-erro');
+  botaoCadastrar.disabled = false;
 });
