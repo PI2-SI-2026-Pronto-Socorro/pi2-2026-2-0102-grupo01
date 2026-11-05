@@ -76,6 +76,12 @@ const API_URL = '/api';
         const paciente = await resposta.json();
         resultado.innerHTML = '';
         resultado.appendChild(montarCardPaciente(paciente));
+
+        const botaoAtendimento = document.createElement('a');
+        botaoAtendimento.className = 'botao-principal';
+        botaoAtendimento.href = `./h04-abrir-atendimento.html?cpf=${cpfDigitado}`;
+        botaoAtendimento.textContent = 'Abrir atendimento';
+        resultado.appendChild(botaoAtendimento);
         return;
       }
 
