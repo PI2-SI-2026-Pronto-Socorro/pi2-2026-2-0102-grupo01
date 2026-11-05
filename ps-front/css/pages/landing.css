@@ -89,6 +89,7 @@ body {
   display: flex;
   flex-direction: column;
   gap: 16px;
+  max-width: 420px;
 }
 
 .botao-acao {
@@ -118,6 +119,11 @@ body {
   background: #e6efef;
   color: var(--verde-escuro);
   border: 1px solid rgba(13, 111, 109, 0.18);
+}
+
+.botao-acao:focus-visible {
+  outline: 3px solid #2877d4;
+  outline-offset: 3px;
 }
 
 /* painel visual da direita */

@@ -5,33 +5,37 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>H04 | Abrir atendimento com número</title>
     <link rel="stylesheet" href="/vendor/bootstrap/css/bootstrap.min.css" />
-    <link rel="stylesheet" href="./css/global.css" />
+    <link rel="stylesheet" href="./css/pages/inicio.css" />
     <link rel="stylesheet" href="./css/pages/h04-abrir-atendimento.css" />
   </head>
   <body>
-    <header class="site-header">
-      <a class="marca" href="./index.html">PS Madre Theodora</a>
-      <nav class="navegacao" aria-label="Navegação das histórias">
-        <a href="./h02-buscar-paciente.html">H02 Buscar paciente</a>
-        <a href="./h03-cadastrar-paciente.html">H03 Cadastrar paciente</a>
-        <a href="./h04-abrir-atendimento.html" aria-current="page">H04 Abrir atendimento</a>
-        <a href="./h05-consultar-atendimento.html">H05 Consultar atendimento</a>
-        <a href="./h06-fila-triagem.html">H06 Fila de triagem</a>
-      </nav>
-    </header>
+    <div data-componente="cabecalho"></div>
 
-    <main class="conteudo pagina pagina-h04">
-      <div class="topo">
-        <a class="botao-voltar" href="./index.html">← Início</a>
-      </div>
-      <div class="cabecalho pequeno">
-        <p class="tag">H04 · Recepção</p>
-        <h1>Abrir atendimento com número</h1>
-      </div>
-      <section class="caixa-vazia area-reservada" aria-label="Área de trabalho da história">
-        <p>Espaço reservado para implementar esta história.</p>
-      </section>
-    </main>
+    <div class="dashboard-shell">
+      <div data-componente="menu-lateral"></div>
+      <main class="main-panel pagina-h04">
+        <div class="header-panel">
+          <div class="title-wrap">
+            <h1>Abrir atendimento</h1>
+            <p>Localize o paciente para abrir um novo atendimento</p>
+          </div>
+        </div>
+          <section class="page-card atendimento-card" aria-label="Abertura de atendimento">
+            <form id="form-busca-atendimento" class="busca-form">
+              <label for="cpf-atendimento">Buscar paciente pelo CPF</label>
+              <div class="linha-busca">
+                <input id="cpf-atendimento" type="text" inputmode="numeric" maxlength="14" placeholder="000.000.000-00" required />
+                <button type="submit" class="botao-principal">Buscar paciente</button>
+              </div>
+            </form>
+            <div id="resultado-paciente" class="resultado-atendimento" aria-live="polite">
+              <p>Busque um paciente para abrir o atendimento.</p>
+            </div>
+          </section>
+      </main>
+    </div>
+    <script src="./components/layout.js"></script>
+    <script src="./components/abrir-atendimento.js"></script>
     <script src="/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
   </body>
 </html>

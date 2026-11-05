@@ -3,8 +3,8 @@
 }
 
 .page-card {
-  background: rgba(255, 255, 255, 0.08);
-  border: 1px solid #b8b8b8;
+  background: #fff;
+  border: 1px solid #dce3eb;
   border-radius: 12px;
   padding: 24px 22px;
 }
@@ -23,7 +23,7 @@
 .busca-form label {
   font-size: 1.05rem;
   font-weight: 600;
-  color: #1f1f1f;
+  color: #263a4b;
 }
 
 .linha-busca {
@@ -35,33 +35,28 @@
 .linha-busca input {
   min-width: 220px;
   flex: 1;
+  min-height: 50px;
   padding: 12px 14px;
   border: 1px solid #bdbdbd;
   border-radius: 10px;
-  background: #f7f7f7;
+  background: #fff;
   font-size: 1rem;
 }
 
 .botao-principal {
   border: none;
-  border-radius: 10px;
-  background: #1d8a8a;
+  border-radius: 8px;
+  background: #0c7d78;
   color: white;
-  padding: 12px 24px;
+  padding: 10px 18px;
   font-size: 1rem;
   font-weight: 600;
   cursor: pointer;
 }
 
 .resultado {
-  min-height: 120px;
-  border: 1px solid #d7d7d7;
-  border-radius: 10px;
-  background: #f7f7f7;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #555;
+  min-height: 24px;
+  color: #34485a;
   font-size: 1rem;
 }
 
@@ -69,9 +64,33 @@
   margin: 0;
 }
 
+.resultado-pendente {
+  display: grid;
+  justify-items: start;
+  gap: 12px;
+  padding: 14px 0 0;
+  color: #34485a;
+}
+
+.resultado .caixa-vazia {
+  border: 0;
+  background: transparent;
+}
+
+.resultado .botao-principal {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+}
+
+.resultado .mensagem-erro {
+  color: #b42318;
+}
+
 .card-paciente {
   padding: 18px;
-  border: 1px solid #d4d4d4;
+  border: 1px solid #dce3eb;
   border-radius: 12px;
   background: #fff;
 }
@@ -105,4 +124,50 @@
 .dados-paciente span {
   color: #666;
   font-size: 12px;
+}
+
+.acoes-paciente {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  margin-top: 20px;
+}
+
+.acoes-paciente .botao-principal:disabled {
+  cursor: wait;
+  opacity: 0.7;
+}
+
+.mensagem-atendimento {
+  margin: 0;
+  font-size: 0.95rem;
+}
+
+.mensagem-atendimento.erro,
+.mensagem-erro {
+  color: #b42318;
+}
+
+.mensagem-atendimento.sucesso,
+.mensagem-sucesso {
+  color: #176b3a;
+}
+
+.mensagem-atendimento:empty {
+  display: none;
+}
+
+@media (max-width: 560px) {
+  .page-card {
+    padding: 20px 16px;
+  }
+
+  .linha-busca input {
+    min-width: 100%;
+  }
+
+  .linha-busca .botao-principal {
+    width: 100%;
+  }
 }
