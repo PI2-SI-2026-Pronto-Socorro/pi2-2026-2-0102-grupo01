@@ -171,6 +171,7 @@ paths:
     get:
       tags: [Atendimentos]
       summary: Busca um atendimento pelo número
+      description: Devolve também o nome e o CPF do paciente.
       parameters:
         - in: path
           name: numero
@@ -181,7 +182,13 @@ paths:
           description: Atendimento encontrado
           content:
             application/json:
-              schema: { $ref: '#/components/schemas/Atendimento' }
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Atendimento'
+                  - type: object
+                    properties:
+                      nome: { type: string, example: Maria da Silva }
+                      cpf: { type: string, nullable: true, example: '12345678900' }
         '404':
           description: Atendimento não encontrado
           content:

@@ -34,7 +34,13 @@ function mostrarAtendimentoAberto(card, atendimento) {
   status.innerHTML = '<strong>Situação:</strong> ';
   status.append(atendimento.status_atendimento);
 
-  dados.append(numero, chegada, status);
+  const linkConsulta = document.createElement('a');
+  linkConsulta.className = 'botao-principal';
+  linkConsulta.href = `./h05-consultar-atendimento.html?numero=${encodeURIComponent(atendimento.numero_atendimento)}`;
+  linkConsulta.textContent = 'Consultar atendimento';
+
+  dados.append(numero, chegada, status, linkConsulta);
+  
   card.appendChild(dados);
 }
 

@@ -32,7 +32,7 @@ async function buscarPorNumero(numero) {
 
   const linha = await AtendimentoRepository.findByNumero(numeroNormalizado);
   if (!linha) throw new ErroHttp(404, 'Atendimento não encontrado');
-  return new Atendimento(linha);
+  return { ...new Atendimento(linha), nome: linha.nome, cpf: linha.cpf };
 }
 
 async function buscarPorCpf(cpf) {
