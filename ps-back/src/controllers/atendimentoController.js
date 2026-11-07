@@ -26,4 +26,8 @@ async function painel(req, res) {
   res.json(await AtendimentoService.painel());
 }
 
-module.exports = { create, findByNumero, findByCpf, findAbertos, cancelar, painel };
+async function alterar(req, res) {
+  res.json(await AtendimentoService.alterar(req.params.numero, req.body));
+}
+
+module.exports = { create, findByNumero, findByCpf, findAbertos, cancelar, painel, alterar };

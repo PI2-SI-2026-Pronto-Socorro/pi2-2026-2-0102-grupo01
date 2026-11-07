@@ -39,6 +39,7 @@ async function findByNumero(numero) {
       id_paciente: atendimento.id_paciente,
       status_atendimento: atendimento.status_atendimento,
       data_hora_chegada: atendimento.data_hora_chegada,
+      motivo_atendimento: atendimento.motivo_atendimento,
       nome: paciente.nome,
       cpf: paciente.cpf,
     })
@@ -46,6 +47,42 @@ async function findByNumero(numero) {
     .innerJoin(paciente, eq(paciente.id_paciente, atendimento.id_paciente))
     .where(eq(atendimento.numero_atendimento, numero));
   return linha ?? null;
+}
+
+// Altera, numa transação, o atendimento e os dados cadastrais do paciente.
+// A linha do atendimento fica travada (FOR UPDATE) enquanto a situação é conferida,
+// para ninguém confirmar ou cancelar o atendimento no meio da alteração.
+async function alterarDados(numero, dadosAtendimento, dadosPaciente, statusBloqueados) {
+  return db.transaction(async (tx) => {
+    const [atual] = await tx
+      .select({
+        id_atendimento: atendimento.id_atendimento,
+        id_paciente: atendimento.id_paciente,
+        status_atendimento: atendimento.status_atendimento,
+      })
+      .from(atendimento)
+      .where(eq(atendimento.numero_atendimento, numero))
+      .for('update');
+
+    if (!atual) return { encontrado: false };
+    if (statusBloqueados.includes(atual.status_atendimento)) {
+      return { encontrado: true, bloqueado: true, status_atendimento: atual.status_atendimento };
+    }
+
+    if (Object.keys(dadosAtendimento).length > 0) {
+      await tx.update(atendimento).set(dadosAtendimento)
+        .where(eq(atendimento.id_atendimento, atual.id_atendimento));
+    }
+    let pacienteAtualizado;
+    if (Object.keys(dadosPaciente).length > 0) {
+      [pacienteAtualizado] = await tx.update(paciente).set(dadosPaciente)
+        .where(eq(paciente.id_paciente, atual.id_paciente)).returning();
+    } else {
+      [pacienteAtualizado] = await tx.select().from(paciente)
+        .where(eq(paciente.id_paciente, atual.id_paciente));
+    }
+    return { encontrado: true, bloqueado: false, paciente: pacienteAtualizado };
+  });
 }
 
 async function findByCpf(cpf) {
@@ -113,5 +150,5 @@ async function cancelarSeAberto(numero) {
 }
 
 module.exports = {
-  findStatusAtual, findEmAndamento, findByNumero, findByCpf, create, findAbertos, findPainel, cancelarSeAberto,
+  findStatusAtual, findEmAndamento, findByNumero, findByCpf, create, findAbertos, findPainel, cancelarSeAberto, alterarDados,
 };

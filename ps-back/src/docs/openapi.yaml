@@ -230,6 +230,51 @@ paths:
           content:
             application/json:
               schema: { $ref: '#/components/schemas/Erro' }
+    patch:
+      tags: [Atendimentos]
+      summary: Altera os dados do atendimento e os dados cadastrais do paciente
+      description: >-
+        Altera só os campos enviados. Permitido enquanto o atendimento está em Aberto ou Triado;
+        em Confirmado, Encerrado ou Cancelado a alteração é recusada. A situação do atendimento não muda.
+      parameters:
+        - in: path
+          name: numero
+          required: true
+          schema: { type: string, pattern: '^AT\d{4,9}$', example: AT0008 }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/AlteracaoAtendimento' }
+            example: { motivo_atendimento: Dor abdominal, telefone: (19) 98765-4321 }
+      responses:
+        '200':
+          description: Atendimento alterado
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Atendimento'
+                  - type: object
+                    properties:
+                      motivo_atendimento: { type: string, nullable: true, example: Dor abdominal }
+                      paciente: { $ref: '#/components/schemas/Paciente' }
+        '404':
+          description: Atendimento não encontrado
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Erro' }
+        '409':
+          description: Atendimento em Confirmado, Encerrado ou Cancelado, ou CPF já usado por outro paciente
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Erro' }
+              example: { detail: 'Não é possível alterar atendimento Cancelado (só em Aberto ou Triado)' }
+        '422':
+          description: Número do atendimento inválido, campo não permitido ou valor inválido
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Erro' }
 
   /atendimentos/{numero}/cancelar:
     patch:
@@ -300,6 +345,18 @@ components:
         data_nascimento: { type: string, format: date, example: '1990-03-14' }
         genero: { type: string, maxLength: 20, example: Feminino }
         telefone: { type: string, maxLength: 15, example: (11) 98765-4321 }
+    AlteracaoAtendimento:
+      type: object
+      minProperties: 1
+      additionalProperties: false
+      properties:
+        motivo_atendimento: { type: string, nullable: true, maxLength: 255, example: Dor abdominal }
+        nome: { type: string, maxLength: 100, example: Maria da Silva }
+        cpf: { type: string, pattern: '^\d{11}$', example: '12345678900' }
+        rg: { type: string, nullable: true, maxLength: 15, example: '123456789' }
+        data_nascimento: { type: string, format: date, example: '1990-03-14' }
+        genero: { type: string, nullable: true, maxLength: 20, example: Feminino }
+        telefone: { type: string, nullable: true, maxLength: 15, example: (11) 98765-4321 }
     Erro:
       type: object
       properties:
