@@ -1,8 +1,37 @@
 const { eq, desc, asc, and, or, gte, notInArray, sql } = require('drizzle-orm');
 const { db } = require('../db');
-const { atendimento, paciente } = require('../db/schema');
+const { atendimento, paciente, triagem } = require('../db/schema');
 
 const STATUS_FINAIS = ['Encerrado', 'Cancelado'];
+
+// Prioridade do Protocolo de Manchester: 1 = vermelho (atender primeiro) ... 5 = azul.
+const PRIORIDADE_MANCHESTER = sql`CASE ${triagem.classificacao_risco}
+  WHEN 'Emergência' THEN 1
+  WHEN 'Muito Urgente' THEN 2
+  WHEN 'Urgente' THEN 3
+  WHEN 'Pouco Urgente' THEN 4
+  WHEN 'Não Urgente' THEN 5
+END`;
+
+async function findTriados() {
+  return db
+    .select({
+      id_atendimento: atendimento.id_atendimento,
+      numero_atendimento: atendimento.numero_atendimento,
+      id_paciente: atendimento.id_paciente,
+      nome: paciente.nome,
+      data_nascimento: paciente.data_nascimento,
+      status_atendimento: atendimento.status_atendimento,
+      data_hora_chegada: atendimento.data_hora_chegada,
+      classificacao_risco: triagem.classificacao_risco,
+      data_hora_triagem: triagem.data_hora_triagem,
+    })
+    .from(atendimento)
+    .innerJoin(paciente, eq(paciente.id_paciente, atendimento.id_paciente))
+    .innerJoin(triagem, eq(triagem.id_atendimento, atendimento.id_atendimento))
+    .where(eq(atendimento.status_atendimento, 'Triado'))
+    .orderBy(asc(PRIORIDADE_MANCHESTER), asc(atendimento.data_hora_chegada));
+}
 
 async function findStatusAtual(idPaciente) {
   const [ultimo] = await db
@@ -150,5 +179,5 @@ async function cancelarSeAberto(numero) {
 }
 
 module.exports = {
-  findStatusAtual, findEmAndamento, findByNumero, findByCpf, create, findAbertos, findPainel, cancelarSeAberto, alterarDados,
+  findStatusAtual, findEmAndamento, findByNumero, findByCpf, create, findAbertos, findTriados, findPainel, cancelarSeAberto, alterarDados,
 };

@@ -167,6 +167,35 @@ paths:
                       properties:
                         nome: { type: string, example: Maria da Silva }
 
+  /atendimentos/triados:
+    get:
+      tags: [Atendimentos]
+      summary: Painel do médico - atendimentos em Triado, na ordem de Manchester
+      description: >-
+        Lista só os atendimentos em Triado, ordenados pela classificação de risco do Protocolo de Manchester
+        (Emergência/vermelho primeiro, depois Muito Urgente/laranja, Urgente/amarelo, Pouco Urgente/verde e
+        Não Urgente/azul) e, na mesma cor, pela hora de chegada. Lista vazia quando não há atendimentos triados.
+      responses:
+        '200':
+          description: Atendimentos triados
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  allOf:
+                    - $ref: '#/components/schemas/Atendimento'
+                    - type: object
+                      properties:
+                        nome: { type: string, example: Maria da Silva }
+                        data_nascimento: { type: string, format: date, nullable: true, example: '1990-03-14' }
+                        classificacao_risco:
+                          type: string
+                          enum: [Emergência, Muito Urgente, Urgente, Pouco Urgente, Não Urgente]
+                          example: Emergência
+                        cor: { type: string, enum: [Vermelho, Laranja, Amarelo, Verde, Azul], example: Vermelho }
+                        data_hora_triagem: { type: string, format: date-time, example: '2026-10-25T21:50:02.110Z' }
+
   /atendimentos/painel:
     get:
       tags: [Atendimentos]

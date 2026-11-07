@@ -124,6 +124,19 @@ async function alterar(numero, dados) {
   return { ...new Atendimento(atendimento), paciente: new Paciente(resultado.paciente) };
 }
 
+const COR_MANCHESTER = {
+  'Emergência': 'Vermelho',
+  'Muito Urgente': 'Laranja',
+  'Urgente': 'Amarelo',
+  'Pouco Urgente': 'Verde',
+  'Não Urgente': 'Azul',
+};
+
+async function listarTriados() {
+  const linhas = await AtendimentoRepository.findTriados();
+  return linhas.map((linha) => ({ ...linha, cor: COR_MANCHESTER[linha.classificacao_risco] }));
+}
+
 async function painel() {
   const atendimentos = await AtendimentoRepository.findPainel();
   const resumo = { Aberto: 0, Triado: 0, Confirmado: 0, Encerrado: 0, Cancelado: 0 };
@@ -131,4 +144,6 @@ async function painel() {
   return { resumo, atendimentos };
 }
 
-module.exports = { abrir, buscarPorNumero, buscarPorCpf, listarAbertos, cancelar, painel, alterar };
+module.exports = {
+  abrir, buscarPorNumero, buscarPorCpf, listarAbertos, listarTriados, cancelar, painel, alterar,
+};

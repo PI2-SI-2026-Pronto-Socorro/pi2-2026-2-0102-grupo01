@@ -30,4 +30,10 @@ async function alterar(req, res) {
   res.json(await AtendimentoService.alterar(req.params.numero, req.body));
 }
 
-module.exports = { create, findByNumero, findByCpf, findAbertos, cancelar, painel, alterar };
+async function findTriados(req, res) {
+  res.json(await AtendimentoService.listarTriados());
+}
+
+module.exports = {
+  create, findByNumero, findByCpf, findAbertos, findTriados, cancelar, painel, alterar,
+};
