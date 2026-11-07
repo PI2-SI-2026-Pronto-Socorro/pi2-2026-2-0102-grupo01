@@ -1,4 +1,4 @@
-const { eq, desc, asc, and, notInArray } = require('drizzle-orm');
+const { eq, desc, asc, and, or, gte, notInArray, sql } = require('drizzle-orm');
 const { db } = require('../db');
 const { atendimento, paciente } = require('../db/schema');
 
@@ -79,4 +79,39 @@ async function findAbertos() {
     .orderBy(asc(atendimento.data_hora_chegada));
 }
 
-module.exports = { findStatusAtual, findEmAndamento, findByNumero, findByCpf, create, findAbertos };
+async function findPainel() {
+  const inicioDoDia = sql`(date_trunc('day', now() AT TIME ZONE 'America/Sao_Paulo') AT TIME ZONE 'America/Sao_Paulo')`;
+  return db
+    .select({
+      id_atendimento: atendimento.id_atendimento,
+      numero_atendimento: atendimento.numero_atendimento,
+      id_paciente: atendimento.id_paciente,
+      nome: paciente.nome,
+      cpf: paciente.cpf,
+      status_atendimento: atendimento.status_atendimento,
+      data_hora_chegada: atendimento.data_hora_chegada,
+    })
+    .from(atendimento)
+    .innerJoin(paciente, eq(paciente.id_paciente, atendimento.id_paciente))
+    .where(or(
+      gte(atendimento.data_hora_chegada, inicioDoDia),
+      notInArray(atendimento.status_atendimento, STATUS_FINAIS),
+    ))
+    .orderBy(desc(atendimento.data_hora_chegada));
+}
+
+async function cancelarSeAberto(numero) {
+  const [linha] = await db
+    .update(atendimento)
+    .set({ status_atendimento: 'Cancelado', data_hora_saida: sql`now()` })
+    .where(and(
+      eq(atendimento.numero_atendimento, numero),
+      eq(atendimento.status_atendimento, 'Aberto'),
+    ))
+    .returning();
+  return linha ?? null;
+}
+
+module.exports = {
+  findStatusAtual, findEmAndamento, findByNumero, findByCpf, create, findAbertos, findPainel, cancelarSeAberto,
+};

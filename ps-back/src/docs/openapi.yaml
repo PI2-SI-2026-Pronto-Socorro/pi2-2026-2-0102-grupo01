@@ -167,6 +167,37 @@ paths:
                       properties:
                         nome: { type: string, example: Maria da Silva }
 
+  /atendimentos/painel:
+    get:
+      tags: [Atendimentos]
+      summary: Painel de atendimentos do dia
+      description: Lista os atendimentos que chegaram hoje (horário de Brasília) e os que ainda estão em andamento, do mais recente para o mais antigo, com a contagem por situação.
+      responses:
+        '200':
+          description: Painel de atendimentos
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  resumo:
+                    type: object
+                    properties:
+                      Aberto: { type: integer, example: 12 }
+                      Triado: { type: integer, example: 5 }
+                      Confirmado: { type: integer, example: 3 }
+                      Encerrado: { type: integer, example: 28 }
+                      Cancelado: { type: integer, example: 1 }
+                  atendimentos:
+                    type: array
+                    items:
+                      allOf:
+                        - $ref: '#/components/schemas/Atendimento'
+                        - type: object
+                          properties:
+                            nome: { type: string, example: Maria da Silva }
+                            cpf: { type: string, nullable: true, example: '12345678900' }
+
   /atendimentos/{numero}:
     get:
       tags: [Atendimentos]
@@ -194,6 +225,45 @@ paths:
           content:
             application/json:
               schema: { $ref: '#/components/schemas/Erro' }
+        '422':
+          description: Número do atendimento inválido
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Erro' }
+
+  /atendimentos/{numero}/cancelar:
+    patch:
+      tags: [Atendimentos]
+      summary: Cancela um atendimento em Aberto
+      description: Só cancela atendimento com situação Aberto; nos outros estados a operação é recusada. O atendimento cancelado sai da fila de triagem.
+      parameters:
+        - in: path
+          name: numero
+          required: true
+          schema: { type: string, pattern: '^AT\d{4,9}$', example: AT0008 }
+      responses:
+        '200':
+          description: Atendimento cancelado
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Atendimento' }
+              example:
+                id_atendimento: 7c1d2e3f-4a5b-4c6d-8e7f-9a0b1c2d3e4f
+                numero_atendimento: AT0008
+                id_paciente: 3f2b8c1e-9a4d-4e7b-8c21-5d6f7a8b9c0d
+                status_atendimento: Cancelado
+                data_hora_chegada: '2026-10-25T21:39:14.490Z'
+        '404':
+          description: Atendimento não encontrado
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Erro' }
+        '409':
+          description: Atendimento não está em Aberto
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Erro' }
+              example: { detail: 'Só é possível cancelar atendimento em Aberto (situação atual: Triado)' }
         '422':
           description: Número do atendimento inválido
           content:

@@ -26,9 +26,14 @@ async function abrir({ id_paciente }) {
   }
 }
 
-async function buscarPorNumero(numero) {
+function normalizarNumero(numero) {
   const numeroNormalizado = String(numero).toUpperCase();
   if (!/^AT\d{4,9}$/.test(numeroNormalizado)) throw new ErroHttp(422, 'Número do atendimento inválido (ex.: AT0001)');
+  return numeroNormalizado;
+}
+
+async function buscarPorNumero(numero) {
+  const numeroNormalizado = normalizarNumero(numero);
 
   const linha = await AtendimentoRepository.findByNumero(numeroNormalizado);
   if (!linha) throw new ErroHttp(404, 'Atendimento não encontrado');
@@ -46,4 +51,25 @@ async function listarAbertos() {
   return AtendimentoRepository.findAbertos();
 }
 
-module.exports = { abrir, buscarPorNumero, buscarPorCpf, listarAbertos };
+async function cancelar(numero) {
+  const numeroNormalizado = normalizarNumero(numero);
+
+  const cancelado = await AtendimentoRepository.cancelarSeAberto(numeroNormalizado);
+  if (cancelado) return new Atendimento(cancelado);
+
+  const atual = await AtendimentoRepository.findByNumero(numeroNormalizado);
+  if (!atual) throw new ErroHttp(404, 'Atendimento não encontrado');
+  throw new ErroHttp(
+    409,
+    `Só é possível cancelar atendimento em Aberto (situação atual: ${atual.status_atendimento})`,
+  );
+}
+
+async function painel() {
+  const atendimentos = await AtendimentoRepository.findPainel();
+  const resumo = { Aberto: 0, Triado: 0, Confirmado: 0, Encerrado: 0, Cancelado: 0 };
+  for (const a of atendimentos) resumo[a.status_atendimento] += 1;
+  return { resumo, atendimentos };
+}
+
+module.exports = { abrir, buscarPorNumero, buscarPorCpf, listarAbertos, cancelar, painel };
