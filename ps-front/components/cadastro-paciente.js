@@ -71,7 +71,7 @@ formularioCadastro.addEventListener('submit', async (event) => {
 
   let resposta;
   try {
-    resposta = await fetch('/api/pacientes', {
+    resposta = await fetch(`${API_URL}/pacientes`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(dados),
@@ -84,13 +84,12 @@ formularioCadastro.addEventListener('submit', async (event) => {
   }
 
   if (resposta.ok) {
-    mensagemCadastro.textContent = 'Paciente cadastrado com sucesso.';
-    mensagemCadastro.classList.add('mensagem-sucesso');
-    window.location.href = `./h02-buscar-paciente.html?cpf=${dados.cpf}`;
+    // A confirmação é mostrada pela H02, que recebe o sinal "cadastrado=1".
+    window.location.href = `./h02-buscar-paciente.html?cpf=${dados.cpf}&cadastrado=1`;
     return;
   }
 
-  const erro = await resposta.json().catch(() => null);
+  const erro = await lerJson(resposta);
   const detalhe = erro?.detail ?? 'Erro ao cadastrar paciente.';
   if (resposta.status === 409) mostrarErroCampo('cpf', detalhe);
   mensagemCadastro.textContent = detalhe;
