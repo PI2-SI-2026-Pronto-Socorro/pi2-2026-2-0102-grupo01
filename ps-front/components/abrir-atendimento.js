@@ -33,7 +33,7 @@ function mostrarAtendimentoAberto(card, atendimento) {
   linkConsulta.textContent = 'Consultar atendimento';
 
   dados.append(numero, chegada, status, linkConsulta);
-  
+
   card.appendChild(dados);
 }
 

@@ -49,7 +49,7 @@ formularioCadastro.addEventListener('submit', async (event) => {
   event.preventDefault();
   mensagemCadastro.textContent = '';
   mensagemCadastro.className = 'campo largura-total';
-  
+
   const dados = {
     nome: camposCadastro.nome.value.trim(),
     cpf: camposCadastro.cpf.value.replace(/\D/g, ''),
