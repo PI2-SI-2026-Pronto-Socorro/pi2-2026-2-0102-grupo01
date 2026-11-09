@@ -90,7 +90,7 @@ paths:
     get:
       tags: [Atendimentos]
       summary: Busca os atendimentos de um paciente pelo CPF
-      description: Devolve do mais recente para o mais antigo. Lista vazia quando o CPF não tem atendimentos.
+      description: Devolve do mais recente para o mais antigo, com o nome e o CPF do paciente. Lista vazia quando o CPF não tem atendimentos.
       parameters:
         - in: query
           name: cpf
@@ -103,7 +103,13 @@ paths:
             application/json:
               schema:
                 type: array
-                items: { $ref: '#/components/schemas/Atendimento' }
+                items:
+                  allOf:
+                    - $ref: '#/components/schemas/Atendimento'
+                    - type: object
+                      properties:
+                        nome: { type: string, example: Maria da Silva }
+                        cpf: { type: string, nullable: true, example: '12345678900' }
         '422':
           description: CPF ausente ou inválido
           content:
@@ -171,6 +177,7 @@ paths:
     get:
       tags: [Atendimentos]
       summary: Busca um atendimento pelo número
+      description: Devolve também o nome e o CPF do paciente.
       parameters:
         - in: path
           name: numero
@@ -181,7 +188,13 @@ paths:
           description: Atendimento encontrado
           content:
             application/json:
-              schema: { $ref: '#/components/schemas/Atendimento' }
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Atendimento'
+                  - type: object
+                    properties:
+                      nome: { type: string, example: Maria da Silva }
+                      cpf: { type: string, nullable: true, example: '12345678900' }
         '404':
           description: Atendimento não encontrado
           content:

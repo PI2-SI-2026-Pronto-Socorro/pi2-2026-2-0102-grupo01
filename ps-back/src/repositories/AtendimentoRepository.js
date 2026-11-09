@@ -33,8 +33,17 @@ async function findEmAndamento(idPaciente) {
 
 async function findByNumero(numero) {
   const [linha] = await db
-    .select()
+    .select({
+      id_atendimento: atendimento.id_atendimento,
+      numero_atendimento: atendimento.numero_atendimento,
+      id_paciente: atendimento.id_paciente,
+      status_atendimento: atendimento.status_atendimento,
+      data_hora_chegada: atendimento.data_hora_chegada,
+      nome: paciente.nome,
+      cpf: paciente.cpf,
+    })
     .from(atendimento)
+    .innerJoin(paciente, eq(paciente.id_paciente, atendimento.id_paciente))
     .where(eq(atendimento.numero_atendimento, numero));
   return linha ?? null;
 }
@@ -47,6 +56,8 @@ async function findByCpf(cpf) {
       id_paciente: atendimento.id_paciente,
       status_atendimento: atendimento.status_atendimento,
       data_hora_chegada: atendimento.data_hora_chegada,
+      nome: paciente.nome,
+      cpf: paciente.cpf,
     })
     .from(atendimento)
     .innerJoin(paciente, eq(paciente.id_paciente, atendimento.id_paciente))

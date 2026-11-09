@@ -1,3 +1,44 @@
+// Utilidades compartilhadas por todas as páginas (o layout.js é carregado antes dos outros scripts).
+const API_URL = '/api';
+
+function formatarCpf(cpf) {
+  return cpf ? cpf.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4') : 'Não informado';
+}
+
+function formatarData(isoData) {
+  if (!isoData) return 'Não informado';
+  const [ano, mes, dia] = isoData.split('-');
+  return `${dia}/${mes}/${ano}`;
+}
+
+function formatarDataHora(iso) {
+  return new Date(iso).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' });
+}
+
+// Lê o corpo JSON da resposta; devolve null se vier vazio ou inválido, sem lançar erro.
+async function lerJson(resposta) {
+  try {
+    return await resposta.json();
+  } catch {
+    return null;
+  }
+}
+
+// Controla buscas concorrentes: cada chamada de iniciar() invalida as anteriores,
+// e o retorno diz se aquela busca ainda é a mais recente.
+function criarControleDeBusca() {
+  let buscaAtual = 0;
+  return function iniciar() {
+    const minhaBusca = ++buscaAtual;
+    return () => minhaBusca === buscaAtual;
+  };
+}
+
+// Um paciente só pode abrir atendimento novo se não tiver nenhum em andamento.
+function podeAbrirAtendimento(status) {
+  return !status || status === 'Encerrado' || status === 'Cancelado';
+}
+
 (() => {
   const paginas = {
     'index.html': 'painel',
