@@ -16,9 +16,15 @@ const CLASSE_STATUS = {
 
 const INTERVALO_PAINEL_MS = 30000;
 
-function formatarCpfPainel(cpf) {
-  return cpf ? cpf.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4') : 'Não informado';
-}
+// Evita buscas empilhadas e lembra se a tabela já mostra dados válidos.
+let carregandoPainel = false;
+let painelJaCarregado = false;
+
+// Aviso pequeno, acima da tabela, para falhas nas atualizações automáticas.
+const avisoPainel = document.createElement('p');
+avisoPainel.setAttribute('role', 'status');
+avisoPainel.hidden = true;
+corpoPainel?.closest('.table-panel')?.before(avisoPainel);
 
 function formatarHoraPainel(iso) {
   return new Date(iso).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
@@ -70,7 +76,7 @@ function montarLinhaPainel(atendimento) {
   celulaNome.textContent = atendimento.nome;
 
   const celulaCpf = document.createElement('td');
-  celulaCpf.textContent = formatarCpfPainel(atendimento.cpf);
+  celulaCpf.textContent = formatarCpf(atendimento.cpf);
 
   const celulaStatus = document.createElement('td');
   const etiqueta = document.createElement('span');
@@ -100,29 +106,46 @@ function atualizarContadores(resumo) {
   }
 }
 
+// Na primeira carga o erro vai para a tabela. Depois, os dados que já estão na tela
+// continuam valendo e a falha aparece só como aviso.
+function mostrarFalhaPainel(texto) {
+  if (!painelJaCarregado) {
+    mostrarEstadoPainel(texto, true);
+    return;
+  }
+  avisoPainel.textContent = `${texto} Mostrando os últimos dados carregados; uma nova tentativa será feita em instantes.`;
+  avisoPainel.hidden = false;
+}
+
 async function carregarPainel() {
-  let resposta;
+  if (carregandoPainel) return; // a busca anterior ainda não terminou
+  carregandoPainel = true;
   try {
-    resposta = await fetch('/api/atendimentos/painel');
-  } catch {
-    mostrarEstadoPainel('Não foi possível conectar à API.', true);
-    return;
-  }
+    let resposta;
+    try {
+      resposta = await fetch(`${API_URL}/atendimentos/painel`);
+    } catch {
+      mostrarFalhaPainel('Não foi possível conectar à API.');
+      return;
+    }
 
-  if (!resposta.ok) {
-    const erro = await resposta.json().catch(() => null);
-    mostrarEstadoPainel(erro?.detail ?? 'Erro ao carregar o painel de atendimentos.', true);
-    return;
-  }
+    const corpo = await lerJson(resposta);
+    if (!resposta.ok || !Array.isArray(corpo?.atendimentos)) {
+      mostrarFalhaPainel(corpo?.detail ?? 'Erro ao carregar o painel de atendimentos.');
+      return;
+    }
 
-  const { resumo, atendimentos } = await resposta.json();
-  atualizarContadores(resumo);
-
-  if (atendimentos.length === 0) {
-    mostrarEstadoPainel('Nenhum atendimento hoje.');
-    return;
+    painelJaCarregado = true;
+    avisoPainel.hidden = true;
+    atualizarContadores(corpo.resumo);
+    if (corpo.atendimentos.length === 0) {
+      mostrarEstadoPainel('Nenhum atendimento hoje.');
+      return;
+    }
+    corpoPainel.replaceChildren(...corpo.atendimentos.map(montarLinhaPainel));
+  } finally {
+    carregandoPainel = false;
   }
-  corpoPainel.replaceChildren(...atendimentos.map(montarLinhaPainel));
 }
 
 if (corpoPainel) {
