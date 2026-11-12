@@ -1,14 +1,11 @@
 const formularioConsulta = document.getElementById('form-consulta-atendimento');
 const identificadorAtendimento = document.getElementById('identificador-atendimento');
 const resultadoConsulta = document.getElementById('resultado-consulta');
+const novaConsulta = criarControleDeBusca();
 
-function formatarCpf(cpf) {
-  return cpf ? cpf.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4') : 'Não informado';
-}
-
-function formatarDataHora(iso) {
-  return new Date(iso).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' });
-}
+// Erro vindo da API ou da conexão, com a mensagem pronta para o usuário.
+// Qualquer outro erro é falha de código e não deve aparecer como "sem conexão".
+class ErroConsulta extends Error {}
 
 function mostrarMensagem(texto, erro = false) {
   const paragrafo = document.createElement('p');
@@ -76,18 +73,25 @@ function montarHistorico(atendimentos) {
   return secao;
 }
 
+// Só o fetch fica no try/catch: falha aqui é de fato conexão. 404 vira null.
 async function buscarJson(url) {
-  const resposta = await fetch(url);
-  if (resposta.status === 404) return null;
-  if (!resposta.ok) {
-    const erro = await resposta.json().catch(() => null);
-    throw new Error(erro?.detail ?? 'Erro ao consultar atendimento.');
+  let resposta;
+  try {
+    resposta = await fetch(url);
+  } catch {
+    throw new ErroConsulta('Não foi possível conectar à API.');
   }
-  return resposta.json();
+  if (resposta.status === 404) return null;
+
+  const corpo = await lerJson(resposta);
+  if (!resposta.ok) throw new ErroConsulta(corpo?.detail ?? 'Erro ao consultar atendimento.');
+  if (corpo === null) throw new ErroConsulta('A API respondeu em um formato inesperado.');
+  return corpo;
 }
 
-async function consultarPorNumero(numero) {
-  const atendimento = await buscarJson(`/api/atendimentos/${numero}`);
+async function consultarPorNumero(numero, aindaValida) {
+  const atendimento = await buscarJson(`${API_URL}/atendimentos/${numero}`);
+  if (!aindaValida()) return;
   if (!atendimento) {
     mostrarMensagem(`Atendimento ${numero} não encontrado.`, true);
     return;
@@ -95,25 +99,27 @@ async function consultarPorNumero(numero) {
   resultadoConsulta.replaceChildren(montarCardAtendimento(atendimento, atendimento));
 }
 
-async function consultarPorCpf(cpf) {
-  const [paciente, atendimentos] = await Promise.all([
-    buscarJson(`/api/pacientes/${cpf}`),
-    buscarJson(`/api/atendimentos?cpf=${cpf}`),
-  ]);
+async function consultarPorCpf(cpf, aindaValida) {
+  // Uma chamada só: a lista já vem com o nome e o CPF do paciente.
+  const atendimentos = await buscarJson(`${API_URL}/atendimentos?cpf=${cpf}`);
+  if (!aindaValida()) return;
 
+  if (atendimentos && atendimentos.length > 0) {
+    const [maisRecente, ...anteriores] = atendimentos;
+    const conteudo = [montarCardAtendimento(maisRecente, maisRecente)];
+    if (anteriores.length > 0) conteudo.push(montarHistorico(anteriores));
+    resultadoConsulta.replaceChildren(...conteudo);
+    return;
+  }
+
+  // Lista vazia: só aqui consulta o paciente, para diferenciar "sem atendimentos" de "não cadastrado".
+  const paciente = await buscarJson(`${API_URL}/pacientes/${cpf}`);
+  if (!aindaValida()) return;
   if (!paciente) {
     mostrarMensagem('Paciente não encontrado para o CPF informado.', true);
     return;
   }
-  if (!atendimentos || atendimentos.length === 0) {
-    mostrarMensagem(`${paciente.nome} não possui atendimentos registrados.`);
-    return;
-  }
-
-  const [maisRecente, ...anteriores] = atendimentos;
-  const conteudo = [montarCardAtendimento(maisRecente, paciente)];
-  if (anteriores.length > 0) conteudo.push(montarHistorico(anteriores));
-  resultadoConsulta.replaceChildren(...conteudo);
+  mostrarMensagem(`${paciente.nome} não possui atendimentos registrados.`);
 }
 
 formularioConsulta.addEventListener('submit', async (event) => {
@@ -121,11 +127,12 @@ formularioConsulta.addEventListener('submit', async (event) => {
   const valor = identificadorAtendimento.value.trim().toUpperCase();
   const numeros = valor.replace(/\D/g, '');
 
+  const aindaValida = novaConsulta();
   let consulta;
   if (/^AT\d{4,9}$/.test(valor)) {
-    consulta = () => consultarPorNumero(valor);
+    consulta = () => consultarPorNumero(valor, aindaValida);
   } else if (numeros.length === 11 && !/^(\d)\1{10}$/.test(numeros)) {
-    consulta = () => consultarPorCpf(numeros);
+    consulta = () => consultarPorCpf(numeros, aindaValida);
   } else {
     mostrarMensagem('Informe um número no formato AT0001 ou um CPF válido.', true);
     return;
@@ -135,12 +142,20 @@ formularioConsulta.addEventListener('submit', async (event) => {
   try {
     await consulta();
   } catch (erro) {
-    mostrarMensagem(erro instanceof TypeError ? 'Não foi possível conectar à API.' : erro.message, true);
+    if (!aindaValida()) return;
+    if (erro instanceof ErroConsulta) {
+      mostrarMensagem(erro.message, true);
+    } else {
+      console.error(erro);
+      mostrarMensagem('Erro inesperado ao exibir a consulta. Tente novamente.', true);
+    }
   }
 });
 
-const numeroInicial = new URLSearchParams(window.location.search).get('numero');
-if (numeroInicial) {
-  identificadorAtendimento.value = numeroInicial;
+// Aceita ?numero=AT0001 (vindo da H04 e do painel) ou ?cpf=... (vindo da H02 e da H04).
+const parametros = new URLSearchParams(window.location.search);
+const identificadorInicial = parametros.get('numero') ?? parametros.get('cpf');
+if (identificadorInicial) {
+  identificadorAtendimento.value = identificadorInicial;
   formularioConsulta.requestSubmit();
 }

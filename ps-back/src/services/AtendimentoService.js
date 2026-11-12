@@ -46,7 +46,7 @@ async function buscarPorCpf(cpf) {
   if (!/^\d{11}$/.test(cpf)) throw new ErroHttp(422, 'CPF deve ter 11 números');
 
   const linhas = await AtendimentoRepository.findByCpf(cpf);
-  return linhas.map((linha) => new Atendimento(linha));
+  return linhas.map((linha) => ({ ...new Atendimento(linha), nome: linha.nome, cpf: linha.cpf }));
 }
 
 async function listarAbertos() {

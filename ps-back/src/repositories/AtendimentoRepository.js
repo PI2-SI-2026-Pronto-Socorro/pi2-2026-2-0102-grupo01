@@ -122,6 +122,8 @@ async function findByCpf(cpf) {
       id_paciente: atendimento.id_paciente,
       status_atendimento: atendimento.status_atendimento,
       data_hora_chegada: atendimento.data_hora_chegada,
+      nome: paciente.nome,
+      cpf: paciente.cpf,
     })
     .from(atendimento)
     .innerJoin(paciente, eq(paciente.id_paciente, atendimento.id_paciente))
