@@ -3,12 +3,23 @@ const formTriagem = document.getElementById('form-registrar-triagem');
 const mensagemTriagem = document.getElementById('mensagem-triagem');
 const botaoCancelarTriagem = document.getElementById('cancelar-triagem');
 const corpoFila = document.getElementById('fila-triagem');
+const painelFila = corpoFila.closest('.table-panel');
 
 const INTERVALO_ATUALIZACAO_MS = 30000;
 
-function formatarDataHora(iso) {
-  return new Date(iso).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' });
-}
+// Estado da fila: evita buscas empilhadas e lembra se a tabela já mostra dados válidos.
+let carregandoFila = false;
+let filaJaCarregada = false;
+
+// Atendimento escolhido na fila; a H08 vai usar o id_atendimento dele ao gravar a triagem.
+let atendimentoSelecionado = null;
+
+// Aviso pequeno, acima da tabela, para falhas nas atualizações automáticas.
+const avisoAtualizacao = document.createElement('p');
+avisoAtualizacao.className = 'aviso-triagem';
+avisoAtualizacao.setAttribute('role', 'status');
+avisoAtualizacao.hidden = true;
+painelFila.before(avisoAtualizacao);
 
 function mostrarEstadoFila(texto, erro = false) {
   const linha = document.createElement('tr');
@@ -45,34 +56,51 @@ function montarLinhaFila(atendimento) {
   return linha;
 }
 
+// Na primeira carga o erro vai para a tabela. Depois, a lista que já está na tela
+// continua valendo e a falha aparece só como aviso.
+function mostrarFalhaFila(texto) {
+  if (!filaJaCarregada) {
+    mostrarEstadoFila(texto, true);
+    return;
+  }
+  avisoAtualizacao.textContent = `${texto} Mostrando a última fila carregada; uma nova tentativa será feita em instantes.`;
+  avisoAtualizacao.hidden = false;
+}
+
 async function carregarFila() {
-  let resposta;
+  if (carregandoFila) return; // a busca anterior ainda não terminou
+  carregandoFila = true;
   try {
-    resposta = await fetch('/api/atendimentos/abertos');
-  } catch {
-    mostrarEstadoFila('Não foi possível conectar à API.', true);
-    return;
-  }
+    let resposta;
+    try {
+      resposta = await fetch(`${API_URL}/atendimentos/abertos`);
+    } catch {
+      mostrarFalhaFila('Não foi possível conectar à API.');
+      return;
+    }
 
-  if (!resposta.ok) {
-    const erro = await resposta.json().catch(() => null);
-    mostrarEstadoFila(erro?.detail ?? 'Erro ao carregar a fila de triagem.', true);
-    return;
-  }
+    const corpo = await lerJson(resposta);
+    if (!resposta.ok || !Array.isArray(corpo)) {
+      mostrarFalhaFila(corpo?.detail ?? 'Erro ao carregar a fila de triagem.');
+      return;
+    }
 
-  const atendimentos = await resposta.json();
-  if (atendimentos.length === 0) {
-    mostrarEstadoFila('Nenhum paciente aguardando triagem.');
-    return;
+    filaJaCarregada = true;
+    avisoAtualizacao.hidden = true;
+    if (corpo.length === 0) {
+      mostrarEstadoFila('Nenhum paciente aguardando triagem.');
+      return;
+    }
+    corpoFila.replaceChildren(...corpo.map(montarLinhaFila));
+  } finally {
+    carregandoFila = false;
   }
-
-  corpoFila.replaceChildren(...atendimentos.map(montarLinhaFila));
 }
 
 function abrirFormularioTriagem(atendimento) {
-  document.getElementById('paciente-triagem').textContent = atendimento?.numero_atendimento
-    ? `Atendimento ${atendimento.numero_atendimento} · ${atendimento.nome}`
-    : 'Selecione um paciente na fila para iniciar a triagem.';
+  atendimentoSelecionado = atendimento;
+  document.getElementById('paciente-triagem').textContent =
+    `Atendimento ${atendimento.numero_atendimento} · ${atendimento.nome}`;
   mensagemTriagem.textContent = '';
   formTriagem.reset();
   areaTriagem.hidden = false;
@@ -80,10 +108,12 @@ function abrirFormularioTriagem(atendimento) {
 }
 
 botaoCancelarTriagem.addEventListener('click', () => {
+  atendimentoSelecionado = null;
   areaTriagem.hidden = true;
 });
 
-document.getElementById('visualizar-formulario-triagem').addEventListener('click', () => abrirFormularioTriagem());
+// O botão genérico abria o formulário sem paciente; a triagem agora começa sempre pela fila.
+document.getElementById('visualizar-formulario-triagem').hidden = true;
 
 mostrarEstadoFila('Carregando fila de triagem...');
 carregarFila();
@@ -93,6 +123,12 @@ formTriagem.addEventListener('submit', (event) => {
   event.preventDefault();
   mensagemTriagem.className = 'mensagem-triagem';
   mensagemTriagem.textContent = '';
+
+  if (!atendimentoSelecionado) {
+    mensagemTriagem.textContent = 'Selecione um paciente na fila para iniciar a triagem.';
+    mensagemTriagem.classList.add('mensagem-erro');
+    return;
+  }
 
   if (!formTriagem.reportValidity()) return;
 

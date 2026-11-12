@@ -1,13 +1,7 @@
-const API_URL = '/api';
-
 (() => {
   const formulario = document.getElementById('form-busca');
   const resultado = document.getElementById('resultado');
-
-  function formatarData(iso) {
-    const [ano, mes, dia] = iso.split('-');
-    return `${dia}/${mes}/${ano}`;
-  }
+  const novaBusca = criarControleDeBusca();
 
   function montarCardPaciente(paciente) {
     const card = document.createElement('div');
@@ -26,7 +20,7 @@ const API_URL = '/api';
     dados.className = 'dados-paciente';
 
     const campos = [
-      ['CPF', paciente.cpf],
+      ['CPF', formatarCpf(paciente.cpf)],
       ['Nascimento', formatarData(paciente.data_nascimento)],
       ['Telefone', paciente.telefone ?? '—'],
       ['Gênero', paciente.genero ?? '—'],
@@ -62,26 +56,46 @@ const API_URL = '/api';
         return;
       }
 
+      const buscaAindaValida = novaBusca();
       resultado.innerHTML = '<p>Buscando...</p>';
 
       let resposta;
       try {
         resposta = await fetch(`${API_URL}/pacientes/${cpfDigitado}`);
       } catch {
-        resultado.innerHTML = '<p>Não foi possível conectar à API.</p>';
+        if (buscaAindaValida()) resultado.innerHTML = '<p>Não foi possível conectar à API.</p>';
         return;
       }
+      const paciente = resposta.ok ? await lerJson(resposta) : null;
+      if (!buscaAindaValida()) return; // resposta de uma busca antiga, chegou atrasada
 
       if (resposta.ok) {
-        const paciente = await resposta.json();
+        if (!paciente) {
+          resultado.innerHTML = '<p>Erro ao ler os dados do paciente.</p>';
+          return;
+        }
         resultado.innerHTML = '';
+        if (cadastroRecente === cpfDigitado) {
+          const aviso = document.createElement('p');
+          aviso.className = 'mensagem-sucesso';
+          aviso.setAttribute('role', 'status');
+          aviso.textContent = 'Paciente cadastrado com sucesso.';
+          resultado.appendChild(aviso);
+          cadastroRecente = null;
+        }
         resultado.appendChild(montarCardPaciente(paciente));
 
-        const botaoAtendimento = document.createElement('a');
-        botaoAtendimento.className = 'botao-principal';
-        botaoAtendimento.href = `./h04-abrir-atendimento.html?cpf=${cpfDigitado}`;
-        botaoAtendimento.textContent = 'Abrir atendimento';
-        resultado.appendChild(botaoAtendimento);
+        // Só oferece abrir atendimento se o paciente não tiver um em andamento.
+        const acao = document.createElement('a');
+        acao.className = 'botao-principal';
+        if (podeAbrirAtendimento(paciente.status)) {
+          acao.href = `./h04-abrir-atendimento.html?cpf=${cpfDigitado}`;
+          acao.textContent = 'Abrir atendimento';
+        } else {
+          acao.href = `./h05-consultar-atendimento.html?cpf=${cpfDigitado}`;
+          acao.textContent = 'Consultar atendimento atual';
+        }
+        resultado.appendChild(acao);
         return;
       }
 
@@ -102,7 +116,10 @@ const API_URL = '/api';
       });
     });
 
-    const cpfInicial = new URLSearchParams(window.location.search).get('cpf');
+    const parametros = new URLSearchParams(window.location.search);
+    const cpfInicial = parametros.get('cpf');
+    // Vindo do cadastro (H03) com ?cadastrado=1, mostra a confirmação junto do paciente.
+    let cadastroRecente = parametros.get('cadastrado') === '1' ? (cpfInicial ?? '').replace(/\D/g, '') : null;
     if (cpfInicial) {
       document.getElementById('cpf').value = cpfInicial;
       formulario.requestSubmit();

@@ -1,14 +1,7 @@
 const formularioBusca = document.getElementById('form-busca-atendimento');
 const campoCpf = document.getElementById('cpf-atendimento');
 const resultadoPaciente = document.getElementById('resultado-paciente');
-
-function formatarCpf(cpf) {
-  return cpf.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4');
-}
-
-function formatarDataHora(iso) {
-  return new Date(iso).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' });
-}
+const novaBuscaPaciente = criarControleDeBusca();
 
 function mostrarErro(texto) {
   resultadoPaciente.innerHTML = '';
@@ -40,7 +33,7 @@ function mostrarAtendimentoAberto(card, atendimento) {
   linkConsulta.textContent = 'Consultar atendimento';
 
   dados.append(numero, chegada, status, linkConsulta);
-  
+
   card.appendChild(dados);
 }
 
@@ -54,13 +47,31 @@ function mostrarFichaPaciente(paciente) {
   const cpfPaciente = document.createElement('p');
   cpfPaciente.textContent = `CPF: ${formatarCpf(paciente.cpf)}`;
 
+  const mensagem = document.createElement('p');
+  mensagem.className = 'mensagem-atendimento';
+
+  // Paciente com atendimento em andamento: o back-end recusaria um novo, então não oferece o botão.
+  if (!podeAbrirAtendimento(paciente.status)) {
+    mensagem.textContent = `Este paciente já possui um atendimento em andamento (situação: ${paciente.status}).`;
+    const linkConsulta = document.createElement('a');
+    linkConsulta.className = 'botao-principal';
+    linkConsulta.href = `./h05-consultar-atendimento.html?cpf=${encodeURIComponent(paciente.cpf ?? '')}`;
+    linkConsulta.textContent = 'Consultar atendimento atual';
+    card.append(titulo, cpfPaciente, mensagem, linkConsulta);
+    resultadoPaciente.appendChild(card);
+    return;
+  }
+
   const botaoAbrir = document.createElement('button');
   botaoAbrir.className = 'botao-principal';
   botaoAbrir.type = 'button';
   botaoAbrir.textContent = 'Abrir atendimento';
 
-  const mensagem = document.createElement('p');
-  mensagem.className = 'mensagem-atendimento';
+  function mostrarFalha(texto) {
+    mensagem.textContent = texto;
+    mensagem.className = 'mensagem-atendimento mensagem-erro';
+    botaoAbrir.disabled = false;
+  }
 
   botaoAbrir.addEventListener('click', async () => {
     botaoAbrir.disabled = true;
@@ -69,31 +80,38 @@ function mostrarFichaPaciente(paciente) {
 
     let resposta;
     try {
-      resposta = await fetch('/api/atendimentos', {
+      resposta = await fetch(`${API_URL}/atendimentos`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ id_paciente: paciente.id_paciente }),
       });
     } catch {
-      mensagem.textContent = 'Não foi possível conectar à API.';
-      mensagem.classList.add('mensagem-erro');
-      botaoAbrir.disabled = false;
+      mostrarFalha('Não foi possível conectar à API.');
       return;
     }
+
+    const corpo = await lerJson(resposta);
 
     if (resposta.ok) {
-      const atendimento = await resposta.json();
       botaoAbrir.remove();
+      if (!corpo) {
+        // O atendimento foi criado, mas a resposta veio ilegível: orienta a conferir na consulta.
+        mensagem.textContent = 'O atendimento foi aberto, mas não foi possível exibir os dados. Confira na consulta do atendimento.';
+        mensagem.className = 'mensagem-atendimento mensagem-erro';
+        const linkConsulta = document.createElement('a');
+        linkConsulta.className = 'botao-principal';
+        linkConsulta.href = `./h05-consultar-atendimento.html?cpf=${encodeURIComponent(paciente.cpf ?? '')}`;
+        linkConsulta.textContent = 'Consultar atendimento';
+        card.appendChild(linkConsulta);
+        return;
+      }
       mensagem.textContent = 'Atendimento aberto com sucesso.';
-      mensagem.classList.add('sucesso');
-      mostrarAtendimentoAberto(card, atendimento);
+      mensagem.className = 'mensagem-atendimento sucesso';
+      mostrarAtendimentoAberto(card, corpo);
       return;
     }
 
-    const erro = await resposta.json().catch(() => null);
-    mensagem.textContent = erro?.detail ?? 'Erro ao abrir atendimento.';
-    mensagem.classList.add('mensagem-erro');
-    botaoAbrir.disabled = false;
+    mostrarFalha(corpo?.detail ?? 'Erro ao abrir atendimento.');
   });
 
   card.append(titulo, cpfPaciente, botaoAbrir, mensagem);
@@ -109,26 +127,30 @@ formularioBusca.addEventListener('submit', async (event) => {
     return;
   }
 
+  // Uma busca nova invalida as anteriores: resposta atrasada de outro CPF não troca a ficha.
+  const buscaAindaValida = novaBuscaPaciente();
   resultadoPaciente.innerHTML = '<p>Buscando paciente...</p>';
 
   let resposta;
   try {
-    resposta = await fetch(`/api/pacientes/${cpf}`);
+    resposta = await fetch(`${API_URL}/pacientes/${cpf}`);
   } catch {
-    mostrarErro('Não foi possível conectar à API.');
+    if (buscaAindaValida()) mostrarErro('Não foi possível conectar à API.');
     return;
   }
+  const paciente = resposta.ok ? await lerJson(resposta) : null;
+  if (!buscaAindaValida()) return;
 
   if (resposta.status === 404) {
     mostrarErro('Paciente não encontrado. Cadastre o paciente antes de abrir o atendimento.');
     return;
   }
-  if (!resposta.ok) {
+  if (!resposta.ok || !paciente) {
     mostrarErro('Erro ao buscar paciente.');
     return;
   }
 
-  mostrarFichaPaciente(await resposta.json());
+  mostrarFichaPaciente(paciente);
 });
 
 const cpfInicial = new URLSearchParams(window.location.search).get('cpf');
