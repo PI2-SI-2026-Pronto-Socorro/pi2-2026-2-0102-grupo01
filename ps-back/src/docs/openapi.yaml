@@ -173,6 +173,66 @@ paths:
                       properties:
                         nome: { type: string, example: Maria da Silva }
 
+  /atendimentos/triados:
+    get:
+      tags: [Atendimentos]
+      summary: Painel do médico - atendimentos em Triado, na ordem de Manchester
+      description: >-
+        Lista só os atendimentos em Triado, ordenados pela classificação de risco do Protocolo de Manchester
+        (Emergência/vermelho primeiro, depois Muito Urgente/laranja, Urgente/amarelo, Pouco Urgente/verde e
+        Não Urgente/azul) e, na mesma cor, pela hora de chegada. Lista vazia quando não há atendimentos triados.
+      responses:
+        '200':
+          description: Atendimentos triados
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  allOf:
+                    - $ref: '#/components/schemas/Atendimento'
+                    - type: object
+                      properties:
+                        nome: { type: string, example: Maria da Silva }
+                        data_nascimento: { type: string, format: date, nullable: true, example: '1990-03-14' }
+                        classificacao_risco:
+                          type: string
+                          enum: [Emergência, Muito Urgente, Urgente, Pouco Urgente, Não Urgente]
+                          example: Emergência
+                        cor: { type: string, enum: [Vermelho, Laranja, Amarelo, Verde, Azul], example: Vermelho }
+                        data_hora_triagem: { type: string, format: date-time, example: '2026-10-25T21:50:02.110Z' }
+
+  /atendimentos/painel:
+    get:
+      tags: [Atendimentos]
+      summary: Painel de atendimentos do dia
+      description: Lista os atendimentos que chegaram hoje (horário de Brasília) e os que ainda estão em andamento, do mais recente para o mais antigo, com a contagem por situação.
+      responses:
+        '200':
+          description: Painel de atendimentos
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  resumo:
+                    type: object
+                    properties:
+                      Aberto: { type: integer, example: 12 }
+                      Triado: { type: integer, example: 5 }
+                      Confirmado: { type: integer, example: 3 }
+                      Encerrado: { type: integer, example: 28 }
+                      Cancelado: { type: integer, example: 1 }
+                  atendimentos:
+                    type: array
+                    items:
+                      allOf:
+                        - $ref: '#/components/schemas/Atendimento'
+                        - type: object
+                          properties:
+                            nome: { type: string, example: Maria da Silva }
+                            cpf: { type: string, nullable: true, example: '12345678900' }
+
   /atendimentos/{numero}:
     get:
       tags: [Atendimentos]
@@ -200,6 +260,90 @@ paths:
           content:
             application/json:
               schema: { $ref: '#/components/schemas/Erro' }
+        '422':
+          description: Número do atendimento inválido
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Erro' }
+    patch:
+      tags: [Atendimentos]
+      summary: Altera os dados do atendimento e os dados cadastrais do paciente
+      description: >-
+        Altera só os campos enviados. Permitido enquanto o atendimento está em Aberto ou Triado;
+        em Confirmado, Encerrado ou Cancelado a alteração é recusada. A situação do atendimento não muda.
+      parameters:
+        - in: path
+          name: numero
+          required: true
+          schema: { type: string, pattern: '^AT\d{4,9}$', example: AT0008 }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/AlteracaoAtendimento' }
+            example: { motivo_atendimento: Dor abdominal, telefone: (19) 98765-4321 }
+      responses:
+        '200':
+          description: Atendimento alterado
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Atendimento'
+                  - type: object
+                    properties:
+                      motivo_atendimento: { type: string, nullable: true, example: Dor abdominal }
+                      paciente: { $ref: '#/components/schemas/Paciente' }
+        '404':
+          description: Atendimento não encontrado
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Erro' }
+        '409':
+          description: Atendimento em Confirmado, Encerrado ou Cancelado, ou CPF já usado por outro paciente
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Erro' }
+              example: { detail: 'Não é possível alterar atendimento Cancelado (só em Aberto ou Triado)' }
+        '422':
+          description: Número do atendimento inválido, campo não permitido ou valor inválido
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Erro' }
+
+  /atendimentos/{numero}/cancelar:
+    patch:
+      tags: [Atendimentos]
+      summary: Cancela um atendimento em Aberto
+      description: Só cancela atendimento com situação Aberto; nos outros estados a operação é recusada. O atendimento cancelado sai da fila de triagem.
+      parameters:
+        - in: path
+          name: numero
+          required: true
+          schema: { type: string, pattern: '^AT\d{4,9}$', example: AT0008 }
+      responses:
+        '200':
+          description: Atendimento cancelado
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Atendimento' }
+              example:
+                id_atendimento: 7c1d2e3f-4a5b-4c6d-8e7f-9a0b1c2d3e4f
+                numero_atendimento: AT0008
+                id_paciente: 3f2b8c1e-9a4d-4e7b-8c21-5d6f7a8b9c0d
+                status_atendimento: Cancelado
+                data_hora_chegada: '2026-10-25T21:39:14.490Z'
+        '404':
+          description: Atendimento não encontrado
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Erro' }
+        '409':
+          description: Atendimento não está em Aberto
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Erro' }
+              example: { detail: 'Só é possível cancelar atendimento em Aberto (situação atual: Triado)' }
         '422':
           description: Número do atendimento inválido
           content:
@@ -236,6 +380,18 @@ components:
         data_nascimento: { type: string, format: date, example: '1990-03-14' }
         genero: { type: string, maxLength: 20, example: Feminino }
         telefone: { type: string, maxLength: 15, example: (11) 98765-4321 }
+    AlteracaoAtendimento:
+      type: object
+      minProperties: 1
+      additionalProperties: false
+      properties:
+        motivo_atendimento: { type: string, nullable: true, maxLength: 255, example: Dor abdominal }
+        nome: { type: string, maxLength: 100, example: Maria da Silva }
+        cpf: { type: string, pattern: '^\d{11}$', example: '12345678900' }
+        rg: { type: string, nullable: true, maxLength: 15, example: '123456789' }
+        data_nascimento: { type: string, format: date, example: '1990-03-14' }
+        genero: { type: string, nullable: true, maxLength: 20, example: Feminino }
+        telefone: { type: string, nullable: true, maxLength: 15, example: (11) 98765-4321 }
     Erro:
       type: object
       properties:

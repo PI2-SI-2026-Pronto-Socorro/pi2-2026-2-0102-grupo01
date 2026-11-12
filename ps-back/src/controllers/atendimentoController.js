@@ -18,4 +18,22 @@ async function findAbertos(req, res) {
   res.json(await AtendimentoService.listarAbertos());
 }
 
-module.exports = { create, findByNumero, findByCpf, findAbertos };
+async function cancelar(req, res) {
+  res.json(await AtendimentoService.cancelar(req.params.numero));
+}
+
+async function painel(req, res) {
+  res.json(await AtendimentoService.painel());
+}
+
+async function alterar(req, res) {
+  res.json(await AtendimentoService.alterar(req.params.numero, req.body));
+}
+
+async function findTriados(req, res) {
+  res.json(await AtendimentoService.listarTriados());
+}
+
+module.exports = {
+  create, findByNumero, findByCpf, findAbertos, findTriados, cancelar, painel, alterar,
+};
