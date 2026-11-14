@@ -1,0 +1,36 @@
+.admin-placeholder {
+  display: grid;
+  min-height: 260px;
+  justify-items: center;
+  align-content: center;
+  gap: 12px;
+  padding: 28px;
+  border: 1px solid #dce3eb;
+  border-radius: 12px;
+  background: #fff;
+  color: #405365;
+  text-align: center;
+}
+
+.admin-icon {
+  display: grid;
+  width: 52px;
+  height: 52px;
+  place-items: center;
+  border-radius: 50%;
+  background: #effbf9;
+  color: #0c7d78;
+  font-size: 24px;
+}
+
+.admin-placeholder h2 {
+  margin: 0;
+  color: #263a4b;
+  font-size: 20px;
+}
+
+.admin-placeholder p {
+  max-width: 460px;
+  margin: 0;
+  line-height: 1.5;
+}

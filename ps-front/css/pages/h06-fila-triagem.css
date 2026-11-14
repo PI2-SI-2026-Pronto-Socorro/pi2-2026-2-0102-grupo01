@@ -1,3 +1,133 @@
 .pagina-h06 .area-reservada {
   min-height: 220px;
 }
+
+.fila-triagem-panel {
+  max-width: 1100px;
+}
+
+.fila-triagem-panel th:last-child,
+.fila-triagem-panel td:last-child {
+  text-align: right;
+}
+
+.fila-triagem-panel .estado-fila {
+  height: 72px;
+  text-align: center;
+  white-space: normal;
+}
+
+.fila-triagem-panel .botao-principal {
+  padding: 8px 12px;
+  font-size: 0.9rem;
+}
+
+.formulario-triagem {
+  margin-top: 20px;
+  padding: 22px;
+  border: 1px solid #dce3eb;
+  border-radius: 12px;
+  background: #fff;
+}
+
+.formulario-triagem[hidden] {
+  display: none;
+}
+
+.formulario-triagem .header-panel {
+  margin-bottom: 18px;
+}
+
+.formulario-triagem .title-wrap h2 {
+  margin: 0;
+  font-size: 1.25rem;
+}
+
+.formulario-triagem-campos {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.formulario-triagem-campos .campo {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.formulario-triagem-campos .campo label {
+  font-weight: 600;
+}
+
+.formulario-triagem-campos input,
+.formulario-triagem-campos select,
+.formulario-triagem-campos textarea {
+  width: 100%;
+  min-height: 42px;
+  padding: 9px 11px;
+  border: 1px solid #d7dad7;
+  border-radius: 8px;
+  background: #fff;
+  font: inherit;
+}
+
+.formulario-triagem-campos textarea {
+  resize: vertical;
+}
+
+.aviso-triagem,
+.mensagem-triagem,
+.formulario-triagem-campos .botoes-acoes {
+  grid-column: 1 / -1;
+}
+
+.aviso-triagem {
+  margin: 0;
+  padding: 12px;
+  border-radius: 8px;
+  background: #fff7e6;
+  color: #7a4b00;
+}
+
+.mensagem-triagem {
+  margin: 0;
+}
+
+.mensagem-triagem.mensagem-erro {
+  color: #b42318;
+}
+
+.mensagem-triagem.mensagem-aviso {
+  color: #7a4b00;
+}
+
+.formulario-triagem .botoes-acoes {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+.formulario-triagem .botao {
+  min-width: 120px;
+  min-height: 40px;
+  border: 0;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.formulario-triagem .botao-secundario {
+  border: 1px solid #d6d9d7;
+  background: #f1f2f1;
+}
+
+.formulario-triagem .botao-principal {
+  background: #0c7d78;
+  color: #fff;
+  font-weight: 600;
+}
+
+@media (max-width: 700px) {
+  .formulario-triagem-campos {
+    grid-template-columns: 1fr;
+  }
+}

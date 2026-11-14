@@ -1,7 +1,7 @@
 const { sql } = require('drizzle-orm');
 const {
   pgTable, pgEnum, pgSequence, uuid, varchar, char, date, timestamp, numeric, smallint, text,
-  primaryKey, foreignKey, unique, uniqueIndex, check,
+  primaryKey, foreignKey, unique, uniqueIndex, index, check,
 } = require('drizzle-orm/pg-core');
 
 const statusAtendimentoEnum = pgEnum('status_atendimento_enum', ['Aberto', 'Triado', 'Confirmado', 'Encerrado', 'Cancelado']);
@@ -13,7 +13,7 @@ const statusExameEnum = pgEnum('status_exame_enum', ['Solicitado', 'Em andamento
 const seqNumeroAtendimento = pgSequence('seq_numero_atendimento');
 
 const paciente = pgTable('paciente', {
-  id_paciente: uuid('id_paciente').defaultRandom(),
+  id_paciente: uuid('id_paciente').defaultRandom().notNull(),
   nome: varchar('nome', { length: 100 }).notNull(),
   cpf: char('cpf', { length: 11 }),
   rg: varchar('rg', { length: 15 }),
@@ -29,9 +29,9 @@ const paciente = pgTable('paciente', {
 ]);
 
 const prontuario = pgTable('prontuario', {
-  id_prontuario: uuid('id_prontuario').defaultRandom(),
+  id_prontuario: uuid('id_prontuario').defaultRandom().notNull(),
   id_paciente: uuid('id_paciente').notNull(),
-  data_abertura: date('data_abertura', { mode: 'string' }).notNull().defaultNow(),
+  data_abertura: timestamp('data_abertura', { withTimezone: true }).notNull().defaultNow(),
   obs: text('obs'),
 }, (t) => [
   primaryKey({ name: 'pk_prontuario', columns: [t.id_prontuario] }),
@@ -41,7 +41,7 @@ const prontuario = pgTable('prontuario', {
 ]);
 
 const profissional = pgTable('profissional', {
-  id_profissional: uuid('id_profissional').defaultRandom(),
+  id_profissional: uuid('id_profissional').defaultRandom().notNull(),
   nome: varchar('nome', { length: 100 }).notNull(),
   cpf: char('cpf', { length: 11 }).notNull(),
   telefone: varchar('telefone', { length: 15 }),
@@ -60,7 +60,7 @@ const profissional = pgTable('profissional', {
 ]);
 
 const atendimento = pgTable('atendimento', {
-  id_atendimento: uuid('id_atendimento').defaultRandom(),
+  id_atendimento: uuid('id_atendimento').defaultRandom().notNull(),
   id_paciente: uuid('id_paciente').notNull(),
   id_profissional: uuid('id_profissional'),
   data_hora_chegada: timestamp('data_hora_chegada', { withTimezone: true }).notNull().defaultNow(),
@@ -78,10 +78,12 @@ const atendimento = pgTable('atendimento', {
     .onDelete('restrict'),
   uniqueIndex('uk_atendimento_em_andamento').on(t.id_paciente)
     .where(sql`${t.status_atendimento} NOT IN ('Encerrado', 'Cancelado')`),
+  index('idx_atendimento_paciente').on(t.id_paciente),
+  index('idx_atendimento_profissional').on(t.id_profissional),
 ]);
 
 const triagem = pgTable('triagem', {
-  id_triagem: uuid('id_triagem').defaultRandom(),
+  id_triagem: uuid('id_triagem').defaultRandom().notNull(),
   id_atendimento: uuid('id_atendimento').notNull(),
   id_profissional: uuid('id_profissional').notNull(),
   peso: numeric('peso', { precision: 5, scale: 2 }),
@@ -99,6 +101,7 @@ const triagem = pgTable('triagem', {
     .onDelete('restrict'),
   foreignKey({ name: 'fk_triagem_profissional', columns: [t.id_profissional], foreignColumns: [profissional.id_profissional] })
     .onDelete('restrict'),
+  index('idx_triagem_profissional').on(t.id_profissional),
   check('ck_triagem_peso', sql`${t.peso} > 0 AND ${t.peso} < 500`),
   check('ck_triagem_altura', sql`${t.altura} > 0 AND ${t.altura} < 3`),
   check('ck_triagem_temperatura', sql`${t.temperatura} BETWEEN 25 AND 45`),
@@ -107,18 +110,19 @@ const triagem = pgTable('triagem', {
 ]);
 
 const queixa = pgTable('queixa', {
-  id_queixa: uuid('id_queixa').defaultRandom(),
+  id_queixa: uuid('id_queixa').defaultRandom().notNull(),
   id_triagem: uuid('id_triagem').notNull(),
   sintomas: text('sintomas').notNull(),
-  duracao_sintoma: varchar('duracao_sintoma', { length: 50 }), 
+  duracao_sintoma: varchar('duracao_sintoma', { length: 50 }),
 }, (t) => [
   primaryKey({ name: 'pk_queixa', columns: [t.id_queixa] }),
   foreignKey({ name: 'fk_queixa_triagem', columns: [t.id_triagem], foreignColumns: [triagem.id_triagem] })
     .onDelete('restrict'),
+  index('idx_queixa_triagem').on(t.id_triagem),
 ]);
 
 const consultaMedica = pgTable('consulta_medica', {
-  id_consulta: uuid('id_consulta').defaultRandom(),
+  id_consulta: uuid('id_consulta').defaultRandom().notNull(),
   id_atendimento: uuid('id_atendimento').notNull(),
   id_profissional: uuid('id_profissional').notNull(),
   data_hora_inicio: timestamp('data_hora_inicio', { withTimezone: true }).notNull().defaultNow(),
@@ -130,11 +134,13 @@ const consultaMedica = pgTable('consulta_medica', {
     .onDelete('restrict'),
   foreignKey({ name: 'fk_consulta_profissional', columns: [t.id_profissional], foreignColumns: [profissional.id_profissional] })
     .onDelete('restrict'),
+  index('idx_consulta_atendimento').on(t.id_atendimento),
+  index('idx_consulta_profissional').on(t.id_profissional),
   check('ck_consulta_periodo', sql`${t.data_hora_fim} IS NULL OR ${t.data_hora_fim} >= ${t.data_hora_inicio}`),
 ]);
 
 const internacao = pgTable('internacao', {
-  id_internacao: uuid('id_internacao').defaultRandom(),
+  id_internacao: uuid('id_internacao').defaultRandom().notNull(),
   id_consulta: uuid('id_consulta').notNull(),
   data_hora_indicacao: timestamp('data_hora_indicacao', { withTimezone: true }).notNull().defaultNow(),
   motivo: varchar('motivo', { length: 255 }).notNull(),
@@ -147,7 +153,7 @@ const internacao = pgTable('internacao', {
 ]);
 
 const exame = pgTable('exame', {
-  id_exame: uuid('id_exame').defaultRandom(),
+  id_exame: uuid('id_exame').defaultRandom().notNull(),
   id_consulta: uuid('id_consulta').notNull(),
   tipo: varchar('tipo', { length: 80 }).notNull(),
   data_solicitacao: timestamp('data_solicitacao', { withTimezone: true }).notNull().defaultNow(),
@@ -158,11 +164,12 @@ const exame = pgTable('exame', {
   primaryKey({ name: 'pk_exame', columns: [t.id_exame] }),
   foreignKey({ name: 'fk_exame_consulta', columns: [t.id_consulta], foreignColumns: [consultaMedica.id_consulta] })
     .onDelete('restrict'),
+  index('idx_exame_consulta').on(t.id_consulta),
   check('ck_exame_periodo', sql`${t.data_realizacao} IS NULL OR ${t.data_realizacao} >= ${t.data_solicitacao}`),
 ]);
 
 const prescricao = pgTable('prescricao', {
-  id_prescricao: uuid('id_prescricao').defaultRandom(),
+  id_prescricao: uuid('id_prescricao').defaultRandom().notNull(),
   id_consulta: uuid('id_consulta').notNull(),
   data_hora: timestamp('data_hora', { withTimezone: true }).notNull().defaultNow(),
   orientacoes: text('orientacoes'),
@@ -170,24 +177,25 @@ const prescricao = pgTable('prescricao', {
   primaryKey({ name: 'pk_prescricao', columns: [t.id_prescricao] }),
   foreignKey({ name: 'fk_prescricao_consulta', columns: [t.id_consulta], foreignColumns: [consultaMedica.id_consulta] })
     .onDelete('restrict'),
+  index('idx_prescricao_consulta').on(t.id_consulta),
 ]);
 
 const medicacao = pgTable('medicacao', {
-  id_medicacao: uuid('id_medicacao').defaultRandom(),
+  id_medicacao: uuid('id_medicacao').defaultRandom().notNull(),
   medicamento: varchar('medicamento', { length: 100 }).notNull(),
   principio_ativo: varchar('principio_ativo', { length: 100 }),
-  apresentacao: varchar('apresentacao', { length: 50 }), 
-  concentracao: varchar('concentracao', { length: 50 }), 
+  apresentacao: varchar('apresentacao', { length: 50 }),
+  concentracao: varchar('concentracao', { length: 50 }),
 }, (t) => [
   primaryKey({ name: 'pk_medicacao', columns: [t.id_medicacao] }),
-  unique('uk_medicacao_remedio').on(t.medicamento, t.apresentacao, t.concentracao),
+  unique('uk_medicacao_remedio').on(t.medicamento, t.apresentacao, t.concentracao).nullsNotDistinct(),
 ]);
 
 const prescricaoMedicacao = pgTable('prescricao_medicacao', {
   id_prescricao: uuid('id_prescricao').notNull(),
   id_medicacao: uuid('id_medicacao').notNull(),
-  dose: varchar('dose', { length: 50 }).notNull(),             
-  intervalo_horas: smallint('intervalo_horas').notNull(),     
+  dose: varchar('dose', { length: 50 }).notNull(),
+  intervalo_horas: smallint('intervalo_horas').notNull(),
   duracao_dias: smallint('duracao_dias'),
   via: varchar('via', { length: 30 }),
   observacao: varchar('observacao', { length: 255 }),
@@ -197,6 +205,7 @@ const prescricaoMedicacao = pgTable('prescricao_medicacao', {
     .onDelete('restrict'),
   foreignKey({ name: 'fk_presmed_medicacao', columns: [t.id_medicacao], foreignColumns: [medicacao.id_medicacao] })
     .onDelete('restrict'),
+  index('idx_presmed_medicacao').on(t.id_medicacao),
   check('ck_presmed_intervalo', sql`${t.intervalo_horas} > 0 AND ${t.intervalo_horas} <= 168`),
   check('ck_presmed_duracao', sql`${t.duracao_dias} IS NULL OR ${t.duracao_dias} > 0`),
 ]);

@@ -1,3 +1,121 @@
 .pagina-h05 .area-reservada {
   min-height: 220px;
 }
+
+.consulta-card {
+  max-width: 1000px;
+  padding: 24px 22px;
+  border: 1px solid #dce3eb;
+  border-radius: 12px;
+  background: #fff;
+}
+
+.consulta-card .busca-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 22px;
+}
+
+.consulta-card .busca-form label {
+  font-size: 1.05rem;
+  font-weight: 600;
+}
+
+.consulta-card .linha-busca {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.consulta-card input {
+  min-width: 220px;
+  flex: 1;
+  padding: 12px 14px;
+  border: 1px solid #bdbdbd;
+  border-radius: 10px;
+}
+
+.consulta-card .botao-principal {
+  border: 0;
+  border-radius: 8px;
+  padding: 10px 18px;
+  background: #0c7d78;
+  color: #fff;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.resultado-consulta {
+  display: grid;
+  gap: 14px;
+}
+
+.resultado-consulta > p {
+  margin: 0;
+}
+
+.card-atendimento,
+.historico-paciente {
+  padding: 18px;
+  border: 1px solid #dce3eb;
+  border-radius: 10px;
+  background: #f8fafc;
+}
+
+.card-atendimento h2,
+.historico-paciente h2 {
+  margin: 0 0 14px;
+  font-size: 1.2rem;
+}
+
+.dados-atendimento {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  gap: 14px;
+}
+
+.dado-atendimento {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.dado-atendimento span {
+  color: #647487;
+  font-size: 0.9rem;
+}
+
+.dado-atendimento strong {
+  overflow-wrap: anywhere;
+}
+
+.historico-paciente > p {
+  color: #647487;
+}
+
+.historico-paciente table {
+  width: 100%;
+}
+
+.historico-paciente th,
+.historico-paciente td {
+  padding: 10px;
+  border-bottom: 1px solid #dce3eb;
+  text-align: left;
+}
+
+.resultado-consulta .mensagem-erro {
+  color: #b42318;
+}
+
+@media (max-width: 560px) {
+  .consulta-card {
+    padding: 18px 14px;
+  }
+
+  .historico-paciente {
+    overflow-x: auto;
+  }
+}

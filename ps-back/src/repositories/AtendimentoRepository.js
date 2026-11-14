@@ -1,11 +1,11 @@
 const { eq, desc, asc, and, notInArray } = require('drizzle-orm');
-const { getConnection } = require('../db');
+const { db } = require('../db');
 const { atendimento, paciente } = require('../db/schema');
 
 const STATUS_FINAIS = ['Encerrado', 'Cancelado'];
 
 async function findStatusAtual(idPaciente) {
-  const [ultimo] = await getConnection()
+  const [ultimo] = await db
     .select({ status_atendimento: atendimento.status_atendimento })
     .from(atendimento)
     .where(eq(atendimento.id_paciente, idPaciente))
@@ -15,12 +15,12 @@ async function findStatusAtual(idPaciente) {
 }
 
 async function create(dados) {
-  const [linha] = await getConnection().insert(atendimento).values(dados).returning();
+  const [linha] = await db.insert(atendimento).values(dados).returning();
   return linha;
 }
 
 async function findEmAndamento(idPaciente) {
-  const [linha] = await getConnection()
+  const [linha] = await db
     .select()
     .from(atendimento)
     .where(and(
@@ -32,21 +32,32 @@ async function findEmAndamento(idPaciente) {
 }
 
 async function findByNumero(numero) {
-  const [linha] = await getConnection()
-    .select()
-    .from(atendimento)
-    .where(eq(atendimento.numero_atendimento, numero));
-  return linha ?? null;
-}
-
-async function findByCpf(cpf) {
-  return getConnection()
+  const [linha] = await db
     .select({
       id_atendimento: atendimento.id_atendimento,
       numero_atendimento: atendimento.numero_atendimento,
       id_paciente: atendimento.id_paciente,
       status_atendimento: atendimento.status_atendimento,
       data_hora_chegada: atendimento.data_hora_chegada,
+      nome: paciente.nome,
+      cpf: paciente.cpf,
+    })
+    .from(atendimento)
+    .innerJoin(paciente, eq(paciente.id_paciente, atendimento.id_paciente))
+    .where(eq(atendimento.numero_atendimento, numero));
+  return linha ?? null;
+}
+
+async function findByCpf(cpf) {
+  return db
+    .select({
+      id_atendimento: atendimento.id_atendimento,
+      numero_atendimento: atendimento.numero_atendimento,
+      id_paciente: atendimento.id_paciente,
+      status_atendimento: atendimento.status_atendimento,
+      data_hora_chegada: atendimento.data_hora_chegada,
+      nome: paciente.nome,
+      cpf: paciente.cpf,
     })
     .from(atendimento)
     .innerJoin(paciente, eq(paciente.id_paciente, atendimento.id_paciente))
@@ -55,7 +66,7 @@ async function findByCpf(cpf) {
 }
 
 async function findAbertos() {
-  return getConnection()
+  return db
     .select({
       id_atendimento: atendimento.id_atendimento,
       numero_atendimento: atendimento.numero_atendimento,
