@@ -52,8 +52,8 @@ function montarLinhaFila(atendimento) {
   const celulaAcao = document.createElement('td');
   const botaoTriar = document.createElement('button');
   botaoTriar.type = 'button';
-  botaoTriar.className = 'botao-principal';
-  botaoTriar.textContent = 'Iniciar triagem';
+  botaoTriar.className = 'primary-button';
+  botaoTriar.innerHTML = '<span aria-hidden="true">▶</span>Iniciar triagem';
   botaoTriar.addEventListener('click', () => abrirFormularioTriagem(atendimento));
   celulaAcao.appendChild(botaoTriar);
   linha.appendChild(celulaAcao);

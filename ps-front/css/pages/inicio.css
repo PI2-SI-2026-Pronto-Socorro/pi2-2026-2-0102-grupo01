@@ -220,6 +220,19 @@ button {
   font-size: 15px;
 }
 
+.primary-button:hover {
+  background: #0a6763;
+}
+
+.primary-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+button.primary-button {
+  cursor: pointer;
+}
+
 .stats {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
