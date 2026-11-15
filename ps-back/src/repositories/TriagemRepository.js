@@ -1,5 +1,6 @@
+const { eq } = require('drizzle-orm');
 const { db } = require('../db');
-const { triagem, queixa } = require('../db/schema');
+const { triagem, queixa, atendimento } = require('../db/schema');
 
 async function criarTriagemComQueixas(dadosTriagem, listaQueixas) {
   return db.transaction(async (transacao) => {
@@ -10,6 +11,10 @@ async function criarTriagemComQueixas(dadosTriagem, listaQueixas) {
         .values(listaQueixas.map((dadosQueixa) => ({ ...dadosQueixa, id_triagem: triagemCriada.id_triagem })))
         .returning()
       : [];
+
+    await transacao.update(atendimento)
+      .set({ status_atendimento: 'Triado' })
+      .where(eq(atendimento.id_atendimento, dadosTriagem.id_atendimento));
 
     return { ...triagemCriada, queixas: queixasCriadas };
   });

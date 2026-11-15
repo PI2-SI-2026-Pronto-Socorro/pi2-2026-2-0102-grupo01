@@ -4,6 +4,7 @@ const ErroHttp = require('../utils/ErroHttp');
 const { codigoPg } = require('../utils/pgHelpers');
 
 const FORMATO_UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+const CLASSIFICACOES_RISCO = ['Não Urgente', 'Pouco Urgente', 'Urgente', 'Muito Urgente', 'Emergência'];
 
 const LIMITES_SINAIS_VITAIS = {
   pressao_sistolica: { minimo: 50, maximo: 300, somenteInteiro: true, nomeExibido: 'Pressão sistólica (mmHg)' },
@@ -50,6 +51,9 @@ async function registrarTriagem(numeroAtendimento, dadosTriagem) {
   if (typeof id_profissional !== 'string' || !FORMATO_UUID.test(id_profissional)) {
     throw new ErroHttp(422, 'id_profissional inválido');
   }
+  if (!CLASSIFICACOES_RISCO.includes(classificacao_risco)) {
+    throw new ErroHttp(422, `classificacao_risco deve ser uma de: ${CLASSIFICACOES_RISCO.join(', ')}`);
+  }
 
   const sinaisVitais = {};
   for (const nomeCampo of Object.keys(LIMITES_SINAIS_VITAIS)) {
@@ -62,6 +66,9 @@ async function registrarTriagem(numeroAtendimento, dadosTriagem) {
 
   const atendimento = await AtendimentoRepository.findByNumero(numeroFormatado);
   if (!atendimento) throw new ErroHttp(404, 'Atendimento não encontrado');
+  if (atendimento.status_atendimento !== 'Aberto') {
+    throw new ErroHttp(409, `Atendimento não está aberto para triagem (status: ${atendimento.status_atendimento})`);
+  }
 
   try {
     return await TriagemRepository.criarTriagemComQueixas({
