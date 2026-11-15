@@ -1,0 +1,220 @@
+.pagina-h12 {
+  display: grid;
+  align-content: start;
+  gap: 16px;
+}
+
+.pagina-h12 .header-panel {
+  margin-bottom: 0;
+}
+
+.cartao-h12 {
+  min-width: 0;
+  padding: 22px;
+  border: 1px solid var(--card-border);
+  border-radius: 10px;
+  background: var(--card-bg);
+}
+
+.cartao-h12 h2 {
+  margin: 0 0 16px;
+  color: #253849;
+  font-size: 18px;
+}
+
+.cartao-h12 h3 {
+  margin: 18px 0 10px;
+  font-size: 15px;
+}
+
+.dados-triagem {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 14px;
+}
+
+.dado-triagem {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.dado-triagem span,
+.texto-secundario {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.dado-triagem strong {
+  overflow-wrap: anywhere;
+}
+
+.queixas-triagem ul {
+  display: grid;
+  gap: 7px;
+  margin: 0;
+  padding-left: 22px;
+}
+
+.tabela-h12 {
+  overflow-x: auto;
+}
+
+.tabela-h12 table {
+  min-width: 720px;
+}
+
+.tabela-h12 th,
+.tabela-h12 td {
+  height: auto;
+  padding: 10px;
+  white-space: normal;
+}
+
+#form-medicacoes fieldset {
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.campo-medico {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 16px;
+}
+
+.campo-medico label,
+.medicamento-formulario legend {
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.campo-medico input,
+.campo-medico select,
+.campo-medico textarea {
+  width: 100%;
+  min-height: 40px;
+  padding: 8px 10px;
+  border: 1px solid #b8c2cc;
+  border-radius: 7px;
+  background: #fff;
+  color: inherit;
+  font: inherit;
+}
+
+.campo-medico textarea {
+  resize: vertical;
+}
+
+.lista-medicamentos-form {
+  display: grid;
+  gap: 12px;
+}
+
+.medicamento-formulario {
+  min-width: 0;
+  padding: 16px;
+  border: 1px solid var(--card-border);
+  border-radius: 8px;
+}
+
+.medicamento-formulario legend {
+  padding: 0 6px;
+}
+
+.grade-medicamento {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0 14px;
+}
+
+.remover-medicamento {
+  margin-bottom: 12px;
+}
+
+.mensagem-h12 {
+  margin: 10px 0;
+}
+
+.mensagem-erro {
+  color: #b42318;
+}
+
+.mensagem-sucesso {
+  color: #16803c;
+}
+
+.mensagem-aviso {
+  color: #7a4b00;
+}
+
+.botao-secundario {
+  display: inline-flex;
+  min-height: 38px;
+  align-items: center;
+  justify-content: center;
+  padding: 0 12px;
+  border: 1px solid #d6d9d7;
+  border-radius: 7px;
+  background: #f1f2f1;
+  color: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.acoes-confirmacao {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 14px;
+  padding: 14px 0 4px;
+}
+
+.acoes-confirmacao .texto-secundario {
+  margin: 0;
+}
+
+.primary-button:disabled,
+.botao-secundario:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.primary-button:focus-visible,
+.botao-secundario:focus-visible {
+  outline: 3px solid #8cc9c5;
+  outline-offset: 2px;
+}
+
+@media (max-width: 900px) {
+  .grade-medicamento {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 600px) {
+  .pagina-h12 {
+    padding: 16px;
+  }
+
+  .cartao-h12 {
+    padding: 16px;
+  }
+
+  .grade-medicamento {
+    grid-template-columns: 1fr;
+  }
+
+  .acoes-confirmacao {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .acoes-confirmacao .primary-button {
+    width: 100%;
+  }
+}

@@ -410,6 +410,26 @@ td:nth-child(2) {
   color: #6253ae;
 }
 
+.medical-action {
+  display: inline-flex;
+  min-height: 28px;
+  align-items: center;
+  padding: 0 8px;
+  border: 1px solid #f1c7a8;
+  border-radius: 5px;
+  background: #fff5ed;
+  color: #8a3700;
+  font-size: 11px;
+  font-weight: 700;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.medical-action:focus-visible {
+  outline: 3px solid #8cc9c5;
+  outline-offset: 2px;
+}
+
 .table-footer {
   display: flex;
   min-height: 58px;

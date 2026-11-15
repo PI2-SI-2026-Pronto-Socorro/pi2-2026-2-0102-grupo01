@@ -39,6 +39,10 @@ function podeAbrirAtendimento(status) {
   return !status || status === 'Encerrado' || status === 'Cancelado';
 }
 
+function numeroAtendimentoValido(numero) {
+  return /^AT[0-9]{4,9}$/i.test(numero ?? '');
+}
+
 (() => {
   const paginas = {
     'index.html': 'painel',
@@ -47,6 +51,7 @@ function podeAbrirAtendimento(status) {
     'h04-abrir-atendimento.html': 'atendimento',
     'h05-consultar-atendimento.html': 'historico',
     'h06-fila-triagem.html': 'triagem',
+    'h12-atendimento-medico.html': 'painel',
     'administracao.html': 'admin',
   };
 
