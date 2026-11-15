@@ -86,14 +86,66 @@ async function buscarJson(url) {
   return corpo;
 }
 
+function descreverMedicamento(medicacaoRegistrada) {
+  return [medicacaoRegistrada.medicamento, medicacaoRegistrada.apresentacao, medicacaoRegistrada.concentracao]
+    .filter(Boolean)
+    .join(' ');
+}
+
+function descreverPosologia(medicacaoRegistrada) {
+  const partesPosologia = [`${medicacaoRegistrada.dose}, de ${medicacaoRegistrada.intervalo_horas} em ${medicacaoRegistrada.intervalo_horas} horas`];
+  if (medicacaoRegistrada.duracao_dias) partesPosologia.push(`por ${medicacaoRegistrada.duracao_dias} dia(s)`);
+  if (medicacaoRegistrada.via) partesPosologia.push(`via ${medicacaoRegistrada.via}`);
+  return partesPosologia.join(', ');
+}
+
+function montarSecaoMedicacoes(listaMedicacoes) {
+  const secaoMedicacoes = document.createElement('section');
+  secaoMedicacoes.className = 'historico-paciente';
+  const tituloSecao = document.createElement('h2');
+  tituloSecao.textContent = 'Medicações registradas';
+  secaoMedicacoes.appendChild(tituloSecao);
+
+  if (listaMedicacoes.length === 0) {
+    const avisoSemMedicacao = document.createElement('p');
+    avisoSemMedicacao.textContent = 'Nenhuma medicação registrada neste atendimento.';
+    secaoMedicacoes.appendChild(avisoSemMedicacao);
+    return secaoMedicacoes;
+  }
+
+  const tabelaMedicacoes = document.createElement('table');
+  tabelaMedicacoes.innerHTML = '<thead><tr><th>Medicamento</th><th>Posologia</th><th>Observação</th><th>Registrada em</th></tr></thead>';
+  const corpoTabela = document.createElement('tbody');
+  for (const medicacaoRegistrada of listaMedicacoes) {
+    const linhaMedicacao = document.createElement('tr');
+    for (const valorCelula of [
+      descreverMedicamento(medicacaoRegistrada),
+      descreverPosologia(medicacaoRegistrada),
+      medicacaoRegistrada.observacao ?? '-',
+      formatarDataHora(medicacaoRegistrada.data_hora_prescricao),
+    ]) {
+      const celula = document.createElement('td');
+      celula.textContent = valorCelula;
+      linhaMedicacao.appendChild(celula);
+    }
+    corpoTabela.appendChild(linhaMedicacao);
+  }
+  tabelaMedicacoes.appendChild(corpoTabela);
+  secaoMedicacoes.appendChild(tabelaMedicacoes);
+  return secaoMedicacoes;
+}
+
 async function consultarPorNumero(numero, aindaValida) {
-  const atendimento = await buscarJson(`${API_URL}/atendimentos/${numero}`);
+  const detalhesAtendimento = await buscarJson(`${API_URL}/atendimentos/${numero}/detalhes`);
   if (!aindaValida()) return;
-  if (!atendimento) {
+  if (!detalhesAtendimento) {
     mostrarMensagem(`Atendimento ${numero} não encontrado.`, true);
     return;
   }
-  resultadoConsulta.replaceChildren(montarCardAtendimento(atendimento, atendimento));
+  resultadoConsulta.replaceChildren(
+    montarCardAtendimento(detalhesAtendimento.atendimento, detalhesAtendimento.paciente),
+    montarSecaoMedicacoes(detalhesAtendimento.medicacoes ?? []),
+  );
 }
 
 async function consultarPorCpf(cpf, aindaValida) {

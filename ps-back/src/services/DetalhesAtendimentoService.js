@@ -25,7 +25,11 @@ async function buscarDetalhesAtendimento(numeroAtendimento) {
     }
     : null;
 
-  return { atendimento, paciente, sinais_vitais: sinaisVitais, queixas: queixasDaTriagem };
+  const medicacoesDoAtendimento = await DetalhesAtendimentoRepository.listarMedicacoesPorAtendimento(atendimento.id_atendimento);
+
+  return {
+    atendimento, paciente, sinais_vitais: sinaisVitais, queixas: queixasDaTriagem, medicacoes: medicacoesDoAtendimento,
+  };
 }
 
 module.exports = { buscarDetalhesAtendimento };
