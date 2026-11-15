@@ -1,0 +1,30 @@
+const { eq, asc, inArray, count, sql } = require('drizzle-orm');
+const { db } = require('../db');
+const { atendimento, paciente } = require('../db/schema');
+
+const STATUS_VISIVEIS_NO_PAINEL = ['Aberto', 'Triado'];
+
+async function listarAtendimentosDoPainel() {
+  return db
+    .select({
+      numero_atendimento: atendimento.numero_atendimento,
+      nome: paciente.nome,
+      cpf: paciente.cpf,
+      status_atendimento: atendimento.status_atendimento,
+      data_hora_chegada: atendimento.data_hora_chegada,
+    })
+    .from(atendimento)
+    .innerJoin(paciente, eq(paciente.id_paciente, atendimento.id_paciente))
+    .where(inArray(atendimento.status_atendimento, STATUS_VISIVEIS_NO_PAINEL))
+    .orderBy(asc(atendimento.data_hora_chegada));
+}
+
+async function contarAtendimentosDoDiaPorStatus() {
+  return db
+    .select({ status_atendimento: atendimento.status_atendimento, quantidade: count() })
+    .from(atendimento)
+    .where(sql`${atendimento.data_hora_chegada} >= date_trunc('day', now())`)
+    .groupBy(atendimento.status_atendimento);
+}
+
+module.exports = { listarAtendimentosDoPainel, contarAtendimentosDoDiaPorStatus };
