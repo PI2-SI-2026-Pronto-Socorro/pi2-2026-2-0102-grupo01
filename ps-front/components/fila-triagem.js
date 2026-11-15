@@ -32,20 +32,12 @@ function mostrarFalhaFila(texto) {
   avisoAtualizacao.hidden = false;
 }
 
-function formatarHora(valor) {
-  if (!valor) return '—';
-  const data = new Date(valor);
-  return Number.isNaN(data.getTime())
-    ? '—'
-    : data.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit', timeZone: 'America/Sao_Paulo' });
-}
-
 function montarLinhaFila(atendimento) {
   const linha = document.createElement('tr');
   for (const valor of [
     atendimento.numero_atendimento,
     atendimento.nome || 'Nome indisponível',
-    formatarHora(atendimento.data_hora_chegada),
+    formatarDataHora(atendimento.data_hora_chegada),
   ]) {
     const celula = document.createElement('td');
     celula.textContent = valor || '—';
@@ -54,10 +46,7 @@ function montarLinhaFila(atendimento) {
 
   const celulaAcao = document.createElement('td');
   const linkTriar = document.createElement('a');
-  const parametros = new URLSearchParams({
-    numero: atendimento.numero_atendimento,
-    nome: atendimento.nome || '',
-  });
+  const parametros = new URLSearchParams({ numero: atendimento.numero_atendimento });
   linkTriar.className = 'botao-triar';
   linkTriar.href = `./h08-triagem.html?${parametros.toString()}`;
   linkTriar.textContent = 'Triar';

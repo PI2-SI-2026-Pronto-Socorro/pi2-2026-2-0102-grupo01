@@ -17,16 +17,8 @@ function adicionarResumo(titulo, valor) {
   dadosAlteracao.appendChild(item);
 }
 
-function formatarDataAlteracao(valor) {
-  if (!valor) return '—';
-  const data = new Date(valor);
-  return Number.isNaN(data.getTime())
-    ? '—'
-    : data.toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' });
-}
-
 async function carregarDadosAlteracao() {
-  if (!numeroAlteracao || !/^AT\d{4,9}$/i.test(numeroAlteracao)) {
+  if (!numeroAtendimentoValido(numeroAlteracao)) {
     identificacaoAlteracao.textContent = 'Número de atendimento ausente ou inválido.';
     mensagemAlteracao.textContent = 'Abra a alteração a partir de uma consulta de atendimento válida.';
     mensagemAlteracao.classList.add('mensagem-erro');
@@ -39,25 +31,31 @@ async function carregarDadosAlteracao() {
   document.getElementById('voltar-consulta').href =
     `./h05-consultar-atendimento.html?numero=${encodeURIComponent(numero)}`;
 
+  let resposta;
   try {
-    const resposta = await fetch(`/api/atendimentos/${encodeURIComponent(numero)}`);
-    const atendimento = await resposta.json();
-    if (!resposta.ok) {
-      throw new Error(atendimento.detail || 'Não foi possível carregar o atendimento.');
-    }
-
-    adicionarResumo('Número', atendimento.numero_atendimento);
-    adicionarResumo('Situação atual', atendimento.status_atendimento);
-    adicionarResumo('Chegada', formatarDataAlteracao(atendimento.data_hora_chegada));
-    document.getElementById('status-atendimento').value = atendimento.status_atendimento;
-    document.getElementById('motivo-alteracao').value = atendimento.motivo_atendimento || '';
-  } catch (erro) {
-    identificacaoAlteracao.textContent = `Atendimento ${numero}`;
-    mensagemAlteracao.textContent = erro.message;
+    resposta = await fetch(`${API_URL}/atendimentos/${encodeURIComponent(numero)}`);
+  } catch {
+    mensagemAlteracao.textContent = 'Não foi possível conectar ao servidor. Tente novamente.';
     mensagemAlteracao.classList.add('mensagem-erro');
     mensagemAlteracao.setAttribute('role', 'alert');
     botaoSalvarAlteracao.disabled = true;
+    return;
   }
+
+  const atendimento = await lerJson(resposta);
+  if (!resposta.ok || !atendimento) {
+    mensagemAlteracao.textContent =
+      atendimento?.detail ?? 'Não foi possível carregar o atendimento.';
+    mensagemAlteracao.classList.add('mensagem-erro');
+    mensagemAlteracao.setAttribute('role', 'alert');
+    botaoSalvarAlteracao.disabled = true;
+    return;
+  }
+
+  adicionarResumo('Número', atendimento.numero_atendimento);
+  adicionarResumo('Situação atual', atendimento.status_atendimento);
+  adicionarResumo('Chegada', formatarDataHora(atendimento.data_hora_chegada));
+  document.getElementById('status-atendimento').value = atendimento.status_atendimento;
 }
 
 formAlteracao.addEventListener('submit', (event) => {

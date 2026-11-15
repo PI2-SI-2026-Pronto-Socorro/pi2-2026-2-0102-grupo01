@@ -1,5 +1,4 @@
-const parametrosTriagem = new URLSearchParams(window.location.search);
-const numeroTriagem = parametrosTriagem.get('numero');
+const numeroTriagem = new URLSearchParams(window.location.search).get('numero');
 const identificacaoAtendimento = document.getElementById('identificacao-atendimento');
 const formTriagem = document.getElementById('form-triagem');
 const mensagemTriagem = document.getElementById('mensagem-triagem');
@@ -12,39 +11,52 @@ function mostrarMensagemTriagem(texto, tipo) {
 }
 
 async function carregarAtendimento() {
-  if (!numeroTriagem || !/^AT\d{4,9}$/i.test(numeroTriagem)) {
+  if (!numeroAtendimentoValido(numeroTriagem)) {
     identificacaoAtendimento.textContent = 'Número de atendimento ausente ou inválido.';
     mostrarMensagemTriagem('Volte à fila e selecione um atendimento válido.', 'mensagem-erro');
     botaoConcluirTriagem.disabled = true;
     return;
   }
 
-  const nome = parametrosTriagem.get('nome');
-  identificacaoAtendimento.textContent = `${numeroTriagem.toUpperCase()}${nome ? ` · ${nome}` : ''}`;
-
+  let resposta;
   try {
-    const resposta = await fetch(`/api/atendimentos/${encodeURIComponent(numeroTriagem.toUpperCase())}`);
-    const atendimento = await resposta.json();
-    if (!resposta.ok) {
-      throw new Error(atendimento.detail || 'Não foi possível carregar o atendimento.');
-    }
-    if (atendimento.status_atendimento !== 'Aberto') {
-      throw new Error('Este atendimento não está mais aguardando triagem.');
-    }
-  } catch (erro) {
-    mostrarMensagemTriagem(erro.message, 'mensagem-erro');
+    resposta = await fetch(`${API_URL}/atendimentos/${encodeURIComponent(numeroTriagem.toUpperCase())}`);
+  } catch {
+    mostrarMensagemTriagem('Não foi possível conectar ao servidor. Tente novamente.', 'mensagem-erro');
     botaoConcluirTriagem.disabled = true;
+    return;
   }
+
+  const atendimento = await lerJson(resposta);
+  if (!resposta.ok || !atendimento) {
+    mostrarMensagemTriagem(
+      atendimento?.detail ?? 'Não foi possível carregar o atendimento.',
+      'mensagem-erro',
+    );
+    botaoConcluirTriagem.disabled = true;
+    return;
+  }
+
+  identificacaoAtendimento.textContent = `${atendimento.numero_atendimento} · ${atendimento.nome}`;
+  if (atendimento.status_atendimento !== 'Aberto') {
+    mostrarMensagemTriagem('Este atendimento não está mais aguardando triagem.', 'mensagem-erro');
+    botaoConcluirTriagem.disabled = true;
+    return;
+  }
+
+  botaoConcluirTriagem.disabled = false;
 }
 
 formTriagem.addEventListener('submit', (event) => {
   event.preventDefault();
+  if (botaoConcluirTriagem.disabled) return;
+
   mensagemTriagem.textContent = '';
   mensagemTriagem.className = 'mensagem-triagem';
 
   if (!formTriagem.checkValidity()) {
     formTriagem.reportValidity();
-    mostrarMensagemTriagem('Selecione uma classificação de risco e corrija os campos destacados.', 'mensagem-erro');
+    mostrarMensagemTriagem('Confira os campos destacados antes de continuar.', 'mensagem-erro');
     return;
   }
 
