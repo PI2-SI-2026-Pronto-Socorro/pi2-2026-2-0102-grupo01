@@ -47,6 +47,8 @@ function podeAbrirAtendimento(status) {
     'h04-abrir-atendimento.html': 'atendimento',
     'h05-consultar-atendimento.html': 'historico',
     'h06-fila-triagem.html': 'triagem',
+    'h08-triagem.html': 'triagem',
+    'h11-alterar-atendimento.html': 'historico',
     'administracao.html': 'admin',
   };
 
