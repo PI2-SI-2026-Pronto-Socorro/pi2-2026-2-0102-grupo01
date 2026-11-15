@@ -7,19 +7,24 @@ const painelFila = corpoFila.closest('.table-panel');
 
 const INTERVALO_ATUALIZACAO_MS = 30000;
 
-// Estado da fila: evita buscas empilhadas e lembra se a tabela já mostra dados válidos.
 let carregandoFila = false;
 let filaJaCarregada = false;
 
-// Atendimento escolhido na fila; a H08 vai usar o id_atendimento dele ao gravar a triagem.
 let atendimentoSelecionado = null;
 
-// Aviso pequeno, acima da tabela, para falhas nas atualizações automáticas.
 const avisoAtualizacao = document.createElement('p');
 avisoAtualizacao.className = 'aviso-triagem';
 avisoAtualizacao.setAttribute('role', 'status');
 avisoAtualizacao.hidden = true;
 painelFila.before(avisoAtualizacao);
+
+const mensagemSucessoFila = document.createElement('p');
+mensagemSucessoFila.className = 'mensagem-sucesso';
+mensagemSucessoFila.setAttribute('role', 'status');
+mensagemSucessoFila.hidden = true;
+painelFila.before(mensagemSucessoFila);
+
+const botaoGravarTriagem = document.getElementById('botao-gravar-triagem');
 
 function mostrarEstadoFila(texto, erro = false) {
   const linha = document.createElement('tr');
@@ -56,8 +61,6 @@ function montarLinhaFila(atendimento) {
   return linha;
 }
 
-// Na primeira carga o erro vai para a tabela. Depois, a lista que já está na tela
-// continua valendo e a falha aparece só como aviso.
 function mostrarFalhaFila(texto) {
   if (!filaJaCarregada) {
     mostrarEstadoFila(texto, true);
@@ -68,7 +71,7 @@ function mostrarFalhaFila(texto) {
 }
 
 async function carregarFila() {
-  if (carregandoFila) return; // a busca anterior ainda não terminou
+  if (carregandoFila) return;
   carregandoFila = true;
   try {
     let resposta;
@@ -102,6 +105,7 @@ function abrirFormularioTriagem(atendimento) {
   document.getElementById('paciente-triagem').textContent =
     `Atendimento ${atendimento.numero_atendimento} · ${atendimento.nome}`;
   mensagemTriagem.textContent = '';
+  mensagemSucessoFila.hidden = true;
   formTriagem.reset();
   areaTriagem.hidden = false;
   areaTriagem.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -112,14 +116,13 @@ botaoCancelarTriagem.addEventListener('click', () => {
   areaTriagem.hidden = true;
 });
 
-// O botão genérico abria o formulário sem paciente; a triagem agora começa sempre pela fila.
 document.getElementById('visualizar-formulario-triagem').hidden = true;
 
 mostrarEstadoFila('Carregando fila de triagem...');
 carregarFila();
 setInterval(carregarFila, INTERVALO_ATUALIZACAO_MS);
 
-formTriagem.addEventListener('submit', (event) => {
+formTriagem.addEventListener('submit', async (event) => {
   event.preventDefault();
   mensagemTriagem.className = 'mensagem-triagem';
   mensagemTriagem.textContent = '';
@@ -134,12 +137,83 @@ formTriagem.addEventListener('submit', (event) => {
 
   const sistolica = Number(document.getElementById('pressao-sistolica').value);
   const diastolica = Number(document.getElementById('pressao-diastolica').value);
-  if (sistolica && diastolica && sistolica < diastolica) {
+  if (sistolica < diastolica) {
     mensagemTriagem.textContent = 'A pressão sistólica deve ser maior ou igual à diastólica.';
     mensagemTriagem.classList.add('mensagem-erro');
     return;
   }
 
-  mensagemTriagem.textContent = 'Dados validados no navegador. O envio e a gravação serão conectados ao back-end.';
-  mensagemTriagem.classList.add('mensagem-aviso');
+  const dadosTriagem = {
+    id_profissional: document.getElementById('profissional-responsavel').value,
+    classificacao_risco: document.getElementById('classificacao-risco').value,
+    temperatura: Number(document.getElementById('temperatura').value),
+    pressao_sistolica: sistolica,
+    pressao_diastolica: diastolica,
+    frequencia_cardiaca: Number(document.getElementById('frequencia-cardiaca').value),
+    queixas: [{
+      sintomas: document.getElementById('sintomas').value,
+      duracao_sintoma: document.getElementById('duracao-sintoma').value,
+    }],
+  };
+
+  await gravarTriagem(atendimentoSelecionado, dadosTriagem);
 });
+
+async function gravarTriagem(atendimento, dadosTriagem) {
+  botaoGravarTriagem.disabled = true;
+  try {
+    let resposta;
+    try {
+      resposta = await fetch(`${API_URL}/atendimentos/${atendimento.numero_atendimento}/triagem`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(dadosTriagem),
+      });
+    } catch {
+      mostrarErroTriagem('Não foi possível conectar à API.');
+      return;
+    }
+
+    const corpoResposta = await lerJson(resposta);
+    if (!resposta.ok) {
+      mostrarErroTriagem(corpoResposta?.detail ?? 'Erro ao gravar a triagem.');
+      return;
+    }
+
+    atendimentoSelecionado = null;
+    areaTriagem.hidden = true;
+    mensagemSucessoFila.textContent =
+      `Triagem do atendimento ${atendimento.numero_atendimento} (${atendimento.nome}) gravada como ${dadosTriagem.classificacao_risco}.`;
+    mensagemSucessoFila.hidden = false;
+    await carregarFila();
+  } finally {
+    botaoGravarTriagem.disabled = false;
+  }
+}
+
+function mostrarErroTriagem(texto) {
+  mensagemTriagem.className = 'mensagem-triagem mensagem-erro';
+  mensagemTriagem.textContent = texto;
+}
+
+async function carregarProfissionais() {
+  const campoProfissional = document.getElementById('profissional-responsavel');
+  const opcaoInicial = new Option('Não foi possível carregar', '');
+  try {
+    const resposta = await fetch(`${API_URL}/profissionais`);
+    const listaProfissionais = await lerJson(resposta);
+    if (!resposta.ok || !Array.isArray(listaProfissionais)) {
+      campoProfissional.replaceChildren(opcaoInicial);
+      return;
+    }
+    opcaoInicial.textContent = listaProfissionais.length ? 'Selecione' : 'Nenhum profissional cadastrado';
+    const opcoesProfissionais = listaProfissionais.map(
+      (profissional) => new Option(`${profissional.nome} (${profissional.cargo})`, profissional.id_profissional),
+    );
+    campoProfissional.replaceChildren(opcaoInicial, ...opcoesProfissionais);
+  } catch {
+    campoProfissional.replaceChildren(opcaoInicial);
+  }
+}
+
+carregarProfissionais();

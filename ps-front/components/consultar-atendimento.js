@@ -3,8 +3,6 @@ const identificadorAtendimento = document.getElementById('identificador-atendime
 const resultadoConsulta = document.getElementById('resultado-consulta');
 const novaConsulta = criarControleDeBusca();
 
-// Erro vindo da API ou da conexão, com a mensagem pronta para o usuário.
-// Qualquer outro erro é falha de código e não deve aparecer como "sem conexão".
 class ErroConsulta extends Error {}
 
 function mostrarMensagem(texto, erro = false) {
@@ -73,7 +71,6 @@ function montarHistorico(atendimentos) {
   return secao;
 }
 
-// Só o fetch fica no try/catch: falha aqui é de fato conexão. 404 vira null.
 async function buscarJson(url) {
   let resposta;
   try {
@@ -100,7 +97,6 @@ async function consultarPorNumero(numero, aindaValida) {
 }
 
 async function consultarPorCpf(cpf, aindaValida) {
-  // Uma chamada só: a lista já vem com o nome e o CPF do paciente.
   const atendimentos = await buscarJson(`${API_URL}/atendimentos?cpf=${cpf}`);
   if (!aindaValida()) return;
 
@@ -112,7 +108,6 @@ async function consultarPorCpf(cpf, aindaValida) {
     return;
   }
 
-  // Lista vazia: só aqui consulta o paciente, para diferenciar "sem atendimentos" de "não cadastrado".
   const paciente = await buscarJson(`${API_URL}/pacientes/${cpf}`);
   if (!aindaValida()) return;
   if (!paciente) {
@@ -152,7 +147,6 @@ formularioConsulta.addEventListener('submit', async (event) => {
   }
 });
 
-// Aceita ?numero=AT0001 (vindo da H04 e do painel) ou ?cpf=... (vindo da H02 e da H04).
 const parametros = new URLSearchParams(window.location.search);
 const identificadorInicial = parametros.get('numero') ?? parametros.get('cpf');
 if (identificadorInicial) {
