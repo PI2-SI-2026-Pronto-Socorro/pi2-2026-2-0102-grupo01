@@ -50,7 +50,6 @@ function mostrarFichaPaciente(paciente) {
   const mensagem = document.createElement('p');
   mensagem.className = 'mensagem-atendimento';
 
-  // Paciente com atendimento em andamento: o back-end recusaria um novo, então não oferece o botão.
   if (!podeAbrirAtendimento(paciente.status)) {
     mensagem.textContent = `Este paciente já possui um atendimento em andamento (situação: ${paciente.status}).`;
     const linkConsulta = document.createElement('a');
@@ -95,7 +94,6 @@ function mostrarFichaPaciente(paciente) {
     if (resposta.ok) {
       botaoAbrir.remove();
       if (!corpo) {
-        // O atendimento foi criado, mas a resposta veio ilegível: orienta a conferir na consulta.
         mensagem.textContent = 'O atendimento foi aberto, mas não foi possível exibir os dados. Confira na consulta do atendimento.';
         mensagem.className = 'mensagem-atendimento mensagem-erro';
         const linkConsulta = document.createElement('a');
@@ -127,7 +125,6 @@ formularioBusca.addEventListener('submit', async (event) => {
     return;
   }
 
-  // Uma busca nova invalida as anteriores: resposta atrasada de outro CPF não troca a ficha.
   const buscaAindaValida = novaBuscaPaciente();
   resultadoPaciente.innerHTML = '<p>Buscando paciente...</p>';
 

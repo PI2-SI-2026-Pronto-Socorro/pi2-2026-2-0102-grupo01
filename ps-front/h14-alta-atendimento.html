@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>H14 | Alta do atendimento</title>
+    <link rel="stylesheet" href="/vendor/bootstrap/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="./css/pages/inicio.css" />
+    <link rel="stylesheet" href="./css/pages/h06-fila-triagem.css" />
+  </head>
+  <body>
+    <div data-componente="cabecalho"></div>
+
+    <div class="dashboard-shell">
+      <div data-componente="menu-lateral"></div>
+      <main class="main-panel pagina-h06">
+        <div class="header-panel">
+          <div class="title-wrap">
+            <h1>Alta do atendimento</h1>
+            <p>Atendimentos confirmados aguardando alta, ordenados pela chegada</p>
+          </div>
+        </div>
+        <p id="mensagem-alta" class="mensagem-sucesso" role="status" hidden></p>
+        <section class="table-panel" aria-label="Atendimentos confirmados">
+          <div class="table-scroll">
+            <table>
+              <thead>
+                <tr>
+                  <th scope="col">Nº Atendimento</th>
+                  <th scope="col">Paciente</th>
+                  <th scope="col">CPF</th>
+                  <th scope="col">Hora de chegada</th>
+                  <th scope="col">Ação</th>
+                </tr>
+              </thead>
+              <tbody id="lista-confirmados"></tbody>
+            </table>
+          </div>
+        </section>
+      </main>
+    </div>
+    <script src="./components/layout.js"></script>
+    <script src="./components/alta-atendimento.js"></script>
+    <script src="/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+  </body>
+</html>

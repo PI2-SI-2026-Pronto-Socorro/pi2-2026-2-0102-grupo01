@@ -21,7 +21,7 @@ function adicionarDado(container, titulo, valor) {
   const legenda = document.createElement('span');
   legenda.textContent = titulo;
   const conteudo = document.createElement('strong');
-  conteudo.textContent = valor || '—';
+  conteudo.textContent = valor;
   item.append(legenda, conteudo);
   container.appendChild(item);
 }
@@ -34,21 +34,12 @@ function montarCardAtendimento(atendimento, paciente) {
 
   const dados = document.createElement('div');
   dados.className = 'dados-atendimento';
-  adicionarDado(dados, 'Paciente', paciente.nome || 'Nome não disponível');
+  adicionarDado(dados, 'Paciente', paciente.nome);
   adicionarDado(dados, 'CPF', formatarCpf(paciente.cpf));
   adicionarDado(dados, 'Situação', atendimento.status_atendimento);
   adicionarDado(dados, 'Data e hora de chegada', formatarDataHora(atendimento.data_hora_chegada));
 
-  const acoes = document.createElement('div');
-  acoes.className = 'acoes-atendimento';
-  const alterar = document.createElement('a');
-  alterar.className = 'botao-alterar-atendimento';
-  alterar.href = `./h11-alterar-atendimento.html?numero=${encodeURIComponent(atendimento.numero_atendimento)}`;
-  alterar.textContent = 'Alterar atendimento';
-  alterar.setAttribute('aria-label', `Alterar atendimento ${atendimento.numero_atendimento}`);
-  acoes.appendChild(alterar);
-
-  card.append(titulo, dados, acoes);
+  card.append(titulo, dados);
   return card;
 }
 
@@ -59,7 +50,7 @@ function montarHistorico(atendimentos) {
   titulo.textContent = 'Histórico de atendimentos';
 
   const tabela = document.createElement('table');
-  tabela.innerHTML = '<thead><tr><th>Número</th><th>Chegada</th><th>Situação</th><th>Ação</th></tr></thead>';
+  tabela.innerHTML = '<thead><tr><th>Número</th><th>Chegada</th><th>Situação</th></tr></thead>';
   const corpo = document.createElement('tbody');
   for (const atendimento of atendimentos) {
     const linha = document.createElement('tr');
@@ -69,17 +60,9 @@ function montarHistorico(atendimentos) {
       atendimento.status_atendimento,
     ]) {
       const celula = document.createElement('td');
-      celula.textContent = valor || '—';
+      celula.textContent = valor;
       linha.appendChild(celula);
     }
-
-    const acao = document.createElement('td');
-    const alterar = document.createElement('a');
-    alterar.href = `./h11-alterar-atendimento.html?numero=${encodeURIComponent(atendimento.numero_atendimento)}`;
-    alterar.textContent = 'Alterar';
-    alterar.setAttribute('aria-label', `Alterar atendimento ${atendimento.numero_atendimento}`);
-    acao.appendChild(alterar);
-    linha.appendChild(acao);
     corpo.appendChild(linha);
   }
   tabela.appendChild(corpo);
@@ -103,18 +86,70 @@ async function buscarJson(url) {
   return corpo;
 }
 
+function descreverMedicamento(medicacaoRegistrada) {
+  return [medicacaoRegistrada.medicamento, medicacaoRegistrada.apresentacao, medicacaoRegistrada.concentracao]
+    .filter(Boolean)
+    .join(' ');
+}
+
+function descreverPosologia(medicacaoRegistrada) {
+  const partesPosologia = [`${medicacaoRegistrada.dose}, de ${medicacaoRegistrada.intervalo_horas} em ${medicacaoRegistrada.intervalo_horas} horas`];
+  if (medicacaoRegistrada.duracao_dias) partesPosologia.push(`por ${medicacaoRegistrada.duracao_dias} dia(s)`);
+  if (medicacaoRegistrada.via) partesPosologia.push(`via ${medicacaoRegistrada.via}`);
+  return partesPosologia.join(', ');
+}
+
+function montarSecaoMedicacoes(listaMedicacoes) {
+  const secaoMedicacoes = document.createElement('section');
+  secaoMedicacoes.className = 'historico-paciente';
+  const tituloSecao = document.createElement('h2');
+  tituloSecao.textContent = 'Medicações registradas';
+  secaoMedicacoes.appendChild(tituloSecao);
+
+  if (listaMedicacoes.length === 0) {
+    const avisoSemMedicacao = document.createElement('p');
+    avisoSemMedicacao.textContent = 'Nenhuma medicação registrada neste atendimento.';
+    secaoMedicacoes.appendChild(avisoSemMedicacao);
+    return secaoMedicacoes;
+  }
+
+  const tabelaMedicacoes = document.createElement('table');
+  tabelaMedicacoes.innerHTML = '<thead><tr><th>Medicamento</th><th>Posologia</th><th>Observação</th><th>Registrada em</th></tr></thead>';
+  const corpoTabela = document.createElement('tbody');
+  for (const medicacaoRegistrada of listaMedicacoes) {
+    const linhaMedicacao = document.createElement('tr');
+    for (const valorCelula of [
+      descreverMedicamento(medicacaoRegistrada),
+      descreverPosologia(medicacaoRegistrada),
+      medicacaoRegistrada.observacao ?? '-',
+      formatarDataHora(medicacaoRegistrada.data_hora_prescricao),
+    ]) {
+      const celula = document.createElement('td');
+      celula.textContent = valorCelula;
+      linhaMedicacao.appendChild(celula);
+    }
+    corpoTabela.appendChild(linhaMedicacao);
+  }
+  tabelaMedicacoes.appendChild(corpoTabela);
+  secaoMedicacoes.appendChild(tabelaMedicacoes);
+  return secaoMedicacoes;
+}
+
 async function consultarPorNumero(numero, aindaValida) {
-  const atendimento = await buscarJson(`${API_URL}/atendimentos/${encodeURIComponent(numero)}`);
+  const detalhesAtendimento = await buscarJson(`${API_URL}/atendimentos/${numero}/detalhes`);
   if (!aindaValida()) return;
-  if (!atendimento) {
+  if (!detalhesAtendimento) {
     mostrarMensagem(`Atendimento ${numero} não encontrado.`, true);
     return;
   }
-  resultadoConsulta.replaceChildren(montarCardAtendimento(atendimento, atendimento));
+  resultadoConsulta.replaceChildren(
+    montarCardAtendimento(detalhesAtendimento.atendimento, detalhesAtendimento.paciente),
+    montarSecaoMedicacoes(detalhesAtendimento.medicacoes ?? []),
+  );
 }
 
 async function consultarPorCpf(cpf, aindaValida) {
-  const atendimentos = await buscarJson(`${API_URL}/atendimentos?cpf=${encodeURIComponent(cpf)}`);
+  const atendimentos = await buscarJson(`${API_URL}/atendimentos?cpf=${cpf}`);
   if (!aindaValida()) return;
 
   if (atendimentos && atendimentos.length > 0) {
@@ -125,7 +160,7 @@ async function consultarPorCpf(cpf, aindaValida) {
     return;
   }
 
-  const paciente = await buscarJson(`${API_URL}/pacientes/${encodeURIComponent(cpf)}`);
+  const paciente = await buscarJson(`${API_URL}/pacientes/${cpf}`);
   if (!aindaValida()) return;
   if (!paciente) {
     mostrarMensagem('Paciente não encontrado para o CPF informado.', true);

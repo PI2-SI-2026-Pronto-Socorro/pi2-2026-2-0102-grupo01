@@ -91,29 +91,6 @@
   overflow-wrap: anywhere;
 }
 
-.acoes-atendimento {
-  display: flex;
-  justify-content: flex-end;
-  margin-top: 16px;
-}
-
-.botao-alterar-atendimento {
-  display: inline-flex;
-  min-height: 40px;
-  align-items: center;
-  padding: 0 16px;
-  border-radius: 8px;
-  background: #0c7d78;
-  color: #fff;
-  font-weight: 600;
-  text-decoration: none;
-}
-
-.botao-alterar-atendimento:focus-visible {
-  outline: 3px solid #8cc9c5;
-  outline-offset: 2px;
-}
-
 .historico-paciente > p {
   color: #647487;
 }

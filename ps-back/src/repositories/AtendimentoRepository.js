@@ -157,7 +157,16 @@ async function cancelarSeAberto(numero) {
   return linha ?? null;
 }
 
+async function travarAtendimentoEBuscarStatus(transacao, idAtendimento) {
+  const [atendimentoTravado] = await transacao
+    .select({ status_atendimento: atendimento.status_atendimento })
+    .from(atendimento)
+    .where(eq(atendimento.id_atendimento, idAtendimento))
+    .for('update');
+  return atendimentoTravado ? atendimentoTravado.status_atendimento : null;
+}
+
 module.exports = {
   findStatusAtual, findEmAndamento, findByNumero, findByCpf, create, findAbertos, findTriados, cancelarSeAberto,
-  alterarDados,
+  alterarDados, travarAtendimentoEBuscarStatus,
 };

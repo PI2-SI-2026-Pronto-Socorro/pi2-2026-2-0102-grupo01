@@ -84,7 +84,6 @@ formularioCadastro.addEventListener('submit', async (event) => {
   }
 
   if (resposta.ok) {
-    // A confirmação é mostrada pela H02, que recebe o sinal "cadastrado=1".
     window.location.href = `./h02-buscar-paciente.html?cpf=${dados.cpf}&cadastrado=1`;
     return;
   }
