@@ -126,6 +126,19 @@
   font-weight: 600;
 }
 
+.formulario-triagem .botao-principal:hover {
+  background: #0a6763;
+}
+
+.formulario-triagem .botao-secundario:hover {
+  background: #e6e8e6;
+}
+
+.formulario-triagem .botao:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
 @media (max-width: 700px) {
   .formulario-triagem-campos {
     grid-template-columns: 1fr;

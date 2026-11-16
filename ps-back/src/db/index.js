@@ -6,7 +6,7 @@ const isLocalDatabase = !connectionString || /localhost|127\.0\.0\.1/.test(conne
 const db = drizzle({
   connection: {
     connectionString,
-    ssl: isLocalDatabase ? false : { rejectUnauthorized: true }, // o Neon exige SSL
+    ssl: isLocalDatabase ? false : { rejectUnauthorized: true },
   },
 });
 
