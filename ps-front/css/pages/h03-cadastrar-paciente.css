@@ -1,4 +1,3 @@
-/* estrutura da tela de cadastro do paciente */
 :root {
   --fundo-externo: #e8e8e8;
   --fundo-lateral: #efefef;
@@ -28,7 +27,6 @@ body {
   color: var(--texto-principal);
 }
 
-/* layout principal */
 .pagina-paciente {
   display: flex;
   min-height: 100vh;
@@ -111,7 +109,6 @@ body {
   cursor: pointer;
 }
 
-/* conteudo principal */
 .conteudo-principal {
   flex: 1;
   padding: 18px 22px 0 22px;

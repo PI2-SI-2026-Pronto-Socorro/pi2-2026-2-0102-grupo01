@@ -1,6 +1,5 @@
 const PacienteService = require('../services/PacienteService');
 
-// Operação de teste: confirma a conexão lendo a tabela paciente
 async function check(req, res) {
   try {
     res.json({ banco: 'ok', pacientes: await PacienteService.contar() });

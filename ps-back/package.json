@@ -8,6 +8,7 @@
     "db:push": "drizzle-kit push"
   },
   "dependencies": {
+    "bootstrap": "^5.3.8",
     "cors": "^2.8.6",
     "dotenv": "^18.0.9",
     "drizzle-orm": "^0.45.4",

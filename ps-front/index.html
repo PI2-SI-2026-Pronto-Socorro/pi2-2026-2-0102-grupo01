@@ -4,6 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Painel de atendimentos | PS Madre Theodora</title>
+    <link rel="stylesheet" href="/vendor/bootstrap/css/bootstrap.min.css" />
     <link rel="stylesheet" href="./css/pages/inicio.css" />
   </head>
   <body>
@@ -26,19 +27,19 @@
 
         <section class="stats" aria-label="Estatísticas de atendimento">
           <article class="stat-card stat-open">
-            <div><span>Abertos</span><strong>12</strong></div>
+            <div><span>Abertos</span><strong id="total-abertos">-</strong></div>
             <span class="stat-dot" aria-hidden="true"></span>
           </article>
           <article class="stat-card stat-triaged">
-            <div><span>Triados</span><strong>5</strong></div>
+            <div><span>Triados</span><strong id="total-triados">-</strong></div>
             <span class="stat-dot" aria-hidden="true"></span>
           </article>
           <article class="stat-card stat-confirmed">
-            <div><span>Confirmados</span><strong>3</strong></div>
+            <div><span>Confirmados</span><strong id="total-confirmados">-</strong></div>
             <span class="stat-dot" aria-hidden="true"></span>
           </article>
           <article class="stat-card stat-closed">
-            <div><span>Encerrados</span><strong>28</strong></div>
+            <div><span>Encerrados</span><strong id="total-encerrados">-</strong></div>
             <span class="stat-dot" aria-hidden="true"></span>
           </article>
         </section>
@@ -152,18 +153,13 @@
             </table>
           </div>
           <footer class="table-footer">
-            <p>Mostrando 1-6 de 28 atendimentos do dia</p>
-            <nav class="pagination" aria-label="Paginação dos atendimentos">
-              <button class="page-button" type="button" aria-label="Página anterior" disabled>‹</button>
-              <button class="page-button active" type="button" aria-current="page">1</button>
-              <button class="page-button" type="button" disabled>2</button>
-              <button class="page-button" type="button" disabled>3</button>
-              <button class="page-button" type="button" aria-label="Próxima página" disabled>›</button>
-            </nav>
+            <p id="rodape-painel-atendimentos"></p>
           </footer>
         </section>
       </main>
     </div>
     <script src="./components/layout.js"></script>
+    <script src="./components/painel-atendimentos.js"></script>
+    <script src="/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
   </body>
 </html>

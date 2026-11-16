@@ -67,7 +67,7 @@
         return;
       }
       const paciente = resposta.ok ? await lerJson(resposta) : null;
-      if (!buscaAindaValida()) return; // resposta de uma busca antiga, chegou atrasada
+      if (!buscaAindaValida()) return;
 
       if (resposta.ok) {
         if (!paciente) {
@@ -85,7 +85,6 @@
         }
         resultado.appendChild(montarCardPaciente(paciente));
 
-        // Só oferece abrir atendimento se o paciente não tiver um em andamento.
         const acao = document.createElement('a');
         acao.className = 'botao-principal';
         if (podeAbrirAtendimento(paciente.status)) {
@@ -118,7 +117,6 @@
 
     const parametros = new URLSearchParams(window.location.search);
     const cpfInicial = parametros.get('cpf');
-    // Vindo do cadastro (H03) com ?cadastrado=1, mostra a confirmação junto do paciente.
     let cadastroRecente = parametros.get('cadastrado') === '1' ? (cpfInicial ?? '').replace(/\D/g, '') : null;
     if (cpfInicial) {
       document.getElementById('cpf').value = cpfInicial;
