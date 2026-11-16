@@ -3,8 +3,6 @@ const identificadorAtendimento = document.getElementById('identificador-atendime
 const resultadoConsulta = document.getElementById('resultado-consulta');
 const novaConsulta = criarControleDeBusca();
 
-// Erro vindo da API ou da conexão, com a mensagem pronta para o usuário.
-// Qualquer outro erro é falha de código e não deve aparecer como "sem conexão".
 class ErroConsulta extends Error {}
 
 function mostrarMensagem(texto, erro = false) {
@@ -23,7 +21,7 @@ function adicionarDado(container, titulo, valor) {
   const legenda = document.createElement('span');
   legenda.textContent = titulo;
   const conteudo = document.createElement('strong');
-  conteudo.textContent = valor;
+  conteudo.textContent = valor || '—';
   item.append(legenda, conteudo);
   container.appendChild(item);
 }
@@ -36,12 +34,21 @@ function montarCardAtendimento(atendimento, paciente) {
 
   const dados = document.createElement('div');
   dados.className = 'dados-atendimento';
-  adicionarDado(dados, 'Paciente', paciente.nome);
+  adicionarDado(dados, 'Paciente', paciente.nome || 'Nome não disponível');
   adicionarDado(dados, 'CPF', formatarCpf(paciente.cpf));
   adicionarDado(dados, 'Situação', atendimento.status_atendimento);
   adicionarDado(dados, 'Data e hora de chegada', formatarDataHora(atendimento.data_hora_chegada));
 
-  card.append(titulo, dados);
+  const acoes = document.createElement('div');
+  acoes.className = 'acoes-atendimento';
+  const alterar = document.createElement('a');
+  alterar.className = 'botao-alterar-atendimento';
+  alterar.href = `./h11-alterar-atendimento.html?numero=${encodeURIComponent(atendimento.numero_atendimento)}`;
+  alterar.textContent = 'Alterar atendimento';
+  alterar.setAttribute('aria-label', `Alterar atendimento ${atendimento.numero_atendimento}`);
+  acoes.appendChild(alterar);
+
+  card.append(titulo, dados, acoes);
   return card;
 }
 
@@ -52,7 +59,7 @@ function montarHistorico(atendimentos) {
   titulo.textContent = 'Histórico de atendimentos';
 
   const tabela = document.createElement('table');
-  tabela.innerHTML = '<thead><tr><th>Número</th><th>Chegada</th><th>Situação</th></tr></thead>';
+  tabela.innerHTML = '<thead><tr><th>Número</th><th>Chegada</th><th>Situação</th><th>Ação</th></tr></thead>';
   const corpo = document.createElement('tbody');
   for (const atendimento of atendimentos) {
     const linha = document.createElement('tr');
@@ -62,9 +69,17 @@ function montarHistorico(atendimentos) {
       atendimento.status_atendimento,
     ]) {
       const celula = document.createElement('td');
-      celula.textContent = valor;
+      celula.textContent = valor || '—';
       linha.appendChild(celula);
     }
+
+    const acao = document.createElement('td');
+    const alterar = document.createElement('a');
+    alterar.href = `./h11-alterar-atendimento.html?numero=${encodeURIComponent(atendimento.numero_atendimento)}`;
+    alterar.textContent = 'Alterar';
+    alterar.setAttribute('aria-label', `Alterar atendimento ${atendimento.numero_atendimento}`);
+    acao.appendChild(alterar);
+    linha.appendChild(acao);
     corpo.appendChild(linha);
   }
   tabela.appendChild(corpo);
@@ -73,7 +88,6 @@ function montarHistorico(atendimentos) {
   return secao;
 }
 
-// Só o fetch fica no try/catch: falha aqui é de fato conexão. 404 vira null.
 async function buscarJson(url) {
   let resposta;
   try {
@@ -90,7 +104,7 @@ async function buscarJson(url) {
 }
 
 async function consultarPorNumero(numero, aindaValida) {
-  const atendimento = await buscarJson(`${API_URL}/atendimentos/${numero}`);
+  const atendimento = await buscarJson(`${API_URL}/atendimentos/${encodeURIComponent(numero)}`);
   if (!aindaValida()) return;
   if (!atendimento) {
     mostrarMensagem(`Atendimento ${numero} não encontrado.`, true);
@@ -100,8 +114,7 @@ async function consultarPorNumero(numero, aindaValida) {
 }
 
 async function consultarPorCpf(cpf, aindaValida) {
-  // Uma chamada só: a lista já vem com o nome e o CPF do paciente.
-  const atendimentos = await buscarJson(`${API_URL}/atendimentos?cpf=${cpf}`);
+  const atendimentos = await buscarJson(`${API_URL}/atendimentos?cpf=${encodeURIComponent(cpf)}`);
   if (!aindaValida()) return;
 
   if (atendimentos && atendimentos.length > 0) {
@@ -112,8 +125,7 @@ async function consultarPorCpf(cpf, aindaValida) {
     return;
   }
 
-  // Lista vazia: só aqui consulta o paciente, para diferenciar "sem atendimentos" de "não cadastrado".
-  const paciente = await buscarJson(`${API_URL}/pacientes/${cpf}`);
+  const paciente = await buscarJson(`${API_URL}/pacientes/${encodeURIComponent(cpf)}`);
   if (!aindaValida()) return;
   if (!paciente) {
     mostrarMensagem('Paciente não encontrado para o CPF informado.', true);
@@ -152,7 +164,6 @@ formularioConsulta.addEventListener('submit', async (event) => {
   }
 });
 
-// Aceita ?numero=AT0001 (vindo da H04 e do painel) ou ?cpf=... (vindo da H02 e da H04).
 const parametros = new URLSearchParams(window.location.search);
 const identificadorInicial = parametros.get('numero') ?? parametros.get('cpf');
 if (identificadorInicial) {
