@@ -83,18 +83,22 @@ function separarCamposAlteracao(dados) {
   if (naoPermitido) throw new ErroHttp(422, `Campo não pode ser alterado: ${naoPermitido}`);
 
   const dadosAtendimento = {};
-  const dadosPaciente = {};
+  const camposPaciente = {};
   for (const campo of campos) {
-    (CAMPOS_ATENDIMENTO.includes(campo) ? dadosAtendimento : dadosPaciente)[campo] = dados[campo];
+    (CAMPOS_ATENDIMENTO.includes(campo) ? dadosAtendimento : camposPaciente)[campo] = dados[campo];
   }
 
-  const motivo = dadosAtendimento.motivo_atendimento;
-  if (motivo !== undefined && motivo !== null && (typeof motivo !== 'string' || motivo.length > 255)) {
-    throw new ErroHttp(422, 'Motivo do atendimento inválido (até 255 caracteres)');
+  if ('motivo_atendimento' in dadosAtendimento) {
+    const motivo = PacienteService.limparTextoOpcional(dadosAtendimento.motivo_atendimento);
+    if (motivo !== null && (typeof motivo !== 'string' || motivo.length > 255)) {
+      throw new ErroHttp(422, 'Motivo do atendimento inválido (até 255 caracteres)');
+    }
+    dadosAtendimento.motivo_atendimento = motivo;
   }
+
+  const dadosPaciente = PacienteService.normalizarDadosPaciente(camposPaciente);
   const erroPaciente = PacienteService.validarAlteracao(dadosPaciente);
   if (erroPaciente) throw new ErroHttp(422, erroPaciente);
-  if ('nome' in dadosPaciente) dadosPaciente.nome = dadosPaciente.nome.trim();
 
   return { dadosAtendimento, dadosPaciente };
 }

@@ -4,11 +4,28 @@ const Paciente = require('../models/Paciente');
 const ErroHttp = require('../utils/ErroHttp');
 const { codigoPg } = require('../utils/pgHelpers');
 
+const CAMPOS_TEXTO_OPCIONAL = ['rg', 'genero', 'telefone'];
+
 function textoOpcional(valor, max) {
   return valor === undefined || valor === null || (typeof valor === 'string' && valor.length <= max);
 }
 
-const nomeValido = (v) => typeof v === 'string' && v.trim().length >= 1 && v.length <= 100;
+function limparTextoOpcional(valor) {
+  if (typeof valor !== 'string') return valor;
+  const textoLimpo = valor.trim();
+  return textoLimpo === '' ? null : textoLimpo;
+}
+
+function normalizarDadosPaciente(dados) {
+  const normalizado = { ...dados };
+  if (typeof normalizado.nome === 'string') normalizado.nome = normalizado.nome.trim();
+  for (const campo of CAMPOS_TEXTO_OPCIONAL) {
+    if (campo in normalizado) normalizado[campo] = limparTextoOpcional(normalizado[campo]);
+  }
+  return normalizado;
+}
+
+const nomeValido = (v) => typeof v === 'string' && v.length >= 1 && v.length <= 100;
 const cpfValido = (v) => typeof v === 'string' && /^\d{11}$/.test(v);
 
 function dataDeHoje() {
@@ -57,10 +74,11 @@ async function buscarPorCpf(cpf) {
 }
 
 async function cadastrar(dados) {
-  const erro = validar(dados);
+  const dadosLimpos = normalizarDadosPaciente(dados);
+  const erro = validar(dadosLimpos);
   if (erro) throw new ErroHttp(422, erro);
 
-  const novo = new Paciente(dados);
+  const novo = new Paciente(dadosLimpos);
   try {
     return new Paciente(await PacienteRepository.create(novo.paraInsercao()));
   } catch (e) {
@@ -73,4 +91,6 @@ async function contar() {
   return PacienteRepository.count();
 }
 
-module.exports = { listar, buscarPorCpf, cadastrar, contar, validarAlteracao };
+module.exports = {
+  listar, buscarPorCpf, cadastrar, contar, validarAlteracao, normalizarDadosPaciente, limparTextoOpcional,
+};
