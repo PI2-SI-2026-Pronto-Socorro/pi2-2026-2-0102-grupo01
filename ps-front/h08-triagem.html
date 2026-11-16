@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>H08 | Triagem</title>
+    <link rel="stylesheet" href="./css/pages/inicio.css" />
+    <link rel="stylesheet" href="./css/pages/h08-triagem.css" />
+  </head>
+  <body>
+    <div data-componente="cabecalho"></div>
+
+    <div class="dashboard-shell">
+      <div data-componente="menu-lateral"></div>
+      <main class="main-panel pagina-h08">
+        <div class="header-panel">
+          <div class="title-wrap">
+            <h1>Triagem</h1>
+            <p id="identificacao-atendimento">Carregando atendimento...</p>
+          </div>
+        </div>
+
+        <section class="page-card triagem-card" aria-label="Registro de triagem">
+          <form id="form-triagem" novalidate>
+            <div class="campos-triagem">
+              <div class="campo-triagem">
+                <label for="classificacao-risco">Classificação de risco <span aria-hidden="true">*</span></label>
+                <select id="classificacao-risco" name="classificacao_risco" required>
+                  <option value="">Selecione</option>
+                  <option>Não Urgente</option>
+                  <option>Pouco Urgente</option>
+                  <option>Urgente</option>
+                  <option>Muito Urgente</option>
+                  <option>Emergência</option>
+                </select>
+              </div>
+              <div class="campo-triagem">
+                <label for="peso">Peso (kg)</label>
+                <input id="peso" name="peso" type="number" min="0.01" max="499.99" step="0.01" inputmode="decimal" />
+              </div>
+              <div class="campo-triagem">
+                <label for="altura">Altura (m)</label>
+                <input id="altura" name="altura" type="number" min="0.01" max="2.99" step="0.01" inputmode="decimal" />
+              </div>
+              <div class="campo-triagem">
+                <label for="temperatura">Temperatura (°C)</label>
+                <input id="temperatura" name="temperatura" type="number" min="25" max="45" step="0.1" inputmode="decimal" />
+              </div>
+              <div class="campo-triagem">
+                <label for="pressao-sistolica">Pressão sistólica (mmHg)</label>
+                <input id="pressao-sistolica" name="pressao_sistolica" type="number" min="1" max="300" step="1" inputmode="numeric" />
+              </div>
+              <div class="campo-triagem">
+                <label for="pressao-diastolica">Pressão diastólica (mmHg)</label>
+                <input id="pressao-diastolica" name="pressao_diastolica" type="number" min="1" max="300" step="1" inputmode="numeric" />
+              </div>
+              <div class="campo-triagem">
+                <label for="frequencia-cardiaca">Frequência cardíaca (bpm)</label>
+                <input id="frequencia-cardiaca" name="frequencia_cardiaca" type="number" min="0" max="300" step="1" inputmode="numeric" />
+              </div>
+              <div class="campo-triagem campo-triagem-largo">
+                <label for="sintomas">Sintomas relatados</label>
+                <textarea id="sintomas" name="sintomas_relatados" maxlength="5000" rows="4"></textarea>
+              </div>
+            </div>
+            <p class="aviso-triagem">Os dados são validados nesta tela. A gravação será disponibilizada pela integração do atendimento.</p>
+            <p id="mensagem-triagem" class="mensagem-triagem" role="status" aria-live="polite"></p>
+            <div class="acoes-triagem">
+              <a class="botao-secundario" href="./h06-fila-triagem.html">Voltar à fila</a>
+              <button class="botao-principal" type="submit" id="concluir-triagem" disabled>Validar triagem</button>
+            </div>
+          </form>
+        </section>
+      </main>
+    </div>
+    <script src="./components/layout.js"></script>
+    <script src="./components/triagem.js"></script>
+  </body>
+</html>

@@ -12,7 +12,15 @@ function formatarData(isoData) {
 }
 
 function formatarDataHora(iso) {
-  return new Date(iso).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' });
+  if (!iso) return '—';
+  const data = new Date(iso);
+  return Number.isNaN(data.getTime())
+    ? '—'
+    : data.toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' });
+}
+
+function numeroAtendimentoValido(numero) {
+  return /^AT[0-9]{4,9}$/i.test(numero ?? '');
 }
 
 // Lê o corpo JSON da resposta; devolve null se vier vazio ou inválido, sem lançar erro.
@@ -51,6 +59,8 @@ function numeroAtendimentoValido(numero) {
     'h04-abrir-atendimento.html': 'atendimento',
     'h05-consultar-atendimento.html': 'historico',
     'h06-fila-triagem.html': 'triagem',
+    'h08-triagem.html': 'triagem',
+    'h11-alterar-atendimento.html': 'historico',
     'h12-atendimento-medico.html': 'painel',
     'administracao.html': 'admin',
   };

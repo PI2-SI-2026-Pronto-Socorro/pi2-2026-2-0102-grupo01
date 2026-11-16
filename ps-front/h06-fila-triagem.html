@@ -4,7 +4,6 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>H06 | Fila de triagem</title>
-    <link rel="stylesheet" href="/vendor/bootstrap/css/bootstrap.min.css" />
     <link rel="stylesheet" href="./css/pages/inicio.css" />
     <link rel="stylesheet" href="./css/pages/h06-fila-triagem.css" />
   </head>
@@ -19,7 +18,7 @@
             <h1>Fila de triagem</h1>
             <p>Pacientes aguardando triagem, ordenados pela chegada</p>
           </div>
-          <button class="primary-button" id="visualizar-formulario-triagem" type="button">Visualizar entrada de triagem</button>
+          <button class="primary-button" id="atualizar-fila-triagem" type="button">Atualizar fila</button>
         </div>
           <section class="table-panel fila-triagem-panel" aria-label="Fila de triagem">
             <div class="table-scroll">
@@ -28,67 +27,19 @@
                   <tr>
                     <th scope="col">Nº Atendimento</th>
                     <th scope="col">Paciente</th>
-                    <th scope="col">Hora de chegada</th>
+                    <th scope="col">Data e hora de chegada</th>
                     <th scope="col">Ação</th>
                   </tr>
                 </thead>
                 <tbody id="fila-triagem">
-                  <tr><td colspan="4" class="estado-fila" role="status">A fila será preenchida com número, paciente e hora de chegada após a integração com o back-end.</td></tr>
+                  <tr><td colspan="4" class="estado-fila" role="status">Carregando fila de triagem...</td></tr>
                 </tbody>
               </table>
             </div>
-          </section>
-          <section id="formulario-triagem" class="page-card formulario-triagem" aria-label="Entrada da triagem" hidden>
-            <div class="header-panel">
-              <div class="title-wrap">
-                <h2>Entrada para triagem</h2>
-                <p id="paciente-triagem"></p>
-              </div>
-            </div>
-            <form id="form-registrar-triagem" class="formulario-triagem-campos" novalidate>
-              <div class="campo">
-                <label for="classificacao-risco">Classificação de risco <span class="obrigatorio">*</span></label>
-                <select id="classificacao-risco" required>
-                  <option value="">Selecione</option>
-                  <option>Não Urgente</option>
-                  <option>Pouco Urgente</option>
-                  <option>Urgente</option>
-                  <option>Muito Urgente</option>
-                  <option>Emergência</option>
-                </select>
-              </div>
-              <div class="campo">
-                <label for="temperatura">Temperatura (°C)</label>
-                <input id="temperatura" type="number" min="25" max="45" step="0.1" />
-              </div>
-              <div class="campo">
-                <label for="pressao-sistolica">Pressão sistólica (mmHg)</label>
-                <input id="pressao-sistolica" type="number" min="1" max="300" />
-              </div>
-              <div class="campo">
-                <label for="pressao-diastolica">Pressão diastólica (mmHg)</label>
-                <input id="pressao-diastolica" type="number" min="1" max="300" />
-              </div>
-              <div class="campo">
-                <label for="frequencia-cardiaca">Frequência cardíaca (bpm)</label>
-                <input id="frequencia-cardiaca" type="number" min="1" max="300" />
-              </div>
-              <div class="campo">
-                <label for="sintomas">Sintomas relatados</label>
-                <textarea id="sintomas" rows="3"></textarea>
-              </div>
-              <p class="aviso-triagem">A tela está preparada para receber os dados da fila e enviar a triagem ao back-end.</p>
-              <div id="mensagem-triagem" class="mensagem-triagem" role="status" aria-live="polite"></div>
-              <div class="botoes-acoes">
-                <button type="button" class="botao botao-secundario" id="cancelar-triagem">Cancelar</button>
-                <button type="submit" class="botao botao-principal">Validar dados</button>
-              </div>
-            </form>
           </section>
       </main>
     </div>
     <script src="./components/layout.js"></script>
     <script src="./components/fila-triagem.js"></script>
-    <script src="/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
   </body>
 </html>
