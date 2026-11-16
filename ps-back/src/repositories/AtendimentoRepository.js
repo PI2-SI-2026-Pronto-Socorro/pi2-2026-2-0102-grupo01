@@ -1,17 +1,14 @@
-const { eq, desc, asc, and, or, gte, notInArray, sql } = require('drizzle-orm');
+const { eq, desc, asc, and, notInArray, sql } = require('drizzle-orm');
 const { db } = require('../db');
 const { atendimento, paciente, triagem } = require('../db/schema');
+const { CLASSIFICACOES_MANCHESTER } = require('../utils/classificacaoManchester');
 
 const STATUS_FINAIS = ['Encerrado', 'Cancelado'];
 
-// Prioridade do Protocolo de Manchester: 1 = vermelho (atender primeiro) ... 5 = azul.
-const PRIORIDADE_MANCHESTER = sql`CASE ${triagem.classificacao_risco}
-  WHEN 'Emergência' THEN 1
-  WHEN 'Muito Urgente' THEN 2
-  WHEN 'Urgente' THEN 3
-  WHEN 'Pouco Urgente' THEN 4
-  WHEN 'Não Urgente' THEN 5
-END`;
+const PRIORIDADE_MANCHESTER = sql`CASE ${triagem.classificacao_risco} ${sql.join(
+  CLASSIFICACOES_MANCHESTER.map(({ classificacao, prioridade }) => sql`WHEN ${classificacao} THEN ${sql.raw(String(prioridade))}`),
+  sql` `,
+)} END`;
 
 async function findTriados() {
   return db
@@ -28,7 +25,7 @@ async function findTriados() {
     })
     .from(atendimento)
     .innerJoin(paciente, eq(paciente.id_paciente, atendimento.id_paciente))
-    .innerJoin(triagem, eq(triagem.id_atendimento, atendimento.id_atendimento))
+    .leftJoin(triagem, eq(triagem.id_atendimento, atendimento.id_atendimento))
     .where(eq(atendimento.status_atendimento, 'Triado'))
     .orderBy(asc(PRIORIDADE_MANCHESTER), asc(atendimento.data_hora_chegada));
 }
@@ -78,9 +75,14 @@ async function findByNumero(numero) {
   return linha ?? null;
 }
 
-// Altera, numa transação, o atendimento e os dados cadastrais do paciente.
-// A linha do atendimento fica travada (FOR UPDATE) enquanto a situação é conferida,
-// para ninguém confirmar ou cancelar o atendimento no meio da alteração.
+async function atualizarOuBuscar(tx, tabela, colunaId, id, dados) {
+  const filtro = eq(colunaId, id);
+  const [linha] = Object.keys(dados).length > 0
+    ? await tx.update(tabela).set(dados).where(filtro).returning()
+    : await tx.select().from(tabela).where(filtro);
+  return linha;
+}
+
 async function alterarDados(numero, dadosAtendimento, dadosPaciente, statusBloqueados) {
   return db.transaction(async (tx) => {
     const [atual] = await tx
@@ -98,19 +100,15 @@ async function alterarDados(numero, dadosAtendimento, dadosPaciente, statusBloqu
       return { encontrado: true, bloqueado: true, status_atendimento: atual.status_atendimento };
     }
 
-    if (Object.keys(dadosAtendimento).length > 0) {
-      await tx.update(atendimento).set(dadosAtendimento)
-        .where(eq(atendimento.id_atendimento, atual.id_atendimento));
-    }
-    let pacienteAtualizado;
-    if (Object.keys(dadosPaciente).length > 0) {
-      [pacienteAtualizado] = await tx.update(paciente).set(dadosPaciente)
-        .where(eq(paciente.id_paciente, atual.id_paciente)).returning();
-    } else {
-      [pacienteAtualizado] = await tx.select().from(paciente)
-        .where(eq(paciente.id_paciente, atual.id_paciente));
-    }
-    return { encontrado: true, bloqueado: false, paciente: pacienteAtualizado };
+    const atendimentoAtualizado = await atualizarOuBuscar(
+      tx, atendimento, atendimento.id_atendimento, atual.id_atendimento, dadosAtendimento,
+    );
+    const pacienteAtualizado = await atualizarOuBuscar(
+      tx, paciente, paciente.id_paciente, atual.id_paciente, dadosPaciente,
+    );
+    return {
+      encontrado: true, bloqueado: false, atendimento: atendimentoAtualizado, paciente: pacienteAtualizado,
+    };
   });
 }
 
@@ -147,27 +145,6 @@ async function findAbertos() {
     .orderBy(asc(atendimento.data_hora_chegada));
 }
 
-async function findPainel() {
-  const inicioDoDia = sql`(date_trunc('day', now() AT TIME ZONE 'America/Sao_Paulo') AT TIME ZONE 'America/Sao_Paulo')`;
-  return db
-    .select({
-      id_atendimento: atendimento.id_atendimento,
-      numero_atendimento: atendimento.numero_atendimento,
-      id_paciente: atendimento.id_paciente,
-      nome: paciente.nome,
-      cpf: paciente.cpf,
-      status_atendimento: atendimento.status_atendimento,
-      data_hora_chegada: atendimento.data_hora_chegada,
-    })
-    .from(atendimento)
-    .innerJoin(paciente, eq(paciente.id_paciente, atendimento.id_paciente))
-    .where(or(
-      gte(atendimento.data_hora_chegada, inicioDoDia),
-      notInArray(atendimento.status_atendimento, STATUS_FINAIS),
-    ))
-    .orderBy(desc(atendimento.data_hora_chegada));
-}
-
 async function cancelarSeAberto(numero) {
   const [linha] = await db
     .update(atendimento)
@@ -181,5 +158,6 @@ async function cancelarSeAberto(numero) {
 }
 
 module.exports = {
-  findStatusAtual, findEmAndamento, findByNumero, findByCpf, create, findAbertos, findTriados, findPainel, cancelarSeAberto, alterarDados,
+  findStatusAtual, findEmAndamento, findByNumero, findByCpf, create, findAbertos, findTriados, cancelarSeAberto,
+  alterarDados,
 };

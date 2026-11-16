@@ -22,10 +22,6 @@ async function cancelar(req, res) {
   res.json(await AtendimentoService.cancelar(req.params.numero));
 }
 
-async function painel(req, res) {
-  res.json(await AtendimentoService.painel());
-}
-
 async function alterar(req, res) {
   res.json(await AtendimentoService.alterar(req.params.numero, req.body));
 }
@@ -35,5 +31,5 @@ async function findTriados(req, res) {
 }
 
 module.exports = {
-  create, findByNumero, findByCpf, findAbertos, findTriados, cancelar, painel, alterar,
+  create, findByNumero, findByCpf, findAbertos, findTriados, cancelar, alterar,
 };

@@ -5,6 +5,7 @@ const Atendimento = require('../models/Atendimento');
 const Paciente = require('../models/Paciente');
 const ErroHttp = require('../utils/ErroHttp');
 const { codigoPg } = require('../utils/pgHelpers');
+const { corDaClassificacao } = require('../utils/classificacaoManchester');
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
@@ -67,7 +68,6 @@ async function cancelar(numero) {
   );
 }
 
-// Pela Parte 4 do escopo, a recepção altera os dados enquanto o atendimento está em Aberto ou Triado.
 const STATUS_SEM_ALTERACAO = ['Confirmado', 'Encerrado', 'Cancelado'];
 const CAMPOS_PACIENTE = ['nome', 'cpf', 'data_nascimento', 'rg', 'genero', 'telefone'];
 const CAMPOS_ATENDIMENTO = ['motivo_atendimento'];
@@ -94,6 +94,7 @@ function separarCamposAlteracao(dados) {
   }
   const erroPaciente = PacienteService.validarAlteracao(dadosPaciente);
   if (erroPaciente) throw new ErroHttp(422, erroPaciente);
+  if ('nome' in dadosPaciente) dadosPaciente.nome = dadosPaciente.nome.trim();
 
   return { dadosAtendimento, dadosPaciente };
 }
@@ -120,30 +121,14 @@ async function alterar(numero, dados) {
     );
   }
 
-  const atendimento = await AtendimentoRepository.findByNumero(numeroNormalizado);
-  return { ...new Atendimento(atendimento), paciente: new Paciente(resultado.paciente) };
+  return { ...new Atendimento(resultado.atendimento), paciente: new Paciente(resultado.paciente) };
 }
-
-const COR_MANCHESTER = {
-  'Emergência': 'Vermelho',
-  'Muito Urgente': 'Laranja',
-  'Urgente': 'Amarelo',
-  'Pouco Urgente': 'Verde',
-  'Não Urgente': 'Azul',
-};
 
 async function listarTriados() {
   const linhas = await AtendimentoRepository.findTriados();
-  return linhas.map((linha) => ({ ...linha, cor: COR_MANCHESTER[linha.classificacao_risco] }));
-}
-
-async function painel() {
-  const atendimentos = await AtendimentoRepository.findPainel();
-  const resumo = { Aberto: 0, Triado: 0, Confirmado: 0, Encerrado: 0, Cancelado: 0 };
-  for (const a of atendimentos) resumo[a.status_atendimento] += 1;
-  return { resumo, atendimentos };
+  return linhas.map((linha) => ({ ...linha, cor: corDaClassificacao(linha.classificacao_risco) }));
 }
 
 module.exports = {
-  abrir, buscarPorNumero, buscarPorCpf, listarAbertos, listarTriados, cancelar, painel, alterar,
+  abrir, buscarPorNumero, buscarPorCpf, listarAbertos, listarTriados, cancelar, alterar,
 };

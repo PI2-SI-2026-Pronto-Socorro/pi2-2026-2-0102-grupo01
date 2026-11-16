@@ -180,7 +180,8 @@ paths:
       description: >-
         Lista só os atendimentos em Triado, ordenados pela classificação de risco do Protocolo de Manchester
         (Emergência/vermelho primeiro, depois Muito Urgente/laranja, Urgente/amarelo, Pouco Urgente/verde e
-        Não Urgente/azul) e, na mesma cor, pela hora de chegada. Lista vazia quando não há atendimentos triados.
+        Não Urgente/azul) e, na mesma cor, pela hora de chegada. Um atendimento Triado sem triagem gravada aparece
+        no fim da lista, com classificação e cor nulas. Lista vazia quando não há atendimentos triados.
       responses:
         '200':
           description: Atendimentos triados
@@ -197,41 +198,11 @@ paths:
                         data_nascimento: { type: string, format: date, nullable: true, example: '1990-03-14' }
                         classificacao_risco:
                           type: string
+                          nullable: true
                           enum: [Emergência, Muito Urgente, Urgente, Pouco Urgente, Não Urgente]
                           example: Emergência
-                        cor: { type: string, enum: [Vermelho, Laranja, Amarelo, Verde, Azul], example: Vermelho }
-                        data_hora_triagem: { type: string, format: date-time, example: '2026-10-25T21:50:02.110Z' }
-
-  /atendimentos/painel:
-    get:
-      tags: [Atendimentos]
-      summary: Painel de atendimentos do dia
-      description: Lista os atendimentos que chegaram hoje (horário de Brasília) e os que ainda estão em andamento, do mais recente para o mais antigo, com a contagem por situação.
-      responses:
-        '200':
-          description: Painel de atendimentos
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  resumo:
-                    type: object
-                    properties:
-                      Aberto: { type: integer, example: 12 }
-                      Triado: { type: integer, example: 5 }
-                      Confirmado: { type: integer, example: 3 }
-                      Encerrado: { type: integer, example: 28 }
-                      Cancelado: { type: integer, example: 1 }
-                  atendimentos:
-                    type: array
-                    items:
-                      allOf:
-                        - $ref: '#/components/schemas/Atendimento'
-                        - type: object
-                          properties:
-                            nome: { type: string, example: Maria da Silva }
-                            cpf: { type: string, nullable: true, example: '12345678900' }
+                        cor: { type: string, nullable: true, enum: [Vermelho, Laranja, Amarelo, Verde, Azul], example: Vermelho }
+                        data_hora_triagem: { type: string, format: date-time, nullable: true, example: '2026-10-25T21:50:02.110Z' }
 
   /atendimentos/{numero}:
     get:
@@ -360,6 +331,7 @@ components:
         id_paciente: { type: string, format: uuid, example: 3f2b8c1e-9a4d-4e7b-8c21-5d6f7a8b9c0d }
         status_atendimento: { type: string, enum: [Aberto, Triado, Confirmado, Encerrado, Cancelado], example: Aberto }
         data_hora_chegada: { type: string, format: date-time, example: '2026-10-25T21:39:14.490Z' }
+        data_hora_saida: { type: string, format: date-time, nullable: true, example: '2026-10-25T23:05:41.020Z' }
     Paciente:
       type: object
       properties:

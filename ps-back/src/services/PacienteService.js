@@ -8,9 +8,20 @@ function textoOpcional(valor, max) {
   return valor === undefined || valor === null || (typeof valor === 'string' && valor.length <= max);
 }
 
-const nomeValido = (v) => typeof v === 'string' && v.length >= 1 && v.length <= 100;
+const nomeValido = (v) => typeof v === 'string' && v.trim().length >= 1 && v.length <= 100;
 const cpfValido = (v) => typeof v === 'string' && /^\d{11}$/.test(v);
-const dataValida = (v) => typeof v === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(v) && !isNaN(new Date(v));
+
+function dataDeHoje() {
+  return new Date().toLocaleDateString('sv-SE', { timeZone: 'America/Sao_Paulo' });
+}
+
+function dataExiste(texto) {
+  const data = new Date(`${texto}T00:00:00Z`);
+  return !Number.isNaN(data.getTime()) && data.toISOString().slice(0, 10) === texto;
+}
+
+const dataValida = (v) => typeof v === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(v)
+  && v >= '1900-01-01' && dataExiste(v) && v <= dataDeHoje();
 
 function validarOpcionais(p) {
   if (!textoOpcional(p.rg, 15)) return 'RG inválido';
@@ -22,15 +33,14 @@ function validarOpcionais(p) {
 function validar(p) {
   if (!nomeValido(p.nome)) return 'Nome inválido';
   if (!cpfValido(p.cpf)) return 'CPF deve ter 11 números';
-  if (!dataValida(p.data_nascimento)) return 'Data de nascimento inválida (use AAAA-MM-DD)';
+  if (!dataValida(p.data_nascimento)) return 'Data de nascimento inválida (use AAAA-MM-DD, entre 1900 e hoje)';
   return validarOpcionais(p);
 }
 
-// Valida só os campos enviados (alteração parcial dos dados cadastrais).
 function validarAlteracao(p) {
   if ('nome' in p && !nomeValido(p.nome)) return 'Nome inválido';
   if ('cpf' in p && !cpfValido(p.cpf)) return 'CPF deve ter 11 números';
-  if ('data_nascimento' in p && !dataValida(p.data_nascimento)) return 'Data de nascimento inválida (use AAAA-MM-DD)';
+  if ('data_nascimento' in p && !dataValida(p.data_nascimento)) return 'Data de nascimento inválida (use AAAA-MM-DD, entre 1900 e hoje)';
   return validarOpcionais(p);
 }
 
