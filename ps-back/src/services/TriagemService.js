@@ -71,14 +71,19 @@ async function registrarTriagem(numeroAtendimento, dadosTriagem) {
   }
 
   try {
-    return await TriagemRepository.criarTriagemComQueixas({
+    const resultadoGravacao = await TriagemRepository.criarTriagemComQueixas({
       id_atendimento: atendimento.id_atendimento,
       id_profissional,
       classificacao_risco,
       ...sinaisVitais,
       temperatura: String(sinaisVitais.temperatura),
     }, queixasValidas);
+    if (!resultadoGravacao.gravado) {
+      throw new ErroHttp(409, `Atendimento não está aberto para triagem (status: ${resultadoGravacao.statusAtualDoAtendimento})`);
+    }
+    return resultadoGravacao.triagemGravada;
   } catch (erro) {
+    if (erro instanceof ErroHttp) throw erro;
     const codigoErroBanco = codigoPg(erro);
     if (codigoErroBanco === '23505') throw new ErroHttp(409, 'Atendimento já possui triagem');
     if (codigoErroBanco === '23503') throw new ErroHttp(404, 'Profissional não existe');

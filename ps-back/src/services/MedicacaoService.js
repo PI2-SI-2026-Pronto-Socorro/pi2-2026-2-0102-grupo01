@@ -66,12 +66,16 @@ async function registrarMedicacoes(numeroAtendimento, dadosRecebidos) {
   }
 
   try {
-    return await MedicacaoRepository.gravarPrescricaoComMedicacoes(
+    const resultadoGravacao = await MedicacaoRepository.gravarPrescricaoComMedicacoes(
       atendimento.id_atendimento,
       id_profissional,
       orientacoes,
       medicacoesValidas,
     );
+    if (!resultadoGravacao.gravado) {
+      throw new ErroHttp(409, `Só é possível registrar medicação em atendimento Triado (status: ${resultadoGravacao.statusAtualDoAtendimento})`);
+    }
+    return resultadoGravacao.prescricaoGravada;
   } catch (erro) {
     const codigoErroBanco = codigoPg(erro);
     if (codigoErroBanco === '23505') throw new ErroHttp(409, 'O mesmo medicamento foi informado mais de uma vez');

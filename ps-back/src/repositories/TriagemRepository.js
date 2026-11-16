@@ -1,9 +1,13 @@
-const { eq } = require('drizzle-orm');
+const { eq, and } = require('drizzle-orm');
 const { db } = require('../db');
 const { triagem, queixa, atendimento } = require('../db/schema');
+const { travarAtendimentoEBuscarStatus } = require('./AtendimentoRepository');
 
 async function criarTriagemComQueixas(dadosTriagem, listaQueixas) {
   return db.transaction(async (transacao) => {
+    const statusAtualDoAtendimento = await travarAtendimentoEBuscarStatus(transacao, dadosTriagem.id_atendimento);
+    if (statusAtualDoAtendimento !== 'Aberto') return { gravado: false, statusAtualDoAtendimento };
+
     const [triagemCriada] = await transacao.insert(triagem).values(dadosTriagem).returning();
 
     const queixasCriadas = listaQueixas.length
@@ -14,9 +18,9 @@ async function criarTriagemComQueixas(dadosTriagem, listaQueixas) {
 
     await transacao.update(atendimento)
       .set({ status_atendimento: 'Triado' })
-      .where(eq(atendimento.id_atendimento, dadosTriagem.id_atendimento));
+      .where(and(eq(atendimento.id_atendimento, dadosTriagem.id_atendimento), eq(atendimento.status_atendimento, 'Aberto')));
 
-    return { ...triagemCriada, queixas: queixasCriadas };
+    return { gravado: true, triagemGravada: { ...triagemCriada, queixas: queixasCriadas } };
   });
 }
 
