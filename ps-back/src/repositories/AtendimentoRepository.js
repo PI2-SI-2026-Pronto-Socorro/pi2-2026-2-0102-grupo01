@@ -1,8 +1,34 @@
-const { eq, desc, asc, and, notInArray } = require('drizzle-orm');
+const { eq, desc, asc, and, notInArray, sql } = require('drizzle-orm');
 const { db } = require('../db');
-const { atendimento, paciente } = require('../db/schema');
+const { atendimento, paciente, triagem } = require('../db/schema');
+const { CLASSIFICACOES_MANCHESTER } = require('../utils/classificacaoManchester');
 
 const STATUS_FINAIS = ['Encerrado', 'Cancelado'];
+
+const PRIORIDADE_MANCHESTER = sql`CASE ${triagem.classificacao_risco} ${sql.join(
+  CLASSIFICACOES_MANCHESTER.map(({ classificacao, prioridade }) => sql`WHEN ${classificacao} THEN ${sql.raw(String(prioridade))}`),
+  sql` `,
+)} END`;
+
+async function findTriados() {
+  return db
+    .select({
+      id_atendimento: atendimento.id_atendimento,
+      numero_atendimento: atendimento.numero_atendimento,
+      id_paciente: atendimento.id_paciente,
+      nome: paciente.nome,
+      data_nascimento: paciente.data_nascimento,
+      status_atendimento: atendimento.status_atendimento,
+      data_hora_chegada: atendimento.data_hora_chegada,
+      classificacao_risco: triagem.classificacao_risco,
+      data_hora_triagem: triagem.data_hora_triagem,
+    })
+    .from(atendimento)
+    .innerJoin(paciente, eq(paciente.id_paciente, atendimento.id_paciente))
+    .leftJoin(triagem, eq(triagem.id_atendimento, atendimento.id_atendimento))
+    .where(eq(atendimento.status_atendimento, 'Triado'))
+    .orderBy(asc(PRIORIDADE_MANCHESTER), asc(atendimento.data_hora_chegada));
+}
 
 async function findStatusAtual(idPaciente) {
   const [ultimo] = await db
@@ -39,6 +65,7 @@ async function findByNumero(numero) {
       id_paciente: atendimento.id_paciente,
       status_atendimento: atendimento.status_atendimento,
       data_hora_chegada: atendimento.data_hora_chegada,
+      motivo_atendimento: atendimento.motivo_atendimento,
       nome: paciente.nome,
       cpf: paciente.cpf,
     })
@@ -46,6 +73,43 @@ async function findByNumero(numero) {
     .innerJoin(paciente, eq(paciente.id_paciente, atendimento.id_paciente))
     .where(eq(atendimento.numero_atendimento, numero));
   return linha ?? null;
+}
+
+async function atualizarOuBuscar(tx, tabela, colunaId, id, dados) {
+  const filtro = eq(colunaId, id);
+  const [linha] = Object.keys(dados).length > 0
+    ? await tx.update(tabela).set(dados).where(filtro).returning()
+    : await tx.select().from(tabela).where(filtro);
+  return linha;
+}
+
+async function alterarDados(numero, dadosAtendimento, dadosPaciente, statusBloqueados) {
+  return db.transaction(async (tx) => {
+    const [atual] = await tx
+      .select({
+        id_atendimento: atendimento.id_atendimento,
+        id_paciente: atendimento.id_paciente,
+        status_atendimento: atendimento.status_atendimento,
+      })
+      .from(atendimento)
+      .where(eq(atendimento.numero_atendimento, numero))
+      .for('update');
+
+    if (!atual) return { encontrado: false };
+    if (statusBloqueados.includes(atual.status_atendimento)) {
+      return { encontrado: true, bloqueado: true, status_atendimento: atual.status_atendimento };
+    }
+
+    const atendimentoAtualizado = await atualizarOuBuscar(
+      tx, atendimento, atendimento.id_atendimento, atual.id_atendimento, dadosAtendimento,
+    );
+    const pacienteAtualizado = await atualizarOuBuscar(
+      tx, paciente, paciente.id_paciente, atual.id_paciente, dadosPaciente,
+    );
+    return {
+      encontrado: true, bloqueado: false, atendimento: atendimentoAtualizado, paciente: pacienteAtualizado,
+    };
+  });
 }
 
 async function findByCpf(cpf) {
@@ -81,6 +145,18 @@ async function findAbertos() {
     .orderBy(asc(atendimento.data_hora_chegada));
 }
 
+async function cancelarSeAberto(numero) {
+  const [linha] = await db
+    .update(atendimento)
+    .set({ status_atendimento: 'Cancelado', data_hora_saida: sql`now()` })
+    .where(and(
+      eq(atendimento.numero_atendimento, numero),
+      eq(atendimento.status_atendimento, 'Aberto'),
+    ))
+    .returning();
+  return linha ?? null;
+}
+
 async function travarAtendimentoEBuscarStatus(transacao, idAtendimento) {
   const [atendimentoTravado] = await transacao
     .select({ status_atendimento: atendimento.status_atendimento })
@@ -91,5 +167,6 @@ async function travarAtendimentoEBuscarStatus(transacao, idAtendimento) {
 }
 
 module.exports = {
-  findStatusAtual, findEmAndamento, findByNumero, findByCpf, create, findAbertos, travarAtendimentoEBuscarStatus,
+  findStatusAtual, findEmAndamento, findByNumero, findByCpf, create, findAbertos, findTriados, cancelarSeAberto,
+  alterarDados, travarAtendimentoEBuscarStatus,
 };
