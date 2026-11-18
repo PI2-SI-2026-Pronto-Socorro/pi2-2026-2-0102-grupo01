@@ -47,6 +47,12 @@
             </div>
             <form id="form-registrar-triagem" class="formulario-triagem-campos" novalidate>
               <div class="campo">
+                <label for="profissional-responsavel">Profissional responsável <span class="obrigatorio">*</span></label>
+                <select id="profissional-responsavel" required>
+                  <option value="">Carregando...</option>
+                </select>
+              </div>
+              <div class="campo">
                 <label for="classificacao-risco">Classificação de risco <span class="obrigatorio">*</span></label>
                 <select id="classificacao-risco" required>
                   <option value="">Selecione</option>
@@ -58,30 +64,33 @@
                 </select>
               </div>
               <div class="campo">
-                <label for="temperatura">Temperatura (°C)</label>
-                <input id="temperatura" type="number" min="25" max="45" step="0.1" />
+                <label for="temperatura">Temperatura (°C) <span class="obrigatorio">*</span></label>
+                <input id="temperatura" type="number" min="25" max="45" step="0.1" required />
               </div>
               <div class="campo">
-                <label for="pressao-sistolica">Pressão sistólica (mmHg)</label>
-                <input id="pressao-sistolica" type="number" min="1" max="300" />
+                <label for="pressao-sistolica">Pressão sistólica (mmHg) <span class="obrigatorio">*</span></label>
+                <input id="pressao-sistolica" type="number" min="50" max="300" required />
               </div>
               <div class="campo">
-                <label for="pressao-diastolica">Pressão diastólica (mmHg)</label>
-                <input id="pressao-diastolica" type="number" min="1" max="300" />
+                <label for="pressao-diastolica">Pressão diastólica (mmHg) <span class="obrigatorio">*</span></label>
+                <input id="pressao-diastolica" type="number" min="20" max="200" required />
               </div>
               <div class="campo">
-                <label for="frequencia-cardiaca">Frequência cardíaca (bpm)</label>
-                <input id="frequencia-cardiaca" type="number" min="1" max="300" />
+                <label for="frequencia-cardiaca">Frequência cardíaca (bpm) <span class="obrigatorio">*</span></label>
+                <input id="frequencia-cardiaca" type="number" min="20" max="300" required />
               </div>
               <div class="campo">
-                <label for="sintomas">Sintomas relatados</label>
-                <textarea id="sintomas" rows="3"></textarea>
+                <label for="sintomas">Sintomas relatados <span class="obrigatorio">*</span></label>
+                <textarea id="sintomas" rows="3" required></textarea>
               </div>
-              <p class="aviso-triagem">A tela está preparada para receber os dados da fila e enviar a triagem ao back-end.</p>
+              <div class="campo">
+                <label for="duracao-sintoma">Há quanto tempo (ex.: 2 dias)</label>
+                <input id="duracao-sintoma" type="text" maxlength="50" />
+              </div>
               <div id="mensagem-triagem" class="mensagem-triagem" role="status" aria-live="polite"></div>
               <div class="botoes-acoes">
                 <button type="button" class="botao botao-secundario" id="cancelar-triagem">Cancelar</button>
-                <button type="submit" class="botao botao-principal">Validar dados</button>
+                <button type="submit" class="botao botao-principal" id="botao-gravar-triagem">Gravar triagem</button>
               </div>
             </form>
           </section>

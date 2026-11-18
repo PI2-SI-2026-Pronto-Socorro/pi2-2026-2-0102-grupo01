@@ -1,8 +1,11 @@
 const PacienteRepository = require('../repositories/PacienteRepository');
 const AtendimentoRepository = require('../repositories/AtendimentoRepository');
+const PacienteService = require('./PacienteService');
 const Atendimento = require('../models/Atendimento');
+const Paciente = require('../models/Paciente');
 const ErroHttp = require('../utils/ErroHttp');
 const { codigoPg } = require('../utils/pgHelpers');
+const { corDaClassificacao } = require('../utils/classificacaoManchester');
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
@@ -26,9 +29,14 @@ async function abrir({ id_paciente }) {
   }
 }
 
-async function buscarPorNumero(numero) {
+function normalizarNumero(numero) {
   const numeroNormalizado = String(numero).toUpperCase();
   if (!/^AT\d{4,9}$/.test(numeroNormalizado)) throw new ErroHttp(422, 'Número do atendimento inválido (ex.: AT0001)');
+  return numeroNormalizado;
+}
+
+async function buscarPorNumero(numero) {
+  const numeroNormalizado = normalizarNumero(numero);
 
   const linha = await AtendimentoRepository.findByNumero(numeroNormalizado);
   if (!linha) throw new ErroHttp(404, 'Atendimento não encontrado');
@@ -46,4 +54,85 @@ async function listarAbertos() {
   return AtendimentoRepository.findAbertos();
 }
 
-module.exports = { abrir, buscarPorNumero, buscarPorCpf, listarAbertos };
+async function cancelar(numero) {
+  const numeroNormalizado = normalizarNumero(numero);
+
+  const cancelado = await AtendimentoRepository.cancelarSeAberto(numeroNormalizado);
+  if (cancelado) return new Atendimento(cancelado);
+
+  const atual = await AtendimentoRepository.findByNumero(numeroNormalizado);
+  if (!atual) throw new ErroHttp(404, 'Atendimento não encontrado');
+  throw new ErroHttp(
+    409,
+    `Só é possível cancelar atendimento em Aberto (situação atual: ${atual.status_atendimento})`,
+  );
+}
+
+const STATUS_SEM_ALTERACAO = ['Confirmado', 'Encerrado', 'Cancelado'];
+const CAMPOS_PACIENTE = ['nome', 'cpf', 'data_nascimento', 'rg', 'genero', 'telefone'];
+const CAMPOS_ATENDIMENTO = ['motivo_atendimento'];
+
+function separarCamposAlteracao(dados) {
+  if (dados === null || typeof dados !== 'object' || Array.isArray(dados)) {
+    throw new ErroHttp(422, 'Envie os dados a alterar em um objeto JSON');
+  }
+  const campos = Object.keys(dados);
+  if (campos.length === 0) throw new ErroHttp(422, 'Informe ao menos um campo para alterar');
+
+  const naoPermitido = campos.find((c) => !CAMPOS_PACIENTE.includes(c) && !CAMPOS_ATENDIMENTO.includes(c));
+  if (naoPermitido) throw new ErroHttp(422, `Campo não pode ser alterado: ${naoPermitido}`);
+
+  const dadosAtendimento = {};
+  const camposPaciente = {};
+  for (const campo of campos) {
+    (CAMPOS_ATENDIMENTO.includes(campo) ? dadosAtendimento : camposPaciente)[campo] = dados[campo];
+  }
+
+  if ('motivo_atendimento' in dadosAtendimento) {
+    const motivo = PacienteService.limparTextoOpcional(dadosAtendimento.motivo_atendimento);
+    if (motivo !== null && (typeof motivo !== 'string' || motivo.length > 255)) {
+      throw new ErroHttp(422, 'Motivo do atendimento inválido (até 255 caracteres)');
+    }
+    dadosAtendimento.motivo_atendimento = motivo;
+  }
+
+  const dadosPaciente = PacienteService.normalizarDadosPaciente(camposPaciente);
+  const erroPaciente = PacienteService.validarAlteracao(dadosPaciente);
+  if (erroPaciente) throw new ErroHttp(422, erroPaciente);
+
+  return { dadosAtendimento, dadosPaciente };
+}
+
+async function alterar(numero, dados) {
+  const numeroNormalizado = normalizarNumero(numero);
+  const { dadosAtendimento, dadosPaciente } = separarCamposAlteracao(dados);
+
+  let resultado;
+  try {
+    resultado = await AtendimentoRepository.alterarDados(
+      numeroNormalizado, dadosAtendimento, dadosPaciente, STATUS_SEM_ALTERACAO,
+    );
+  } catch (e) {
+    if (codigoPg(e) === '23505') throw new ErroHttp(409, 'CPF já cadastrado para outro paciente');
+    throw e;
+  }
+
+  if (!resultado.encontrado) throw new ErroHttp(404, 'Atendimento não encontrado');
+  if (resultado.bloqueado) {
+    throw new ErroHttp(
+      409,
+      `Não é possível alterar atendimento ${resultado.status_atendimento} (só em Aberto ou Triado)`,
+    );
+  }
+
+  return { ...new Atendimento(resultado.atendimento), paciente: new Paciente(resultado.paciente) };
+}
+
+async function listarTriados() {
+  const linhas = await AtendimentoRepository.findTriados();
+  return linhas.map((linha) => ({ ...linha, cor: corDaClassificacao(linha.classificacao_risco) }));
+}
+
+module.exports = {
+  abrir, buscarPorNumero, buscarPorCpf, listarAbertos, listarTriados, cancelar, alterar,
+};

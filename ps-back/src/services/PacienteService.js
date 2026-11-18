@@ -4,19 +4,61 @@ const Paciente = require('../models/Paciente');
 const ErroHttp = require('../utils/ErroHttp');
 const { codigoPg } = require('../utils/pgHelpers');
 
+const CAMPOS_TEXTO_OPCIONAL = ['rg', 'genero', 'telefone'];
+
 function textoOpcional(valor, max) {
   return valor === undefined || valor === null || (typeof valor === 'string' && valor.length <= max);
 }
 
-function validar(p) {
-  if (typeof p.nome !== 'string' || p.nome.length < 1 || p.nome.length > 100) return 'Nome inválido';
-  if (typeof p.cpf !== 'string' || !/^\d{11}$/.test(p.cpf)) return 'CPF deve ter 11 números';
-  if (typeof p.data_nascimento !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(p.data_nascimento)
-      || isNaN(new Date(p.data_nascimento))) return 'Data de nascimento inválida (use AAAA-MM-DD)';
+function limparTextoOpcional(valor) {
+  if (typeof valor !== 'string') return valor;
+  const textoLimpo = valor.trim();
+  return textoLimpo === '' ? null : textoLimpo;
+}
+
+function normalizarDadosPaciente(dados) {
+  const normalizado = { ...dados };
+  if (typeof normalizado.nome === 'string') normalizado.nome = normalizado.nome.trim();
+  for (const campo of CAMPOS_TEXTO_OPCIONAL) {
+    if (campo in normalizado) normalizado[campo] = limparTextoOpcional(normalizado[campo]);
+  }
+  return normalizado;
+}
+
+const nomeValido = (v) => typeof v === 'string' && v.length >= 1 && v.length <= 100;
+const cpfValido = (v) => typeof v === 'string' && /^\d{11}$/.test(v);
+
+function dataDeHoje() {
+  return new Date().toLocaleDateString('sv-SE', { timeZone: 'America/Sao_Paulo' });
+}
+
+function dataExiste(texto) {
+  const data = new Date(`${texto}T00:00:00Z`);
+  return !Number.isNaN(data.getTime()) && data.toISOString().slice(0, 10) === texto;
+}
+
+const dataValida = (v) => typeof v === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(v)
+  && v >= '1900-01-01' && dataExiste(v) && v <= dataDeHoje();
+
+function validarOpcionais(p) {
   if (!textoOpcional(p.rg, 15)) return 'RG inválido';
   if (!textoOpcional(p.genero, 20)) return 'Gênero inválido';
   if (!textoOpcional(p.telefone, 15)) return 'Telefone inválido';
   return null;
+}
+
+function validar(p) {
+  if (!nomeValido(p.nome)) return 'Nome inválido';
+  if (!cpfValido(p.cpf)) return 'CPF deve ter 11 números';
+  if (!dataValida(p.data_nascimento)) return 'Data de nascimento inválida (use AAAA-MM-DD, entre 1900 e hoje)';
+  return validarOpcionais(p);
+}
+
+function validarAlteracao(p) {
+  if ('nome' in p && !nomeValido(p.nome)) return 'Nome inválido';
+  if ('cpf' in p && !cpfValido(p.cpf)) return 'CPF deve ter 11 números';
+  if ('data_nascimento' in p && !dataValida(p.data_nascimento)) return 'Data de nascimento inválida (use AAAA-MM-DD, entre 1900 e hoje)';
+  return validarOpcionais(p);
 }
 
 async function listar() {
@@ -32,10 +74,11 @@ async function buscarPorCpf(cpf) {
 }
 
 async function cadastrar(dados) {
-  const erro = validar(dados);
+  const dadosLimpos = normalizarDadosPaciente(dados);
+  const erro = validar(dadosLimpos);
   if (erro) throw new ErroHttp(422, erro);
 
-  const novo = new Paciente(dados);
+  const novo = new Paciente(dadosLimpos);
   try {
     return new Paciente(await PacienteRepository.create(novo.paraInsercao()));
   } catch (e) {
@@ -48,4 +91,6 @@ async function contar() {
   return PacienteRepository.count();
 }
 
-module.exports = { listar, buscarPorCpf, cadastrar, contar };
+module.exports = {
+  listar, buscarPorCpf, cadastrar, contar, validarAlteracao, normalizarDadosPaciente, limparTextoOpcional,
+};

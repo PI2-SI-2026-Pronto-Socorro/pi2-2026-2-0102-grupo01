@@ -13,11 +13,15 @@ const medicamentosARegistrar = document.getElementById('medicamentos-a-registrar
 const botaoAdicionarMedicamento = document.getElementById('adicionar-medicamento');
 const botaoSalvarMedicacoes = document.getElementById('salvar-medicacoes');
 const botaoConfirmarAtendimento = document.getElementById('confirmar-atendimento');
+const botaoTentarProfissionaisNovamente = document.getElementById('tentar-profissionais-novamente');
+const avisoConfirmacao = document.getElementById('aviso-confirmacao');
+const orientacoesRegistradas = document.getElementById('orientacoes-registradas');
 const numeroAtendimento = new URLSearchParams(window.location.search).get('numero');
 
 let atendimentoAtual = null;
 let detalhesAtuais = null;
 let profissionaisCarregados = false;
+let existeMedicoCadastrado = false;
 let proximoIdMedicamento = 0;
 
 function mostrarMensagem(elemento, texto, tipo = '') {
@@ -43,6 +47,16 @@ function descreverMedicamento(medicacao) {
   return [medicacao.medicamento, medicacao.apresentacao, medicacao.concentracao]
     .filter(Boolean)
     .join(' ');
+}
+
+function atualizarEstadoDosBotoes(atendimentoTriado, temMedicacoes) {
+  camposMedicacoes.disabled =
+    !atendimentoTriado ||
+    !profissionaisCarregados ||
+    !existeMedicoCadastrado;
+  botaoSalvarMedicacoes.disabled = camposMedicacoes.disabled;
+  botaoAdicionarMedicamento.disabled = camposMedicacoes.disabled;
+  botaoConfirmarAtendimento.disabled = !atendimentoTriado || !temMedicacoes;
 }
 
 function montarLinhaMedicacao(medicacao) {
@@ -73,6 +87,7 @@ function renderizarDetalhes(detalhes) {
 
   adicionarDadoTriagem('Paciente', paciente.nome || 'Nome não disponível');
   adicionarDadoTriagem('CPF', formatarCpf(paciente.cpf));
+  adicionarDadoTriagem('Nascimento', formatarData(paciente.data_nascimento));
   adicionarDadoTriagem('Situação', atendimento.status_atendimento);
   adicionarDadoTriagem('Chegada', formatarDataHora(atendimento.data_hora_chegada));
 
@@ -121,11 +136,22 @@ function renderizarDetalhes(detalhes) {
     listaMedicacoes.replaceChildren(linha);
   }
 
+  const orientacoes =
+    itensMedicacao.find((medicacao) => medicacao.orientacoes)?.orientacoes ??
+    detalhes.orientacoes ??
+    atendimento.orientacoes;
+  if (orientacoes) {
+    orientacoesRegistradas.textContent = `Orientações: ${orientacoes}`;
+    orientacoesRegistradas.hidden = false;
+  } else {
+    orientacoesRegistradas.textContent = '';
+    orientacoesRegistradas.hidden = true;
+  }
+
   const atendimentoTriado = atendimento.status_atendimento === 'Triado';
-  camposMedicacoes.disabled = !atendimentoTriado || !profissionaisCarregados || profissionalResponsavel.options.length < 2;
-  botaoSalvarMedicacoes.disabled = camposMedicacoes.disabled;
-  botaoAdicionarMedicamento.disabled = camposMedicacoes.disabled;
-  botaoConfirmarAtendimento.disabled = !atendimentoTriado;
+  const temMedicacoes = itensMedicacao.length > 0;
+  avisoConfirmacao.hidden = !atendimentoTriado || temMedicacoes;
+  atualizarEstadoDosBotoes(atendimentoTriado, temMedicacoes);
   if (!atendimentoTriado) {
     mostrarMensagem(
       mensagemAtendimento,
@@ -185,9 +211,10 @@ function criarCampoMedicacao(rotulo, chave, opcoes = {}) {
 
 function atualizarBotoesRemover() {
   const linhas = [...medicamentosARegistrar.querySelectorAll('.medicamento-formulario')];
-  for (const linha of linhas) {
+  linhas.forEach((linha, indice) => {
     linha.querySelector('.remover-medicamento').disabled = linhas.length === 1;
-  }
+    linha.querySelector('legend').textContent = `Medicamento ${indice + 1}`;
+  });
 }
 
 function adicionarMedicamento() {
@@ -251,17 +278,25 @@ async function carregarProfissionais() {
   try {
     resposta = await fetch(`${API_URL}/profissionais`);
   } catch {
+    profissionaisCarregados = false;
+    existeMedicoCadastrado = false;
     mostrarMensagem(mensagemMedicacao, 'Não foi possível carregar os profissionais pela API.', 'mensagem-erro');
+    botaoTentarProfissionaisNovamente.hidden = false;
+    if (detalhesAtuais) atualizarEstadoDosBotoes(detalhesAtuais.atendimento.status_atendimento === 'Triado', (detalhesAtuais.medicacoes ?? []).length > 0);
     return;
   }
 
   const profissionais = await lerJson(resposta);
   if (!resposta.ok || !Array.isArray(profissionais)) {
+    profissionaisCarregados = false;
+    existeMedicoCadastrado = false;
     mostrarMensagem(
       mensagemMedicacao,
       profissionais?.detail ?? 'Não foi possível carregar os profissionais.',
       'mensagem-erro',
     );
+    botaoTentarProfissionaisNovamente.hidden = false;
+    if (detalhesAtuais) atualizarEstadoDosBotoes(detalhesAtuais.atendimento.status_atendimento === 'Triado', (detalhesAtuais.medicacoes ?? []).length > 0);
     return;
   }
 
@@ -270,8 +305,14 @@ async function carregarProfissionais() {
   const opcoes = medicos.map(
     (profissional) => new Option(profissional.nome, profissional.id_profissional),
   );
+  const profissionalSelecionado = profissionalResponsavel.value;
   profissionalResponsavel.replaceChildren(opcaoInicial, ...opcoes);
+  if (medicos.some((profissional) => profissional.id_profissional === profissionalSelecionado)) {
+    profissionalResponsavel.value = profissionalSelecionado;
+  }
   profissionaisCarregados = true;
+  existeMedicoCadastrado = medicos.length > 0;
+  botaoTentarProfissionaisNovamente.hidden = true;
   if (detalhesAtuais) renderizarDetalhes(detalhesAtuais);
   if (medicos.length === 0) {
     mostrarMensagem(mensagemMedicacao, 'Não há profissional médico cadastrado para registrar medicações.', 'mensagem-erro');
@@ -318,7 +359,9 @@ async function salvarMedicacoes(event) {
     return;
   }
 
+  const profissionalSelecionado = profissionalResponsavel.value;
   formularioMedicacoes.reset();
+  profissionalResponsavel.value = profissionalSelecionado;
   medicamentosARegistrar.replaceChildren();
   adicionarMedicamento();
   mostrarMensagem(mensagemMedicacao, 'Medicações registradas com sucesso.', 'mensagem-sucesso');
@@ -355,7 +398,7 @@ async function confirmarAtendimento() {
       resultado?.detail ?? 'Não foi possível confirmar o atendimento.',
       'mensagem-erro',
     );
-    botaoConfirmarAtendimento.disabled = atendimentoAtual?.status_atendimento !== 'Triado';
+    await carregarDetalhes();
     return;
   }
 
@@ -370,6 +413,7 @@ async function confirmarAtendimento() {
 document.getElementById('adicionar-medicamento').addEventListener('click', adicionarMedicamento);
 formularioMedicacoes.addEventListener('submit', salvarMedicacoes);
 botaoConfirmarAtendimento.addEventListener('click', confirmarAtendimento);
+botaoTentarProfissionaisNovamente.addEventListener('click', carregarProfissionais);
 
 if (!numeroAtendimentoValido(numeroAtendimento)) {
   identificacaoAtendimento.textContent = 'Número de atendimento ausente ou inválido.';
@@ -378,5 +422,6 @@ if (!numeroAtendimentoValido(numeroAtendimento)) {
   botaoConfirmarAtendimento.disabled = true;
 } else {
   adicionarMedicamento();
-  Promise.all([carregarDetalhes(), carregarProfissionais()]);
+  carregarDetalhes();
+  carregarProfissionais();
 }
