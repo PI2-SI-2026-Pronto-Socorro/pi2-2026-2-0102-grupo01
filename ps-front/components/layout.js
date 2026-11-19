@@ -46,6 +46,7 @@ function numeroAtendimentoValido(numero) {
     'h04-abrir-atendimento.html': 'atendimento',
     'h05-consultar-atendimento.html': 'historico',
     'h06-fila-triagem.html': 'triagem',
+    'h11-alterar-atendimento.html': 'historico',
     'h12-atendimento-medico.html': 'painel',
     'h14-alta-atendimento.html': 'alta',
     'administracao.html': 'admin',

@@ -38,8 +38,17 @@ function montarCardAtendimento(atendimento, paciente) {
   adicionarDado(dados, 'CPF', formatarCpf(paciente.cpf));
   adicionarDado(dados, 'Situação', atendimento.status_atendimento);
   adicionarDado(dados, 'Data e hora de chegada', formatarDataHora(atendimento.data_hora_chegada));
+  adicionarDado(dados, 'Motivo', atendimento.motivo_atendimento || 'Não informado');
 
   card.append(titulo, dados);
+  if (!['Confirmado', 'Encerrado', 'Cancelado'].includes(atendimento.status_atendimento)) {
+    const acaoAlterar = document.createElement('a');
+    acaoAlterar.className = 'botao-principal';
+    acaoAlterar.href =
+      `./h11-alterar-atendimento.html?numero=${encodeURIComponent(atendimento.numero_atendimento)}`;
+    acaoAlterar.textContent = 'Alterar atendimento';
+    card.appendChild(acaoAlterar);
+  }
   return card;
 }
 
@@ -99,6 +108,56 @@ function descreverPosologia(medicacaoRegistrada) {
   return partesPosologia.join(', ');
 }
 
+function montarSecaoTriagem(detalhesAtendimento) {
+  const secaoTriagem = document.createElement('section');
+  secaoTriagem.className = 'historico-paciente';
+  const titulo = document.createElement('h2');
+  titulo.textContent = 'Dados da triagem';
+  secaoTriagem.appendChild(titulo);
+
+  const sinaisVitais = detalhesAtendimento.sinais_vitais;
+  if (!sinaisVitais) {
+    const avisoSemTriagem = document.createElement('p');
+    avisoSemTriagem.textContent = 'Nenhuma triagem registrada neste atendimento.';
+    secaoTriagem.appendChild(avisoSemTriagem);
+    return secaoTriagem;
+  }
+
+  const dadosTriagem = document.createElement('div');
+  dadosTriagem.className = 'dados-atendimento';
+  adicionarDado(dadosTriagem, 'Classificação de risco', sinaisVitais.classificacao_risco);
+  adicionarDado(dadosTriagem, 'Pressão arterial',
+    `${sinaisVitais.pressao_sistolica ?? '—'} / ${sinaisVitais.pressao_diastolica ?? '—'} mmHg`);
+  adicionarDado(dadosTriagem, 'Temperatura',
+    sinaisVitais.temperatura == null ? '—' : `${sinaisVitais.temperatura} °C`);
+  adicionarDado(dadosTriagem, 'Frequência cardíaca',
+    `${sinaisVitais.frequencia_cardiaca ?? '—'} bpm`);
+  adicionarDado(dadosTriagem, 'Triagem realizada em', formatarDataHora(sinaisVitais.data_hora_triagem));
+  secaoTriagem.appendChild(dadosTriagem);
+
+  const tituloQueixas = document.createElement('h3');
+  tituloQueixas.textContent = 'Queixas relatadas';
+  secaoTriagem.appendChild(tituloQueixas);
+
+  const listaQueixas = document.createElement('ul');
+  const queixas = detalhesAtendimento.queixas ?? [];
+  if (queixas.length === 0) {
+    const itemSemQueixa = document.createElement('li');
+    itemSemQueixa.textContent = 'Nenhuma queixa registrada.';
+    listaQueixas.appendChild(itemSemQueixa);
+  } else {
+    for (const queixa of queixas) {
+      const itemQueixa = document.createElement('li');
+      itemQueixa.textContent = queixa.duracao_sintoma
+        ? `${queixa.sintomas} · ${queixa.duracao_sintoma}`
+        : queixa.sintomas;
+      listaQueixas.appendChild(itemQueixa);
+    }
+  }
+  secaoTriagem.appendChild(listaQueixas);
+  return secaoTriagem;
+}
+
 function montarSecaoMedicacoes(listaMedicacoes) {
   const secaoMedicacoes = document.createElement('section');
   secaoMedicacoes.className = 'historico-paciente';
@@ -144,6 +203,7 @@ async function consultarPorNumero(numero, aindaValida) {
   }
   resultadoConsulta.replaceChildren(
     montarCardAtendimento(detalhesAtendimento.atendimento, detalhesAtendimento.paciente),
+    montarSecaoTriagem(detalhesAtendimento),
     montarSecaoMedicacoes(detalhesAtendimento.medicacoes ?? []),
   );
 }
