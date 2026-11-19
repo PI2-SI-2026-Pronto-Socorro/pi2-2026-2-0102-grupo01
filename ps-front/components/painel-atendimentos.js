@@ -54,20 +54,35 @@ function criarBotaoVisualizar(numeroAtendimento) {
   return botaoVisualizar;
 }
 
+function criarLinkAtendimentoMedico(numeroAtendimento) {
+  const linkAtendimentoMedico = document.createElement('a');
+  linkAtendimentoMedico.className = 'medical-action';
+  linkAtendimentoMedico.href = `./h12-atendimento-medico.html?numero=${numeroAtendimento}`;
+  linkAtendimentoMedico.textContent = 'Atendimento médico';
+  return linkAtendimentoMedico;
+}
+
 function montarLinhaPainel(atendimentoDoPainel) {
   const linhaAtendimento = document.createElement('tr');
+  const acoes = [
+    criarBotaoVisualizar(atendimentoDoPainel.numero_atendimento),
+  ];
+  if (atendimentoDoPainel.status_atendimento === 'Triado') {
+    acoes.unshift(criarLinkAtendimentoMedico(atendimentoDoPainel.numero_atendimento));
+  }
   const conteudoDasCelulas = [
     criarLinkConsulta(atendimentoDoPainel.numero_atendimento),
     atendimentoDoPainel.nome,
     formatarCpf(atendimentoDoPainel.cpf),
     criarSeloStatus(atendimentoDoPainel.status_atendimento),
     formatarDataHora(atendimentoDoPainel.data_hora_chegada),
-    criarBotaoVisualizar(atendimentoDoPainel.numero_atendimento),
+    acoes,
   ];
   conteudoDasCelulas.forEach((conteudoCelula, posicaoCelula) => {
     const celula = document.createElement('td');
     if (posicaoCelula === conteudoDasCelulas.length - 1) celula.className = 'table-actions';
-    celula.append(conteudoCelula ?? '-');
+    if (Array.isArray(conteudoCelula)) celula.append(...conteudoCelula);
+    else celula.append(conteudoCelula ?? '-');
     linhaAtendimento.appendChild(celula);
   });
   return linhaAtendimento;
