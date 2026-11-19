@@ -1,0 +1,56 @@
+.pagina-h11 .alteracao-card {
+  display: grid;
+  gap: 24px;
+}
+
+.pagina-h11 #form-alteracao {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.pagina-h11 .campo-alteracao {
+  display: grid;
+  gap: 8px;
+}
+
+.pagina-h11 .campo-alteracao-largo,
+.pagina-h11 .mensagem-alteracao,
+.pagina-h11 .acoes-alteracao {
+  grid-column: 1 / -1;
+}
+
+.pagina-h11 input,
+.pagina-h11 textarea {
+  width: 100%;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  padding: 10px 12px;
+  background: #fff;
+}
+
+.pagina-h11 .acoes-alteracao {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+.pagina-h11 .mensagem-alteracao {
+  min-height: 24px;
+}
+
+@media (max-width: 720px) {
+  .pagina-h11 #form-alteracao {
+    grid-template-columns: 1fr;
+  }
+
+  .pagina-h11 .campo-alteracao-largo,
+  .pagina-h11 .mensagem-alteracao,
+  .pagina-h11 .acoes-alteracao {
+    grid-column: 1;
+  }
+
+  .pagina-h11 .acoes-alteracao {
+    flex-direction: column;
+  }
+}
