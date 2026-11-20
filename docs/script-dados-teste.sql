@@ -1,18 +1,16 @@
--- SCRIPT DE TESTE - Sistema de atendimento (Neon / PostgreSQL 15+)
--- Todos os dados de teste usam CPFs 999999999xx e prefixo "TESTE"
--- para facilitar a limpeza (bloco 5 no final).
--- Rode o script inteiro (blocos 1 a 4). O resultado final é a tabela
--- test_log, com OK / FALHOU por teste.
+-- SCRIPT DE TESTE - Sistema de atendimento (Neon / PostgreSQL 18)
+-- Dados de teste: CPFs 999999999xx e prefixo "TESTE".
+-- Roda em transação e faz ROLLBACK no fim: nada fica gravado.
+-- Resultado: tabela test_log (OK / FALHOU por teste).
 
+BEGIN;
 
-DROP TABLE IF EXISTS test_log;
-DROP TABLE IF EXISTS test_ids;
+DROP TABLE IF EXISTS pg_temp.test_log;
+DROP TABLE IF EXISTS pg_temp.test_ids;
 CREATE TEMP TABLE test_log (ordem serial, teste text, resultado text);
 CREATE TEMP TABLE test_ids (chave text PRIMARY KEY, id uuid);
 
--- Helper: executa um SQL que DEVE falhar com o SQLSTATE esperado.
--- (o sub-bloco é sempre revertido, então nada fica gravado)
-
+-- Helper: executa um SQL que deve falhar com o SQLSTATE esperado.
 CREATE OR REPLACE FUNCTION pg_temp.esperar_erro(p_nome text, p_sql text, p_sqlstate text)
 RETURNS void LANGUAGE plpgsql AS $f$
 DECLARE v_state text; v_msg text;
@@ -32,7 +30,7 @@ BEGIN
   END IF;
 END $f$;
 
--- 1) FLUXO padrao: inserções válidas
+-- 1) FLUXO padrão: inserções válidas
 
 DO $$
 DECLARE
@@ -106,7 +104,7 @@ BEGIN
 END $$;
 
 
--- 2) TESTES NEGATIVOS: o banco rejeita estes dados
+-- 2) TESTES NEGATIVOS: o banco deve rejeitar
 
 SELECT pg_temp.esperar_erro('2.01 Segundo atendimento aberto p/ mesmo paciente',
   $q$INSERT INTO atendimento (id_paciente) SELECT id FROM test_ids WHERE chave='paciente'$q$, '23505');
@@ -125,7 +123,7 @@ SELECT pg_temp.esperar_erro('2.05 Pressão sistólica < diastólica',
   $q$UPDATE triagem SET pressao_sistolica = 60, pressao_diastolica = 90
      WHERE id_triagem = (SELECT id FROM test_ids WHERE chave='triagem')$q$, '23514');
 
-SELECT pg_temp.esperar_erro('2.06 Temperatura fora do limite (50)',
+SELECT pg_temp.esperar_erro('2.06 Temperatura fora do limite (45.1)',
   $q$UPDATE triagem SET temperatura = 45.1 WHERE id_triagem = (SELECT id FROM test_ids WHERE chave='triagem')$q$, '23514');
 
 SELECT pg_temp.esperar_erro('2.07 Peso negativo',
@@ -173,7 +171,8 @@ SELECT pg_temp.esperar_erro('2.18 Usuário de profissional duplicado',
      VALUES ('TESTE Clone', '99999999913', 'Médico', 'Médico', 'teste_med', 'x')$q$, '23505');
 
 
--- 3) Encerrar atendimento e conferir que um NOVO pode ser aberto
+-- 3) Encerrar atendimento e abrir um novo
+
 DO $$
 DECLARE v_pac uuid; v_atend uuid; v_numero text;
 BEGIN
@@ -191,56 +190,27 @@ EXCEPTION WHEN OTHERS THEN
 END $$;
 
 
--- 4) Contagem de registros de teste + RESULTADO FINAL
+-- 4) Contagem de registros de teste (compara com o esperado) + resultado final
+
 INSERT INTO test_log(teste, resultado)
-SELECT '4. Contagem ' || t, c::text FROM (
-  SELECT 'paciente' t, count(*) c FROM paciente WHERE cpf = '99999999901'
-  UNION ALL SELECT 'prontuario', count(*) FROM prontuario WHERE id_paciente IN (SELECT id FROM test_ids WHERE chave='paciente')
-  UNION ALL SELECT 'profissional', count(*) FROM profissional WHERE cpf LIKE '999999999%'
-  UNION ALL SELECT 'atendimento', count(*) FROM atendimento WHERE id_paciente IN (SELECT id FROM test_ids WHERE chave='paciente')
-  UNION ALL SELECT 'triagem', count(*) FROM triagem WHERE id_atendimento IN (SELECT id FROM test_ids WHERE chave='atendimento')
-  UNION ALL SELECT 'queixa', count(*) FROM queixa WHERE id_triagem IN (SELECT id FROM test_ids WHERE chave='triagem')
-  UNION ALL SELECT 'consulta_medica', count(*) FROM consulta_medica WHERE id_consulta IN (SELECT id FROM test_ids WHERE chave='consulta')
-  UNION ALL SELECT 'exame', count(*) FROM exame WHERE id_consulta IN (SELECT id FROM test_ids WHERE chave='consulta')
-  UNION ALL SELECT 'prescricao', count(*) FROM prescricao WHERE id_consulta IN (SELECT id FROM test_ids WHERE chave='consulta')
-  UNION ALL SELECT 'medicacao', count(*) FROM medicacao WHERE medicamento LIKE 'TESTE%'
-  UNION ALL SELECT 'prescricao_medicacao', count(*) FROM prescricao_medicacao WHERE id_prescricao IN (SELECT id FROM test_ids WHERE chave='prescricao')
-  UNION ALL SELECT 'internacao', count(*) FROM internacao WHERE id_consulta IN (SELECT id FROM test_ids WHERE chave='consulta')
+SELECT '4. Contagem ' || t,
+       CASE WHEN c = esperado THEN 'OK (' || c || ')'
+            ELSE 'FALHOU - esperado ' || esperado || ', veio ' || c END
+FROM (
+  SELECT 'paciente' t, count(*) c, 1 esperado FROM paciente WHERE cpf = '99999999901'
+  UNION ALL SELECT 'prontuario', count(*), 1 FROM prontuario WHERE id_paciente IN (SELECT id FROM test_ids WHERE chave='paciente')
+  UNION ALL SELECT 'profissional', count(*), 2 FROM profissional WHERE cpf LIKE '999999999%'
+  UNION ALL SELECT 'atendimento', count(*), 2 FROM atendimento WHERE id_paciente IN (SELECT id FROM test_ids WHERE chave='paciente')
+  UNION ALL SELECT 'triagem', count(*), 1 FROM triagem WHERE id_atendimento IN (SELECT id FROM test_ids WHERE chave='atendimento')
+  UNION ALL SELECT 'queixa', count(*), 2 FROM queixa WHERE id_triagem IN (SELECT id FROM test_ids WHERE chave='triagem')
+  UNION ALL SELECT 'consulta_medica', count(*), 1 FROM consulta_medica WHERE id_consulta IN (SELECT id FROM test_ids WHERE chave='consulta')
+  UNION ALL SELECT 'exame', count(*), 1 FROM exame WHERE id_consulta IN (SELECT id FROM test_ids WHERE chave='consulta')
+  UNION ALL SELECT 'prescricao', count(*), 1 FROM prescricao WHERE id_consulta IN (SELECT id FROM test_ids WHERE chave='consulta')
+  UNION ALL SELECT 'medicacao', count(*), 2 FROM medicacao WHERE medicamento LIKE 'TESTE%'
+  UNION ALL SELECT 'prescricao_medicacao', count(*), 2 FROM prescricao_medicacao WHERE id_prescricao IN (SELECT id FROM test_ids WHERE chave='prescricao')
+  UNION ALL SELECT 'internacao', count(*), 1 FROM internacao WHERE id_consulta IN (SELECT id FROM test_ids WHERE chave='consulta')
 ) x;
 
 SELECT ordem, teste, resultado FROM test_log ORDER BY ordem;
 
-
--- 5) LIMPEZA (rode separadamente quando quiser apagar os dados de teste)
---    Descomente e execute.
-/*
-DELETE FROM prescricao_medicacao WHERE id_prescricao IN (
-  SELECT p.id_prescricao FROM prescricao p
-  JOIN consulta_medica c ON c.id_consulta = p.id_consulta
-  JOIN atendimento a ON a.id_atendimento = c.id_atendimento
-  JOIN paciente pa ON pa.id_paciente = a.id_paciente WHERE pa.cpf = '99999999901');
-DELETE FROM prescricao WHERE id_consulta IN (
-  SELECT c.id_consulta FROM consulta_medica c
-  JOIN atendimento a ON a.id_atendimento = c.id_atendimento
-  JOIN paciente pa ON pa.id_paciente = a.id_paciente WHERE pa.cpf = '99999999901');
-DELETE FROM medicacao WHERE medicamento LIKE 'TESTE%';
-DELETE FROM exame WHERE id_consulta IN (
-  SELECT c.id_consulta FROM consulta_medica c
-  JOIN atendimento a ON a.id_atendimento = c.id_atendimento
-  JOIN paciente pa ON pa.id_paciente = a.id_paciente WHERE pa.cpf = '99999999901');
-DELETE FROM internacao WHERE id_consulta IN (
-  SELECT c.id_consulta FROM consulta_medica c
-  JOIN atendimento a ON a.id_atendimento = c.id_atendimento
-  JOIN paciente pa ON pa.id_paciente = a.id_paciente WHERE pa.cpf = '99999999901');
-DELETE FROM consulta_medica WHERE id_atendimento IN (
-  SELECT a.id_atendimento FROM atendimento a JOIN paciente pa ON pa.id_paciente = a.id_paciente WHERE pa.cpf = '99999999901');
-DELETE FROM queixa WHERE id_triagem IN (
-  SELECT t.id_triagem FROM triagem t JOIN atendimento a ON a.id_atendimento = t.id_atendimento
-  JOIN paciente pa ON pa.id_paciente = a.id_paciente WHERE pa.cpf = '99999999901');
-DELETE FROM triagem WHERE id_atendimento IN (
-  SELECT a.id_atendimento FROM atendimento a JOIN paciente pa ON pa.id_paciente = a.id_paciente WHERE pa.cpf = '99999999901');
-DELETE FROM atendimento WHERE id_paciente IN (SELECT id_paciente FROM paciente WHERE cpf = '99999999901');
-DELETE FROM prontuario WHERE id_paciente IN (SELECT id_paciente FROM paciente WHERE cpf = '99999999901');
-DELETE FROM paciente WHERE cpf = '99999999901';
-DELETE FROM profissional WHERE cpf IN ('99999999911', '99999999912');
-*/
+ROLLBACK;
