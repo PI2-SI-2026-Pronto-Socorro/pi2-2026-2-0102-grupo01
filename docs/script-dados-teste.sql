@@ -11,7 +11,8 @@ CREATE TEMP TABLE test_log (ordem serial, teste text, resultado text);
 CREATE TEMP TABLE test_ids (chave text PRIMARY KEY, id uuid);
 
 -- Helper: executa um SQL que deve falhar com o SQLSTATE esperado.
-CREATE OR REPLACE FUNCTION pg_temp.esperar_erro(p_nome text, p_sql text, p_sqlstate text)
+DROP FUNCTION IF EXISTS pg_temp.esperar_erro(text, text, text);
+CREATE FUNCTION pg_temp.esperar_erro(p_nome text, p_sql text, p_sqlstate text)
 RETURNS void LANGUAGE plpgsql AS $f$
 DECLARE v_state text; v_msg text;
 BEGIN
