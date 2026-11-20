@@ -66,7 +66,7 @@ const atendimento = pgTable('atendimento', {
   data_hora_chegada: timestamp('data_hora_chegada', { withTimezone: true }).notNull().defaultNow(),
   data_hora_saida: timestamp('data_hora_saida', { withTimezone: true }),
   numero_atendimento: varchar('numero_atendimento', { length: 11 }).notNull()
-    .default(sql`'AT' || LPAD(nextval('seq_numero_atendimento')::text, 4, '0')`),
+    .default(sql`'AT' || LPAD(nextval('seq_numero_atendimento')::text, 9, '0')`),
   status_atendimento: statusAtendimentoEnum('status_atendimento').notNull().default('Aberto'),
   motivo_atendimento: varchar('motivo_atendimento', { length: 255 }),
 }, (t) => [
@@ -80,6 +80,7 @@ const atendimento = pgTable('atendimento', {
     .where(sql`${t.status_atendimento} NOT IN ('Encerrado', 'Cancelado')`),
   index('idx_atendimento_paciente').on(t.id_paciente),
   index('idx_atendimento_profissional').on(t.id_profissional),
+  check('ck_atendimento_periodo', sql`${t.data_hora_saida} IS NULL OR ${t.data_hora_saida} >= ${t.data_hora_chegada}`),''
 ]);
 
 const triagem = pgTable('triagem', {
