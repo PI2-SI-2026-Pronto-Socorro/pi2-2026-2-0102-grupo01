@@ -1,6 +1,7 @@
 const { eq, and, count } = require('drizzle-orm');
 const { db } = require('../db');
 const { atendimento, consultaMedica, prescricao, prescricaoMedicacao } = require('../db/schema');
+const { statusDeOrigem } = require('../utils/transicoesAtendimento');
 
 async function contarMedicacoesDoAtendimento(idAtendimento) {
   const [resultadoContagem] = await db
@@ -16,7 +17,7 @@ async function passarDeTriadoParaConfirmado(idAtendimento) {
   const [atendimentoConfirmado] = await db
     .update(atendimento)
     .set({ status_atendimento: 'Confirmado' })
-    .where(and(eq(atendimento.id_atendimento, idAtendimento), eq(atendimento.status_atendimento, 'Triado')))
+    .where(and(eq(atendimento.id_atendimento, idAtendimento), eq(atendimento.status_atendimento, statusDeOrigem('Confirmado'))))
     .returning();
   return atendimentoConfirmado ?? null;
 }

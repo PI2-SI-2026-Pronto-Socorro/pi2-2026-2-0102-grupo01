@@ -1,6 +1,7 @@
 const { eq, and, asc } = require('drizzle-orm');
 const { db } = require('../db');
 const { atendimento, paciente } = require('../db/schema');
+const { statusDeOrigem } = require('../utils/transicoesAtendimento');
 
 async function listarAtendimentosConfirmados() {
   return db
@@ -21,7 +22,7 @@ async function passarDeConfirmadoParaEncerrado(idAtendimento) {
   const [atendimentoEncerrado] = await db
     .update(atendimento)
     .set({ status_atendimento: 'Encerrado', data_hora_saida: new Date() })
-    .where(and(eq(atendimento.id_atendimento, idAtendimento), eq(atendimento.status_atendimento, 'Confirmado')))
+    .where(and(eq(atendimento.id_atendimento, idAtendimento), eq(atendimento.status_atendimento, statusDeOrigem('Encerrado'))))
     .returning();
   return atendimentoEncerrado ?? null;
 }
