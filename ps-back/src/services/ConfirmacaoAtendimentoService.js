@@ -1,15 +1,18 @@
 const AtendimentoRepository = require('../repositories/AtendimentoRepository');
 const ConfirmacaoAtendimentoRepository = require('../repositories/ConfirmacaoAtendimentoRepository');
 const ErroHttp = require('../utils/ErroHttp');
+const { garantirTransicao } = require('../utils/transicoesAtendimento');
 
-async function confirmarAtendimento(numeroAtendimento) {
+async function confirmarAtendimento(numeroAtendimento, usuario) {
   const numeroFormatado = String(numeroAtendimento).toUpperCase();
   if (!/^AT\d{4,9}$/.test(numeroFormatado)) throw new ErroHttp(422, 'Número do atendimento inválido (ex.: AT0001)');
 
   const atendimentoEncontrado = await AtendimentoRepository.findByNumero(numeroFormatado);
   if (!atendimentoEncontrado) throw new ErroHttp(404, 'Atendimento não encontrado');
-  if (atendimentoEncontrado.status_atendimento !== 'Triado') {
-    throw new ErroHttp(409, `Só é possível confirmar atendimento Triado (status: ${atendimentoEncontrado.status_atendimento})`);
+  garantirTransicao(atendimentoEncontrado.status_atendimento, 'Confirmado');
+  const medicoResponsavel = atendimentoEncontrado.id_profissional;
+  if (usuario && medicoResponsavel && medicoResponsavel !== usuario.id_profissional) {
+    throw new ErroHttp(409, 'Atendimento está com outro médico');
   }
 
   const quantidadeMedicacoes = await ConfirmacaoAtendimentoRepository.contarMedicacoesDoAtendimento(atendimentoEncontrado.id_atendimento);
