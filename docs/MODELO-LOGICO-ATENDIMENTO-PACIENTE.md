@@ -71,7 +71,7 @@ Representa a entrada do paciente no Pronto Socorro.
 | `id_profissional` | `UUID` | `FK` | Médico responsável (`PROFISSIONAL.id_profissional`) |
 | `data_hora_chegada` | `TIMESTAMPTZ` | `NOT NULL` | Data e hora da recepção |
 | `data_hora_saida` | `TIMESTAMPTZ` | - | Data e hora da alta |
-| `numero_atendimento` | `VARCHAR(11)` | `UNIQUE`, `NOT NULL` | Número no formato AT0001, gerado pela sequência `seq_numero_atendimento` |
+| `numero_atendimento` | `VARCHAR(11)` | `UNIQUE`, `NOT NULL` | Número no formato AT000000001, gerado pela sequência `seq_numero_atendimento` |
 | `status_atendimento` | `status_atendimento_enum` | `NOT NULL`, padrão `Aberto` | Situação do atendimento |
 | `motivo_atendimento` | `VARCHAR(255)` | - | Motivo informado na recepção |
 

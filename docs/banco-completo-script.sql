@@ -1,3 +1,4 @@
+BEGIN;
 CREATE TYPE "public"."status_atendimento_enum" AS ENUM('Aberto', 'Triado', 'Confirmado', 'Encerrado', 'Cancelado');
 CREATE TYPE "public"."classificacao_risco_enum" AS ENUM('Não Urgente', 'Pouco Urgente', 'Urgente', 'Muito Urgente', 'Emergência');
 CREATE TYPE "public"."cargo_profissional_enum" AS ENUM('Médico', 'Enfermeiro', 'Técnico de Enfermagem', 'Recepcionista', 'Outro');
@@ -52,11 +53,12 @@ CREATE TABLE "atendimento" (
 	"id_profissional" uuid,
 	"data_hora_chegada" timestamp with time zone DEFAULT now() NOT NULL,
 	"data_hora_saida" timestamp with time zone,
-	"numero_atendimento" varchar(11) DEFAULT 'AT' || LPAD(nextval('seq_numero_atendimento')::text, 4, '0') NOT NULL,
+	"numero_atendimento" varchar(11) DEFAULT 'AT' || LPAD(nextval('seq_numero_atendimento')::text, 9, '0') NOT NULL,
 	"status_atendimento" "status_atendimento_enum" DEFAULT 'Aberto' NOT NULL,
 	"motivo_atendimento" varchar(255),
 	CONSTRAINT "pk_atendimento" PRIMARY KEY("id_atendimento"),
-	CONSTRAINT "uk_atendimento_numero" UNIQUE("numero_atendimento")
+	CONSTRAINT "uk_atendimento_numero" UNIQUE("numero_atendimento"),
+	CONSTRAINT "ck_atendimento_periodo" CHECK ("atendimento"."data_hora_saida" IS NULL OR "atendimento"."data_hora_saida" >= "atendimento"."data_hora_chegada")
 );
 
 CREATE TABLE "triagem" (
@@ -175,3 +177,4 @@ CREATE INDEX "idx_consulta_profissional" ON "consulta_medica" USING btree ("id_p
 CREATE INDEX "idx_exame_consulta" ON "exame" USING btree ("id_consulta");
 CREATE INDEX "idx_prescricao_consulta" ON "prescricao" USING btree ("id_consulta");
 CREATE INDEX "idx_presmed_medicacao" ON "prescricao_medicacao" USING btree ("id_medicacao");
+COMMIT;

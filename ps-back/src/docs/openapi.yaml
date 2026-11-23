@@ -128,7 +128,7 @@ paths:
       summary: Abre um atendimento para um paciente
       description: >
         O atendimento sempre é aberto com status "Aberto". O número (numero_atendimento,
-        no formato AT0001) e a data e hora de chegada são gerados pelo banco. Um paciente
+        no formato AT000000001) e a data e hora de chegada são gerados pelo banco. Um paciente
         não pode ter dois atendimentos em andamento (status diferente de "Encerrado" e "Cancelado").
       requestBody:
         required: true
