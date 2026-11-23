@@ -1,26 +1,97 @@
 const formCadastroProfissional = document.getElementById('form-cadastro-profissional');
 const mensagemCadastroProfissional = document.getElementById('mensagem-cadastro-profissional');
 
+function validarCpf(cpf) {
+  const numeros = cpf.replace(/\D/g, '');
+  if (!/^\d{11}$/.test(numeros) || /^(\d)\1{10}$/.test(numeros)) return false;
+
+  let soma = 0;
+  for (let i = 0; i < 9; i++) soma += Number(numeros[i]) * (10 - i);
+  let digito = (soma * 10) % 11;
+  if (digito === 10) digito = 0;
+  if (digito !== Number(numeros[9])) return false;
+
+  soma = 0;
+  for (let i = 0; i < 10; i++) soma += Number(numeros[i]) * (11 - i);
+  digito = (soma * 10) % 11;
+  if (digito === 10) digito = 0;
+  return digito === Number(numeros[10]);
+}
+
 if (formCadastroProfissional && mensagemCadastroProfissional) {
-    formCadastroProfissional.addEventListener('submit', (event) => {
-        event.preventDefault();
+  formCadastroProfissional.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    mensagemCadastroProfissional.className = 'alert';
+    mensagemCadastroProfissional.textContent = '';
 
-        const nome = document.getElementById('nome-profissional').value.trim();
-        const cpf = document.getElementById('cpf-profissional').value.trim();
-        const cargo = document.getElementById('cargo-profissional').value;
-        const perfil = document.getElementById('perfil-profissional').value;
-        const usuario = document.getElementById('usuario-profissional').value.trim();
-        const senha = document.getElementById('senha-profissional').value;
+    const dados = {
+      nome: document.getElementById('nome-profissional').value.trim(),
+      cpf: document.getElementById('cpf-profissional').value.replace(/\D/g, ''),
+      cargo: document.getElementById('cargo-profissional').value,
+      telefone: document.getElementById('telefone-profissional').value.trim(),
+      registro_profissional: document.getElementById('registro-profissional').value.trim(),
+      especialidade: document.getElementById('especialidade-profissional').value.trim(),
+      plantao: document.getElementById('plantao-profissional').value.trim(),
+      perfil: document.getElementById('perfil-profissional').value,
+      usuario: document.getElementById('usuario-profissional').value.trim(),
+      senha: document.getElementById('senha-profissional').value,
+    };
 
-        if (!nome || !cpf || !cargo || !perfil || !usuario || !senha) {
-            mensagemCadastroProfissional.textContent =
-                'Preencha todos os campos obrigatórios.';
-            mensagemCadastroProfissional.className = 'alert alert-danger';
-            return;
-        }
+    if (!dados.nome || !dados.cpf || !dados.cargo || !dados.perfil || !dados.usuario || !dados.senha) {
+      mensagemCadastroProfissional.textContent = 'Preencha todos os campos obrigatórios.';
+      mensagemCadastroProfissional.className = 'alert alert-danger';
+      return;
+    }
+    if (dados.nome.length < 3) {
+      mensagemCadastroProfissional.textContent = 'Informe o nome completo do profissional.';
+      mensagemCadastroProfissional.className = 'alert alert-danger';
+      return;
+    }
+    if (!validarCpf(dados.cpf)) {
+      mensagemCadastroProfissional.textContent = 'Informe um CPF válido.';
+      mensagemCadastroProfissional.className = 'alert alert-danger';
+      return;
+    }
+    if (dados.usuario.length < 3) {
+      mensagemCadastroProfissional.textContent = 'O usuário deve ter pelo menos 3 caracteres.';
+      mensagemCadastroProfissional.className = 'alert alert-danger';
+      return;
+    }
+    if (dados.senha.length < 6) {
+      mensagemCadastroProfissional.textContent = 'A senha deve ter pelo menos 6 caracteres.';
+      mensagemCadastroProfissional.className = 'alert alert-danger';
+      return;
+    }
 
-        mensagemCadastroProfissional.textContent =
-            'Validação inicial concluída. A integração com a API ainda precisa ser confirmada.';
-        mensagemCadastroProfissional.className = 'alert alert-info';
-    });
+    const botao = formCadastroProfissional.querySelector('[type="submit"]');
+    botao.disabled = true;
+    mensagemCadastroProfissional.textContent = 'Cadastrando profissional...';
+
+    let resposta;
+    try {
+      resposta = await fetch(`${API_URL}/profissionais`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(dados),
+      });
+    } catch {
+      mensagemCadastroProfissional.textContent = 'Não foi possível conectar à API.';
+      mensagemCadastroProfissional.className = 'alert alert-danger';
+      botao.disabled = false;
+      return;
+    }
+
+    const resultado = await lerJson(resposta);
+    if (!resposta.ok) {
+      mensagemCadastroProfissional.textContent = resultado?.detail ?? 'Não foi possível cadastrar o profissional.';
+      mensagemCadastroProfissional.className = 'alert alert-danger';
+      botao.disabled = false;
+      return;
+    }
+
+    mensagemCadastroProfissional.textContent = 'Profissional cadastrado com sucesso.';
+    mensagemCadastroProfissional.className = 'alert alert-success';
+    formCadastroProfissional.reset();
+    botao.disabled = false;
+  });
 }

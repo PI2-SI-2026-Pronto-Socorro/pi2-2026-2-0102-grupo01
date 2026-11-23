@@ -5,4 +5,8 @@ async function findAll(req, res) {
   res.json(listaProfissionais);
 }
 
-module.exports = { findAll };
+async function create(req, res) {
+  res.status(201).json(await ProfissionalService.cadastrar(req.body || {}));
+}
+
+module.exports = { findAll, create };

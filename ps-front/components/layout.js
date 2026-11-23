@@ -50,6 +50,8 @@ function numeroAtendimentoValido(numero) {
     'h12-atendimento-medico.html': 'painel',
     'h14-alta-atendimento.html': 'alta',
     'administracao.html': 'admin',
+    'h19-cadastrar-profissional.html': 'cadastro-profissional',
+    'h20-completar-dados-paciente.html': 'pacientes',
   };
 
   async function carregarComponente(seletor, arquivo) {

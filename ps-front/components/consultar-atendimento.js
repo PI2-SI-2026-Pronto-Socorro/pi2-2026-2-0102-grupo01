@@ -47,31 +47,30 @@ function montarCardAtendimento(atendimento, paciente) {
   botaoCancelar.textContent = 'Cancelar consulta';
 
   botaoCancelar.addEventListener('click', async () => {
-  const confirmar = window.confirm(
-    'Deseja realmente cancelar esta consulta?'
-  );
+    if (!window.confirm('Deseja realmente cancelar esta consulta?')) return;
 
-  if (!confirmar) return;
-
-  alert('Botão de cancelar funcionando!');
-  return;
-
-  try {
-    const resposta = await fetch(
-      `/atendimentos/${atendimento.numero_atendimento}/cancelar`,
-      { method: 'PATCH' }
-    );
-
-    if (!resposta.ok) {
-      throw new Error('Não foi possível cancelar a consulta.');
+    botaoCancelar.disabled = true;
+    let resposta;
+    try {
+      resposta = await fetch(
+        `${API_URL}/atendimentos/${encodeURIComponent(atendimento.numero_atendimento)}/cancelar`,
+        { method: 'PATCH' },
+      );
+    } catch {
+      mostrarMensagem('Não foi possível conectar à API para cancelar a consulta.', true);
+      botaoCancelar.disabled = false;
+      return;
     }
 
-    alert('Consulta cancelada com sucesso!');
+    const resultado = await lerJson(resposta);
+    if (!resposta.ok) {
+      mostrarMensagem(resultado?.detail ?? 'Não foi possível cancelar a consulta.', true);
+      botaoCancelar.disabled = false;
+      return;
+    }
+
     window.location.reload();
-  } catch (erro) {
-    alert(erro.message);
-  }
-});
+  });
 
 if (!['Encerrado', 'Cancelado'].includes(atendimento.status_atendimento)) {
   card.appendChild(botaoCancelar);

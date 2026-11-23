@@ -13,4 +13,9 @@ async function listarProfissionaisPorNome() {
     .orderBy(asc(profissional.nome));
 }
 
-module.exports = { listarProfissionaisPorNome };
+async function create(dados) {
+  const [linha] = await db.insert(profissional).values(dados).returning();
+  return linha;
+}
+
+module.exports = { listarProfissionaisPorNome, create };

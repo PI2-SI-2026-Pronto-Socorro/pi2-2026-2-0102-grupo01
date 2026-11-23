@@ -91,6 +91,31 @@ async function contar() {
   return PacienteRepository.count();
 }
 
+async function atualizarPorCpf(cpfAtual, dadosRecebidos) {
+  if (!/^\d{11}$/.test(cpfAtual)) throw new ErroHttp(422, 'CPF deve ter 11 números');
+  if (dadosRecebidos === null || typeof dadosRecebidos !== 'object' || Array.isArray(dadosRecebidos)) {
+    throw new ErroHttp(422, 'Envie os dados a alterar em um objeto JSON');
+  }
+
+  const camposPermitidos = ['nome', 'cpf', 'data_nascimento', 'rg', 'genero', 'telefone'];
+  const campoNaoPermitido = Object.keys(dadosRecebidos).find((campo) => !camposPermitidos.includes(campo));
+  if (campoNaoPermitido) throw new ErroHttp(422, `Campo não pode ser alterado: ${campoNaoPermitido}`);
+  if (Object.keys(dadosRecebidos).length === 0) throw new ErroHttp(422, 'Informe ao menos um campo para alterar');
+
+  const dadosLimpos = normalizarDadosPaciente(dadosRecebidos);
+  const erro = validarAlteracao(dadosLimpos);
+  if (erro) throw new ErroHttp(422, erro);
+
+  try {
+    const atualizada = await PacienteRepository.updateByCpf(cpfAtual, dadosLimpos);
+    if (!atualizada) throw new ErroHttp(404, 'Paciente não encontrado');
+    return new Paciente(atualizada);
+  } catch (e) {
+    if (codigoPg(e) === '23505') throw new ErroHttp(409, 'CPF já cadastrado para outro paciente');
+    throw e;
+  }
+}
+
 module.exports = {
-  listar, buscarPorCpf, cadastrar, contar, validarAlteracao, normalizarDadosPaciente, limparTextoOpcional,
+  listar, buscarPorCpf, cadastrar, contar, atualizarPorCpf, validarAlteracao, normalizarDadosPaciente, limparTextoOpcional,
 };

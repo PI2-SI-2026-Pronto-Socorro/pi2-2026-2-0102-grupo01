@@ -13,4 +13,8 @@ async function create(req, res) {
   res.status(201).json(await PacienteService.cadastrar(req.body || {}));
 }
 
-module.exports = { findAll, findByCpf, create };
+async function update(req, res) {
+  res.json(await PacienteService.atualizarPorCpf(req.params.cpf, req.body || {}));
+}
+
+module.exports = { findAll, findByCpf, create, update };

@@ -7,5 +7,6 @@ const router = express.Router();
 router.get('/', rota(pacienteController.findAll));
 router.post('/', rota(pacienteController.create));
 router.get('/:cpf', rota(pacienteController.findByCpf));
+router.patch('/:cpf', rota(pacienteController.update));
 
 module.exports = router;
