@@ -93,6 +93,45 @@ paths:
           content:
             application/json:
               schema: { $ref: '#/components/schemas/Erro' }
+    patch:
+      tags: [Pacientes]
+      summary: Altera os dados cadastrais de um paciente pelo CPF
+      description: >-
+        Altera só os campos enviados. Ao enviar um novo cpf, ele precisa ter dígitos verificadores válidos
+        e não pode pertencer a outro paciente.
+      parameters:
+        - in: path
+          name: cpf
+          required: true
+          schema: { type: string, pattern: '^\d{11}$', example: '12345678900' }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/AlteracaoPaciente' }
+            example: { telefone: (19) 98765-4321, genero: Feminino }
+      responses:
+        '200':
+          description: Paciente alterado
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Paciente' }
+        '404':
+          description: Paciente não encontrado
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Erro' }
+        '409':
+          description: CPF já cadastrado para outro paciente
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Erro' }
+        '422':
+          description: CPF da rota inválido, corpo vazio, campo não permitido ou valor inválido
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Erro' }
+              example: { detail: 'Campo não pode ser alterado: endereco' }
 
   /atendimentos:
     get:
@@ -555,6 +594,17 @@ components:
         data_nascimento: { type: string, format: date, example: '1990-03-14' }
         genero: { type: string, maxLength: 20, example: Feminino }
         telefone: { type: string, maxLength: 15, example: (11) 98765-4321 }
+    AlteracaoPaciente:
+      type: object
+      minProperties: 1
+      additionalProperties: false
+      properties:
+        nome: { type: string, maxLength: 100, example: Maria da Silva }
+        cpf: { type: string, pattern: '^\d{11}$', example: '12345678900' }
+        rg: { type: string, nullable: true, maxLength: 15, example: '123456789' }
+        data_nascimento: { type: string, format: date, example: '1990-03-14' }
+        genero: { type: string, nullable: true, maxLength: 20, example: Feminino }
+        telefone: { type: string, nullable: true, maxLength: 15, example: (11) 98765-4321 }
     AlteracaoAtendimento:
       type: object
       minProperties: 1
