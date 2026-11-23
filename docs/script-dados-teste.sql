@@ -1,4 +1,4 @@
--- SCRIPT DE TESTE - Sistema de atendimento (Neon / PostgreSQL 18)
+-- SCRIPT DE TESTE - Sistema de atendimento (Neon / PostgreSQL 15+)
 -- Dados de teste: CPFs 999999999xx e prefixo "TESTE".
 -- Roda em transação e faz ROLLBACK no fim: nada fica gravado.
 -- Resultado: tabela test_log (OK / FALHOU por teste).
@@ -11,7 +11,8 @@ CREATE TEMP TABLE test_log (ordem serial, teste text, resultado text);
 CREATE TEMP TABLE test_ids (chave text PRIMARY KEY, id uuid);
 
 -- Helper: executa um SQL que deve falhar com o SQLSTATE esperado.
-CREATE OR REPLACE FUNCTION pg_temp.esperar_erro(p_nome text, p_sql text, p_sqlstate text)
+DROP FUNCTION IF EXISTS pg_temp.esperar_erro(text, text, text);
+CREATE FUNCTION pg_temp.esperar_erro(p_nome text, p_sql text, p_sqlstate text)
 RETURNS void LANGUAGE plpgsql AS $f$
 DECLARE v_state text; v_msg text;
 BEGIN
@@ -101,6 +102,8 @@ BEGIN
 
   INSERT INTO test_log(teste, resultado)
   VALUES ('1. Fluxo feliz completo', 'OK - todos os inserts passaram (numero_atendimento gerado: ' || v_numero || ')');
+EXCEPTION WHEN OTHERS THEN
+  INSERT INTO test_log(teste, resultado) VALUES ('1. Fluxo feliz completo', 'FALHOU - ' || SQLSTATE || ': ' || SQLERRM);
 END $$;
 
 

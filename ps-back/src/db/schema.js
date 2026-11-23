@@ -80,7 +80,7 @@ const atendimento = pgTable('atendimento', {
     .where(sql`${t.status_atendimento} NOT IN ('Encerrado', 'Cancelado')`),
   index('idx_atendimento_paciente').on(t.id_paciente),
   index('idx_atendimento_profissional').on(t.id_profissional),
-  check('ck_atendimento_periodo', sql`${t.data_hora_saida} IS NULL OR ${t.data_hora_saida} >= ${t.data_hora_chegada}`),''
+  check('ck_atendimento_periodo', sql`${t.data_hora_saida} IS NULL OR ${t.data_hora_saida} >= ${t.data_hora_chegada}`),
 ]);
 
 const triagem = pgTable('triagem', {
