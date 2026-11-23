@@ -28,7 +28,8 @@ pi2-2026-2-0102-grupo01/
 ├── docs/
 │   ├── escopo.pdf                                 → escopo do projeto
 │   ├── MODELO-LOGICO-ATENDIMENTO-PACIENTE.md      → modelo lógico do banco
-│   └── criar-tabelas-atendimento-paciente.sql     → script de criação das tabelas
+│   ├── banco-completo-script.sql                  → script de criação do banco completo
+│   └── script-dados-teste.sql                     → testes do banco (roda e faz ROLLBACK)
 ├── ps-front/
 │   ├── index.html                                 → página inicial da recepção
 │   ├── app.js                                     → lógica da página H02 de busca por CPF

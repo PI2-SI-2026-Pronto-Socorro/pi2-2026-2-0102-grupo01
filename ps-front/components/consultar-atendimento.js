@@ -72,7 +72,7 @@ function montarCardAtendimento(atendimento, paciente) {
     window.location.reload();
   });
 
-if (!['Encerrado', 'Cancelado'].includes(atendimento.status_atendimento)) {
+if (atendimento.status_atendimento === 'Aberto') {
   card.appendChild(botaoCancelar);
 }
     if (!['Confirmado', 'Encerrado', 'Cancelado'].includes(atendimento.status_atendimento)) {

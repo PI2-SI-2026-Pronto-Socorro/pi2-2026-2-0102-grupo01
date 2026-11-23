@@ -1,6 +1,6 @@
 const { eq, asc, inArray, count, sql } = require('drizzle-orm');
 const { db } = require('../db');
-const { atendimento, paciente } = require('../db/schema');
+const { atendimento, paciente, triagem } = require('../db/schema');
 
 const STATUS_VISIVEIS_NO_PAINEL = ['Aberto', 'Triado'];
 
@@ -10,11 +10,14 @@ async function listarAtendimentosDoPainel() {
       numero_atendimento: atendimento.numero_atendimento,
       nome: paciente.nome,
       cpf: paciente.cpf,
+      data_nascimento: paciente.data_nascimento,
+      classificacao_risco: triagem.classificacao_risco,
       status_atendimento: atendimento.status_atendimento,
       data_hora_chegada: atendimento.data_hora_chegada,
     })
     .from(atendimento)
     .innerJoin(paciente, eq(paciente.id_paciente, atendimento.id_paciente))
+    .leftJoin(triagem, eq(triagem.id_atendimento, atendimento.id_atendimento))
     .where(inArray(atendimento.status_atendimento, STATUS_VISIVEIS_NO_PAINEL))
     .orderBy(asc(atendimento.data_hora_chegada));
 }

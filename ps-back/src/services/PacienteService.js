@@ -3,8 +3,10 @@ const AtendimentoRepository = require('../repositories/AtendimentoRepository');
 const Paciente = require('../models/Paciente');
 const ErroHttp = require('../utils/ErroHttp');
 const { codigoPg } = require('../utils/pgHelpers');
+const { cpfComDigitosValidos } = require('../utils/cpf');
 
 const CAMPOS_TEXTO_OPCIONAL = ['rg', 'genero', 'telefone'];
+const CAMPOS_PACIENTE = ['nome', 'cpf', 'data_nascimento', 'rg', 'genero', 'telefone'];
 
 function textoOpcional(valor, max) {
   return valor === undefined || valor === null || (typeof valor === 'string' && valor.length <= max);
@@ -97,14 +99,14 @@ async function atualizarPorCpf(cpfAtual, dadosRecebidos) {
     throw new ErroHttp(422, 'Envie os dados a alterar em um objeto JSON');
   }
 
-  const camposPermitidos = ['nome', 'cpf', 'data_nascimento', 'rg', 'genero', 'telefone'];
-  const campoNaoPermitido = Object.keys(dadosRecebidos).find((campo) => !camposPermitidos.includes(campo));
+  const campoNaoPermitido = Object.keys(dadosRecebidos).find((campo) => !CAMPOS_PACIENTE.includes(campo));
   if (campoNaoPermitido) throw new ErroHttp(422, `Campo não pode ser alterado: ${campoNaoPermitido}`);
   if (Object.keys(dadosRecebidos).length === 0) throw new ErroHttp(422, 'Informe ao menos um campo para alterar');
 
   const dadosLimpos = normalizarDadosPaciente(dadosRecebidos);
   const erro = validarAlteracao(dadosLimpos);
   if (erro) throw new ErroHttp(422, erro);
+  if ('cpf' in dadosLimpos && !cpfComDigitosValidos(dadosLimpos.cpf)) throw new ErroHttp(422, 'CPF inválido');
 
   try {
     const atualizada = await PacienteRepository.updateByCpf(cpfAtual, dadosLimpos);
@@ -117,5 +119,5 @@ async function atualizarPorCpf(cpfAtual, dadosRecebidos) {
 }
 
 module.exports = {
-  listar, buscarPorCpf, cadastrar, contar, atualizarPorCpf, validarAlteracao, normalizarDadosPaciente, limparTextoOpcional,
+  CAMPOS_PACIENTE, listar, buscarPorCpf, cadastrar, contar, atualizarPorCpf, validarAlteracao, normalizarDadosPaciente, limparTextoOpcional,
 };

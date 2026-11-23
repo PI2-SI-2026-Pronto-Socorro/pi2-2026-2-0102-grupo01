@@ -11,6 +11,7 @@ const campos = {
 
 const cpfInicial = new URLSearchParams(window.location.search).get('cpf');
 let cpfAtual = cpfInicial ? cpfInicial.replace(/\D/g, '') : '';
+let pacienteEncontrado = false;
 
 function mostrarMensagem(texto, tipo = '') {
   mensagem.textContent = texto;
@@ -42,6 +43,7 @@ async function carregarPaciente() {
   campos.genero.value = paciente.genero ?? '';
   campos.telefone.value = paciente.telefone ?? '';
   campos.rg.value = paciente.rg ?? '';
+  pacienteEncontrado = true;
 }
 
 formulario.addEventListener('submit', async (event) => {
@@ -61,7 +63,7 @@ formulario.addEventListener('submit', async (event) => {
     mostrarMensagem('Informe o nome completo.', 'mensagem-erro');
     return;
   }
-  if (!/^\d{11}$/.test(dados.cpf) || /^(\d)\1{10}$/.test(dados.cpf)) {
+  if (!cpfComDigitosValidos(dados.cpf)) {
     mostrarMensagem('Informe um CPF válido com 11 números.', 'mensagem-erro');
     return;
   }
@@ -78,7 +80,7 @@ formulario.addEventListener('submit', async (event) => {
   botao.disabled = true;
   mostrarMensagem('Salvando dados...');
 
-  const jaExiste = /^\d{11}$/.test(cpfAtual);
+  const jaExiste = pacienteEncontrado;
   let resposta;
   try {
     resposta = await fetch(jaExiste ? `${API_URL}/pacientes/${cpfAtual}` : `${API_URL}/pacientes`, {

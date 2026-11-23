@@ -109,15 +109,7 @@ function mostrarFichaPaciente(paciente) {
       return;
     }
 
-    if (resposta.status === 409) {
-  mensagem.textContent = 'Atenção! Este atendimento já está sendo conduzido por outro médico. Você não pode abrir este atendimento.';
-  mensagem.className = 'mensagem-atendimento mensagem-erro';
-  botaoAbrir.disabled = true;
-  return;
-}
-
-mostrarFalha(corpo?.detail ?? 'Erro ao abrir atendimento.');
-
+    mostrarFalha(corpo?.detail ?? 'Erro ao abrir atendimento.');
   });
 
   card.append(titulo, cpfPaciente, botaoAbrir, mensagem);
@@ -162,47 +154,4 @@ const cpfInicial = new URLSearchParams(window.location.search).get('cpf');
 if (cpfInicial) {
   campoCpf.value = cpfInicial.replace(/\D/g, '');
   formularioBusca.requestSubmit();
-}
-// H20 - Opção de paciente não identificado
-const pacienteNaoIdentificado = document.getElementById('paciente-nao-identificado');
-
-if (pacienteNaoIdentificado) {
-  pacienteNaoIdentificado.addEventListener('change', () => {
-    campoCpf.disabled = pacienteNaoIdentificado.checked;
-
-    if (pacienteNaoIdentificado.checked) {
-      campoCpf.value = '';
-      resultadoPaciente.innerHTML = `
-        <p class="mensagem-atendimento">
-          Paciente não identificado selecionado.
-          A abertura do atendimento sem CPF depende da integração com a API.
-          Os dados poderão ser completados posteriormente.
-        </p>
-      `;
-      const linkCompletarDados = document.createElement('a');
-        linkCompletarDados.className = 'botao-principal';
-        linkCompletarDados.href = './h20-completar-dados-paciente.html';
-        linkCompletarDados.textContent = 'Completar dados do paciente';
-
-resultadoPaciente.appendChild(linkCompletarDados);
-
-    } else {
-      campoCpf.disabled = false;
-      resultadoPaciente.innerHTML = '<p>Busque um paciente para abrir o atendimento.</p>';
-    }
-  });
-
-  formularioBusca.addEventListener('submit', (event) => {
-    if (pacienteNaoIdentificado.checked) {
-      event.preventDefault();
-      event.stopImmediatePropagation();
-
-      resultadoPaciente.innerHTML = `
-        <p class="mensagem-atendimento">
-          Paciente não identificado selecionado.
-          A abertura ainda depende do suporte da API.
-        </p>
-      `;
-    }
-  }, true);
 }

@@ -28,14 +28,6 @@ function mostrarEstadoPainel(textoEstado, ehErro = false) {
   corpoListaPainel.replaceChildren(linhaEstado);
 }
 
-function mostrarAvisoOutroMedico() {
-  const aviso = document.createElement('p');
-  aviso.className = 'mensagem-erro';
-  aviso.setAttribute('role', 'alert');
-  aviso.textContent = 'Atenção! Este atendimento já está sendo conduzido por outro médico.';
-  return aviso;
-}
-
 function criarLinkConsulta(numeroAtendimento) {
   const linkConsulta = document.createElement('a');
   linkConsulta.className = 'appointment-number';
@@ -90,9 +82,6 @@ function criarSeloClassificacaoRisco(classificacao) {
   'Urgente': 'risk-urgent',
   'Pouco Urgente': 'risk-low-urgent',
   'Não Urgente': 'risk-not-urgent',
-  'Vermelho': 'risk-emergency',
-  'Amarelo': 'risk-urgent',
-  'Verde': 'risk-low-urgent'
 };
 
   const selo = document.createElement('span');

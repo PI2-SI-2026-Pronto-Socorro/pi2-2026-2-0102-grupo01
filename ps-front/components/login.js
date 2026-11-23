@@ -1,10 +1,9 @@
 const formularioLogin = document.getElementById('formulario-login');
-const campoEmail = document.getElementById('email');
+const campoUsuario = document.getElementById('usuario');
 const campoSenha = document.getElementById('senha');
 
 const API_URL = '/api';
 
-// ENDPOINT PROVISÓRIO: Ivan deverá confirmar a rota na integração.
 const ENDPOINT_LOGIN = `${API_URL}/auth/login`;
 
 let mensagemLogin = document.createElement('p');
@@ -19,7 +18,7 @@ formularioLogin.addEventListener('submit', async (event) => {
 
     const botao = formularioLogin.querySelector('button[type="submit"]');
 
-    const email = campoEmail.value.trim();
+    const usuario = campoUsuario.value.trim();
     const senha = campoSenha.value;
 
     mensagemLogin.textContent = '';
@@ -33,13 +32,13 @@ formularioLogin.addEventListener('submit', async (event) => {
                 'Content-Type': 'application/json'
             },
             credentials: 'include',
-            body: JSON.stringify({ email, senha })
+            body: JSON.stringify({ usuario, senha })
         });
 
-        const dados = await resposta.json();
+        const dados = await resposta.json().catch(() => ({}));
 
         if (!resposta.ok) {
-            throw new Error(dados.message || 'E-mail ou senha inválidos.');
+            throw new Error(dados.detail || 'Usuário ou senha inválidos.');
         }
 
         const perfil =

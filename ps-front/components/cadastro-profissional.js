@@ -1,23 +1,6 @@
 const formCadastroProfissional = document.getElementById('form-cadastro-profissional');
 const mensagemCadastroProfissional = document.getElementById('mensagem-cadastro-profissional');
 
-function validarCpf(cpf) {
-  const numeros = cpf.replace(/\D/g, '');
-  if (!/^\d{11}$/.test(numeros) || /^(\d)\1{10}$/.test(numeros)) return false;
-
-  let soma = 0;
-  for (let i = 0; i < 9; i++) soma += Number(numeros[i]) * (10 - i);
-  let digito = (soma * 10) % 11;
-  if (digito === 10) digito = 0;
-  if (digito !== Number(numeros[9])) return false;
-
-  soma = 0;
-  for (let i = 0; i < 10; i++) soma += Number(numeros[i]) * (11 - i);
-  digito = (soma * 10) % 11;
-  if (digito === 10) digito = 0;
-  return digito === Number(numeros[10]);
-}
-
 if (formCadastroProfissional && mensagemCadastroProfissional) {
   formCadastroProfissional.addEventListener('submit', async (event) => {
     event.preventDefault();
@@ -47,7 +30,7 @@ if (formCadastroProfissional && mensagemCadastroProfissional) {
       mensagemCadastroProfissional.className = 'alert alert-danger';
       return;
     }
-    if (!validarCpf(dados.cpf)) {
+    if (!cpfComDigitosValidos(dados.cpf)) {
       mensagemCadastroProfissional.textContent = 'Informe um CPF válido.';
       mensagemCadastroProfissional.className = 'alert alert-danger';
       return;
