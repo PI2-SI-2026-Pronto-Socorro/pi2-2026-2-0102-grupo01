@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Completar dados do paciente</title>
+    <link rel="stylesheet" href="/vendor/bootstrap/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="./css/pages/inicio.css" />
+    <link rel="stylesheet" href="./css/pages/h03-cadastrar-paciente.css" />
+  </head>
+  <body class="page-dashboard">
+    <div data-componente="cabecalho"></div>
+    <div class="dashboard-shell">
+      <div data-componente="menu-lateral"></div>
+      <main class="main-panel">
+        <div class="header-panel">
+          <div class="title-wrap">
+            <h1>Completar dados do paciente</h1>
+            <p>Informe os dados para completar o cadastro do paciente</p>
+          </div>
+        </div>
+        <section class="page-card form-card" aria-label="Formulário para completar os dados do paciente">
+          <form class="formulario-paciente" id="form-completar-dados-paciente" novalidate>
+            <div class="campo">
+              <label for="nome-completo">Nome completo <span class="obrigatorio">*</span></label>
+              <input id="nome-completo" name="nome" type="text" maxlength="100" autocomplete="name" required />
+              <small class="erro-campo" data-erro="nome"></small>
+            </div>
+            <div class="campo">
+              <label for="cpf">CPF <span class="obrigatorio">*</span></label>
+              <input id="cpf" name="cpf" type="text" inputmode="numeric" maxlength="14" placeholder="000.000.000-00" autocomplete="off" required />
+              <small class="erro-campo" data-erro="cpf"></small>
+            </div>
+            <div class="campo">
+              <label for="data-nascimento">Data de nascimento <span class="obrigatorio">*</span></label>
+              <input id="data-nascimento" name="data_nascimento" type="date" autocomplete="bday" required />
+              <small class="erro-campo" data-erro="data_nascimento"></small>
+            </div>
+            <div class="campo">
+              <label for="genero">Gênero</label>
+              <select id="genero" name="genero">
+                <option value="">Selecione</option>
+                <option>Feminino</option>
+                <option>Masculino</option>
+                <option>Outro</option>
+                <option>Prefiro não informar</option>
+              </select>
+            </div>
+            <div class="campo">
+              <label for="telefone">Telefone</label>
+              <input id="telefone" name="telefone" type="tel" maxlength="15" autocomplete="tel" placeholder="(00) 00000-0000" />
+            </div>
+            <div class="campo">
+              <label for="rg">RG</label>
+              <input id="rg" name="rg" type="text" maxlength="15" autocomplete="off" />
+            </div>
+            <div class="campo largura-total" id="mensagem-complemento" role="status" aria-live="polite"></div>
+            <div class="botoes-acoes">
+              <a class="botao botao-secundario" href="./h04-abrir-atendimento.html">Cancelar</a>
+              <button type="submit" class="botao botao-principal">Salvar dados</button>
+            </div>
+          </form>
+        </section>
+      </main>
+    </div>
+    <script src="./components/layout.js"></script>
+    <script src="/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+  </body>
+</html>

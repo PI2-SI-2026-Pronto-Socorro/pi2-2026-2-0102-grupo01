@@ -40,23 +40,58 @@ function montarCardAtendimento(atendimento, paciente) {
   adicionarDado(dados, 'Data e hora de chegada', formatarDataHora(atendimento.data_hora_chegada));
   adicionarDado(dados, 'Motivo', atendimento.motivo_atendimento || 'Não informado');
 
-  card.append(titulo, dados);
-  if (!['Confirmado', 'Encerrado', 'Cancelado'].includes(atendimento.status_atendimento)) {
-    const acaoAlterar = document.createElement('a');
-    acaoAlterar.className = 'botao-principal';
-    acaoAlterar.href =
-      `./h11-alterar-atendimento.html?numero=${encodeURIComponent(atendimento.numero_atendimento)}`;
-    acaoAlterar.textContent = 'Alterar atendimento';
-    card.appendChild(acaoAlterar);
-  }
-  return card;
-}
+    card.append(titulo, dados);
+     const botaoCancelar = document.createElement('button');
+  botaoCancelar.type = 'button';
+  botaoCancelar.className = 'botao-principal';
+  botaoCancelar.textContent = 'Cancelar consulta';
 
-function montarHistorico(atendimentos) {
-  const secao = document.createElement('section');
-  secao.className = 'historico-paciente';
-  const titulo = document.createElement('h2');
-  titulo.textContent = 'Histórico de atendimentos';
+  botaoCancelar.addEventListener('click', async () => {
+  const confirmar = window.confirm(
+    'Deseja realmente cancelar esta consulta?'
+  );
+
+  if (!confirmar) return;
+
+  alert('Botão de cancelar funcionando!');
+  return;
+
+  try {
+    const resposta = await fetch(
+      `/atendimentos/${atendimento.numero_atendimento}/cancelar`,
+      { method: 'PATCH' }
+    );
+
+    if (!resposta.ok) {
+      throw new Error('Não foi possível cancelar a consulta.');
+    }
+
+    alert('Consulta cancelada com sucesso!');
+    window.location.reload();
+  } catch (erro) {
+    alert(erro.message);
+  }
+});
+
+if (!['Encerrado', 'Cancelado'].includes(atendimento.status_atendimento)) {
+  card.appendChild(botaoCancelar);
+}
+    if (!['Confirmado', 'Encerrado', 'Cancelado'].includes(atendimento.status_atendimento)) {
+      const acaoAlterar = document.createElement('a');
+      acaoAlterar.className = 'botao-principal';
+      acaoAlterar.href =
+        `./h11-alterar-atendimento.html?numero=${encodeURIComponent(atendimento.numero_atendimento)}`;
+      acaoAlterar.textContent = 'Alterar atendimento';
+      card.appendChild(acaoAlterar);
+    }
+    return card;
+  }
+
+  function montarHistorico(atendimentos) {
+    const secao = document.createElement('section');
+    secao.className = 'historico-paciente';
+    const titulo = document.createElement('h2');
+    titulo.textContent = 'Histórico de atendimentos';
 
   const tabela = document.createElement('table');
   tabela.innerHTML = '<thead><tr><th>Número</th><th>Chegada</th><th>Situação</th></tr></thead>';

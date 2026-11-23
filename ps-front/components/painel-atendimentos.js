@@ -20,12 +20,20 @@ const CAMPO_TOTAL_DO_STATUS = {
 function mostrarEstadoPainel(textoEstado, ehErro = false) {
   const linhaEstado = document.createElement('tr');
   const celulaEstado = document.createElement('td');
-  celulaEstado.colSpan = 6;
+  celulaEstado.colSpan = 8;
   celulaEstado.className = ehErro ? 'mensagem-erro' : '';
   celulaEstado.setAttribute('role', ehErro ? 'alert' : 'status');
   celulaEstado.textContent = textoEstado;
   linhaEstado.appendChild(celulaEstado);
   corpoListaPainel.replaceChildren(linhaEstado);
+}
+
+function mostrarAvisoOutroMedico() {
+  const aviso = document.createElement('p');
+  aviso.className = 'mensagem-erro';
+  aviso.setAttribute('role', 'alert');
+  aviso.textContent = 'Atenção! Este atendimento já está sendo conduzido por outro médico.';
+  return aviso;
 }
 
 function criarLinkConsulta(numeroAtendimento) {
@@ -62,6 +70,38 @@ function criarLinkAtendimentoMedico(numeroAtendimento) {
   return linkAtendimentoMedico;
 }
 
+function formatarDataNascimento(data) {
+  if (!data) return '-';
+
+  const partes = data.split('-');
+
+  if (partes.length !== 3) return data;
+
+  const [ano, mes, dia] = partes;
+
+  return `${dia}/${mes}/${ano}`;
+}
+
+
+function criarSeloClassificacaoRisco(classificacao) {
+  const classes = {
+  'Emergência': 'risk-emergency',
+  'Muito Urgente': 'risk-very-urgent',
+  'Urgente': 'risk-urgent',
+  'Pouco Urgente': 'risk-low-urgent',
+  'Não Urgente': 'risk-not-urgent',
+  'Vermelho': 'risk-emergency',
+  'Amarelo': 'risk-urgent',
+  'Verde': 'risk-low-urgent'
+}; 
+
+  const selo = document.createElement('span');
+  selo.className = `risk-badge ${classes[classificacao] ?? ''}`.trim();
+  selo.textContent = classificacao || '-';
+
+  return selo;
+}
+
 function montarLinhaPainel(atendimentoDoPainel) {
   const linhaAtendimento = document.createElement('tr');
   const acoes = [
@@ -71,13 +111,18 @@ function montarLinhaPainel(atendimentoDoPainel) {
     acoes.unshift(criarLinkAtendimentoMedico(atendimentoDoPainel.numero_atendimento));
   }
   const conteudoDasCelulas = [
-    criarLinkConsulta(atendimentoDoPainel.numero_atendimento),
-    atendimentoDoPainel.nome,
-    formatarCpf(atendimentoDoPainel.cpf),
-    criarSeloStatus(atendimentoDoPainel.status_atendimento),
-    formatarDataHora(atendimentoDoPainel.data_hora_chegada),
-    acoes,
-  ];
+  criarLinkConsulta(atendimentoDoPainel.numero_atendimento),
+  atendimentoDoPainel.nome,
+  formatarDataNascimento(atendimentoDoPainel.data_nascimento),
+  formatarCpf(atendimentoDoPainel.cpf),
+  criarSeloClassificacaoRisco(
+  atendimentoDoPainel.classificacao_risco
+),
+  criarSeloStatus(atendimentoDoPainel.status_atendimento),
+  formatarDataHora(atendimentoDoPainel.data_hora_chegada),
+  acoes,
+];
+
   conteudoDasCelulas.forEach((conteudoCelula, posicaoCelula) => {
     const celula = document.createElement('td');
     if (posicaoCelula === conteudoDasCelulas.length - 1) celula.className = 'table-actions';
@@ -94,14 +139,17 @@ function mostrarTotaisDoDia(totaisDoDia) {
   }
 }
 
+
 async function carregarPainelAtendimentos() {
+
   let resposta;
-  try {
-    resposta = await fetch(`${API_URL}/atendimentos/painel`);
-  } catch {
-    mostrarEstadoPainel('Não foi possível conectar à API.', true);
-    return;
-  }
+
+try {
+  resposta = await fetch(`${API_URL}/atendimentos/painel`);
+} catch {
+  mostrarEstadoPainel('Não foi possível conectar à API.', true);
+  return;
+}
 
   const painelRecebido = await lerJson(resposta);
   if (!resposta.ok || !Array.isArray(painelRecebido?.atendimentos)) {

@@ -66,11 +66,33 @@ function numeroAtendimentoValido(numero) {
     destino.outerHTML = await resposta.text();
   }
 
+  function aplicarMenuPorPerfil() {
+    const perfil = 'profissional'
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .toLowerCase();
+
+    const itensMenu = document.querySelectorAll(
+        '.menu-item[data-perfis]'
+    );
+
+    itensMenu.forEach((item) => {
+        const perfisPermitidos = item.dataset.perfis
+            .split(',')
+            .map((p) => p.trim().normalize('NFD')
+                .replace(/[\u0300-\u036f]/g, '')
+                .toLowerCase());
+
+        item.hidden = !perfisPermitidos.includes(perfil);
+    });
+}
+
   Promise.all([
     carregarComponente('[data-componente="cabecalho"]', 'cabecalho.html'),
     carregarComponente('[data-componente="menu-lateral"]', 'menu-lateral.html'),
   ])
     .then(() => {
+        aplicarMenuPorPerfil()
       const arquivoAtual = window.location.pathname.split('/').pop() || 'index.html';
       const paginaAtual = paginas[arquivoAtual];
       const itemAtual = document.querySelector(`.menu-item[data-pagina="${paginaAtual}"]`);
