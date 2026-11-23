@@ -37,7 +37,9 @@ function montarLinhaConfirmado(atendimentoConfirmado) {
   const botaoDarAlta = document.createElement('button');
   botaoDarAlta.type = 'button';
   botaoDarAlta.className = 'primary-button';
-  botaoDarAlta.innerHTML = '<span aria-hidden="true">✓</span>Dar alta';
+  botaoDarAlta.innerHTML = '<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">'
+    + '<path d="m5 12.5 4.5 4.5L19 7.5" /></svg>'
+    + 'Dar alta';
   botaoDarAlta.addEventListener('click', () => darAltaAoAtendimento(atendimentoConfirmado, botaoDarAlta));
   celulaAcao.appendChild(botaoDarAlta);
   linhaAtendimento.appendChild(celulaAcao);

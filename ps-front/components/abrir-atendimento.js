@@ -150,6 +150,65 @@ formularioBusca.addEventListener('submit', async (event) => {
   mostrarFichaPaciente(paciente);
 });
 
+function mostrarAtendimentoAbertoPelaLista(paciente, atendimento) {
+  resultadoPaciente.replaceChildren();
+  const card = document.createElement('article');
+  card.className = 'card-paciente';
+  const titulo = document.createElement('h2');
+  titulo.textContent = paciente.nome;
+  const mensagem = document.createElement('p');
+  mensagem.className = 'mensagem-atendimento sucesso';
+  mensagem.setAttribute('role', 'status');
+  mensagem.textContent = 'Atendimento aberto com sucesso.';
+  card.append(titulo, mensagem);
+  mostrarAtendimentoAberto(card, atendimento);
+  resultadoPaciente.appendChild(card);
+}
+
+async function aoClicarAbrirAtendimentoDaLista(paciente, botao) {
+  if (!window.confirm(`Abrir atendimento para ${paciente.nome}?`)) return;
+
+  botao.disabled = true;
+  let resposta;
+  try {
+    resposta = await fetch(`${API_URL}/atendimentos`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id_paciente: paciente.id_paciente }),
+    });
+  } catch {
+    mostrarErro('Não foi possível conectar à API.');
+    botao.disabled = false;
+    return;
+  }
+
+  const corpo = await lerJson(resposta);
+  botao.disabled = false;
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+  if (!resposta.ok || !corpo) {
+    mostrarErro(corpo?.detail ?? 'Erro ao abrir atendimento.');
+    return;
+  }
+  mostrarAtendimentoAbertoPelaLista(paciente, corpo);
+}
+
+function criarBotaoAbrirAtendimento(paciente) {
+  const botao = document.createElement('button');
+  botao.type = 'button';
+  botao.className = 'icon-button open-button';
+  botao.setAttribute('aria-label', `Abrir atendimento para ${paciente.nome}`);
+  botao.title = 'Abrir atendimento';
+  botao.innerHTML = '<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">'
+    + '<circle cx="12" cy="12" r="9" /><path d="M12 7v10m-5-5h10" /></svg>';
+  botao.addEventListener('click', () => aoClicarAbrirAtendimentoDaLista(paciente, botao));
+  return botao;
+}
+
+carregarListaPacientes(document.getElementById('lista-pacientes'), (cpf) => {
+  campoCpf.value = cpf;
+  formularioBusca.requestSubmit();
+}, criarBotaoAbrirAtendimento);
+
 const cpfInicial = new URLSearchParams(window.location.search).get('cpf');
 if (cpfInicial) {
   campoCpf.value = cpfInicial.replace(/\D/g, '');

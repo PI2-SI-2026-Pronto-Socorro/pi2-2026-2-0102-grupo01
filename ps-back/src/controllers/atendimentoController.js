@@ -23,6 +23,10 @@ async function findByCpf(req, res) {
   res.json(await AtendimentoService.buscarPorCpf(req.query.cpf ?? '', req.usuario));
 }
 
+async function findTodos(req, res) {
+  res.json(await AtendimentoService.listarTodos(req.usuario));
+}
+
 async function findAbertos(req, res) {
   res.json(await AtendimentoService.listarAbertos());
 }
@@ -40,5 +44,5 @@ async function findTriados(req, res) {
 }
 
 module.exports = {
-  create, findByNumero, findByCpf, findAbertos, findTriados, cancelar, alterar, abrirNaoIdentificado, reservar,
+  create, findByNumero, findByCpf, findTodos, findAbertos, findTriados, cancelar, alterar, abrirNaoIdentificado, reservar,
 };

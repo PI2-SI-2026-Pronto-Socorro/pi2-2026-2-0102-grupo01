@@ -153,7 +153,7 @@ async function alterarDados(numero, dadosAtendimento, dadosPaciente, statusBloqu
   });
 }
 
-async function findByCpf(cpf) {
+function selecionarAtendimentosComPaciente() {
   return db
     .select({
       id_atendimento: atendimento.id_atendimento,
@@ -165,8 +165,17 @@ async function findByCpf(cpf) {
       cpf: paciente.cpf,
     })
     .from(atendimento)
-    .innerJoin(paciente, eq(paciente.id_paciente, atendimento.id_paciente))
+    .innerJoin(paciente, eq(paciente.id_paciente, atendimento.id_paciente));
+}
+
+async function findByCpf(cpf) {
+  return selecionarAtendimentosComPaciente()
     .where(eq(paciente.cpf, cpf))
+    .orderBy(desc(atendimento.data_hora_chegada));
+}
+
+async function findTodos() {
+  return selecionarAtendimentosComPaciente()
     .orderBy(desc(atendimento.data_hora_chegada));
 }
 
@@ -213,6 +222,6 @@ async function travarAtendimentoEBuscarStatus(transacao, idAtendimento) {
 }
 
 module.exports = {
-  findStatusAtual, findEmAndamento, findByNumero, findByCpf, create, findAbertos, findTriados, cancelarSeAberto,
+  findStatusAtual, findEmAndamento, findByNumero, findByCpf, findTodos, create, findAbertos, findTriados, cancelarSeAberto,
   alterarDados, travarAtendimento, travarAtendimentoEBuscarStatus, abrirParaPacienteNaoIdentificado, reservarParaMedico, findReserva,
 };

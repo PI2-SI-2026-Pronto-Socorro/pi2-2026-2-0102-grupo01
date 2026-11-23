@@ -176,6 +176,23 @@ button {
   min-width: 0;
   flex: 1;
   padding: 24px;
+  font-size: 13px;
+}
+
+.main-panel label {
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.main-panel input,
+.main-panel select,
+.main-panel textarea {
+  font-size: 13px;
+}
+
+.main-panel input:not([type="checkbox"], [type="radio"]),
+.main-panel select {
+  min-height: 40px;
 }
 
 .header-panel {
@@ -200,6 +217,68 @@ button {
   font-size: 12px;
 }
 
+.page-card {
+  padding: 24px 22px;
+  border: 1px solid #dce3eb;
+  border-radius: 12px;
+  background: #fff;
+}
+
+.secao-lista {
+  margin-top: 24px;
+}
+
+.secao-lista h2 {
+  margin: 0 0 12px;
+  color: #253849;
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.secao-lista .estado-lista {
+  height: 72px;
+  text-align: center;
+}
+
+.botao-principal,
+.botao-secundario {
+  display: inline-flex;
+  min-height: 40px;
+  align-items: center;
+  justify-content: center;
+  padding: 0 18px;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.botao-principal {
+  background: #0c7d78;
+  color: #fff;
+}
+
+.botao-secundario {
+  border-color: #d6d9d7;
+  background: #f1f2f1;
+  color: #2a3837;
+}
+
+.botao-principal:hover,
+.botao-secundario:hover {
+  text-decoration: none;
+}
+
+.botao-principal:hover {
+  color: #fff;
+}
+
+.botao-secundario:hover {
+  color: #2a3837;
+}
+
 .primary-button {
   display: inline-flex;
   min-height: 36px;
@@ -217,8 +296,15 @@ button {
   white-space: nowrap;
 }
 
-.primary-button span {
-  font-size: 15px;
+.primary-button svg {
+  width: 16px;
+  height: 16px;
+  flex: 0 0 16px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
 }
 
 .primary-button:hover {
@@ -444,6 +530,27 @@ td:nth-child(2) {
 .icon-button svg {
   width: 13px;
   height: 13px;
+}
+
+.open-button {
+  border-color: transparent;
+  background: #e6f4f3;
+  color: #0c7d78;
+  cursor: pointer;
+}
+
+.open-button svg {
+  width: 15px;
+  height: 15px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+}
+
+.open-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
 }
 
 .view-button {

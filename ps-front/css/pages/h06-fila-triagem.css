@@ -2,16 +2,12 @@
   min-height: 220px;
 }
 
-.fila-triagem-panel {
-  max-width: 1100px;
-}
-
 .fila-triagem-panel th:last-child,
 .fila-triagem-panel td:last-child {
   text-align: right;
 }
 
-.fila-triagem-panel .estado-fila {
+.table-panel td.estado-fila {
   height: 72px;
   text-align: center;
   white-space: normal;
@@ -19,7 +15,7 @@
 
 .fila-triagem-panel .botao-principal {
   padding: 8px 12px;
-  font-size: 0.9rem;
+  font-size: 13px;
 }
 
 .formulario-triagem {
@@ -40,7 +36,7 @@
 
 .formulario-triagem .title-wrap h2 {
   margin: 0;
-  font-size: 1.25rem;
+  font-size: 15px;
 }
 
 .formulario-triagem-campos {

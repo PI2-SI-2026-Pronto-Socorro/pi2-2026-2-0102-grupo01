@@ -219,6 +219,28 @@ paths:
             application/json:
               schema: { $ref: '#/components/schemas/Erro' }
 
+  /atendimentos/historico:
+    get:
+      tags: [Atendimentos]
+      summary: Lista todos os atendimentos, do mais recente para o mais antigo
+      description: >-
+        Usada na tela de consulta. Para a Recepção (com login obrigatório), atendimentos Confirmado e
+        Encerrado não aparecem.
+      responses:
+        '200':
+          description: Atendimentos
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  allOf:
+                    - $ref: '#/components/schemas/Atendimento'
+                    - type: object
+                      properties:
+                        nome: { type: string, example: Maria da Silva }
+                        cpf: { type: string, nullable: true, example: '52998224725' }
+
   /atendimentos/abertos:
     get:
       tags: [Atendimentos]

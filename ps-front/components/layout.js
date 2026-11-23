@@ -47,6 +47,77 @@ function numeroAtendimentoValido(numero) {
   return /^AT[0-9]{4,9}$/i.test(numero ?? '');
 }
 
+function mostrarEstadoTabela(corpoTabela, quantidadeColunas, texto, erro = false) {
+  const linha = document.createElement('tr');
+  const celula = document.createElement('td');
+  celula.colSpan = quantidadeColunas;
+  celula.className = erro ? 'estado-lista mensagem-erro' : 'estado-lista';
+  celula.setAttribute('role', erro ? 'alert' : 'status');
+  celula.textContent = texto;
+  linha.appendChild(celula);
+  corpoTabela.replaceChildren(linha);
+}
+
+function montarLinhaListaPacientes(paciente, aoEscolherPaciente, criarAcaoDoPaciente) {
+  const linha = document.createElement('tr');
+
+  let nomePaciente = paciente.nome;
+  if (paciente.cpf) {
+    nomePaciente = document.createElement('a');
+    nomePaciente.className = 'appointment-number';
+    nomePaciente.href = `?cpf=${paciente.cpf}`;
+    nomePaciente.textContent = paciente.nome;
+    nomePaciente.addEventListener('click', (event) => {
+      event.preventDefault();
+      aoEscolherPaciente(paciente.cpf);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+  }
+
+  for (const conteudo of [
+    nomePaciente,
+    formatarCpf(paciente.cpf),
+    formatarData(paciente.data_nascimento),
+    paciente.telefone ?? '—',
+    paciente.genero ?? '—',
+  ]) {
+    const celula = document.createElement('td');
+    celula.append(conteudo ?? '—');
+    linha.appendChild(celula);
+  }
+
+  if (criarAcaoDoPaciente) {
+    const celulaAcao = document.createElement('td');
+    celulaAcao.className = 'table-actions';
+    celulaAcao.appendChild(criarAcaoDoPaciente(paciente));
+    linha.appendChild(celulaAcao);
+  }
+  return linha;
+}
+
+async function carregarListaPacientes(corpoTabela, aoEscolherPaciente, criarAcaoDoPaciente) {
+  const QUANTIDADE_COLUNAS = criarAcaoDoPaciente ? 6 : 5;
+  mostrarEstadoTabela(corpoTabela, QUANTIDADE_COLUNAS, 'Carregando pacientes...');
+  let resposta;
+  try {
+    resposta = await fetch(`${API_URL}/pacientes`);
+  } catch {
+    mostrarEstadoTabela(corpoTabela, QUANTIDADE_COLUNAS, 'Não foi possível conectar à API.', true);
+    return;
+  }
+  const pacientes = await lerJson(resposta);
+  if (!resposta.ok || !Array.isArray(pacientes)) {
+    mostrarEstadoTabela(corpoTabela, QUANTIDADE_COLUNAS, pacientes?.detail ?? 'Erro ao carregar os pacientes.', true);
+    return;
+  }
+  if (pacientes.length === 0) {
+    mostrarEstadoTabela(corpoTabela, QUANTIDADE_COLUNAS, 'Nenhum paciente cadastrado.');
+    return;
+  }
+  const pacientesPorNome = [...pacientes].sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR'));
+  corpoTabela.replaceChildren(...pacientesPorNome.map((paciente) => montarLinhaListaPacientes(paciente, aoEscolherPaciente, criarAcaoDoPaciente)));
+}
+
 (() => {
   const fetchOriginal = window.fetch.bind(window);
   function voltarAoLoginSeSessaoExpirou(resposta) {
@@ -97,14 +168,6 @@ function numeroAtendimentoValido(numero) {
     destino.outerHTML = await resposta.text();
   }
 
-  function aplicarMenuPorPerfil() {
-    const perfil = sessionStorage.getItem('perfilUsuario');
-    if (!perfil) return;
-    document.querySelectorAll('.menu-item[data-perfis]').forEach((item) => {
-      item.hidden = !item.dataset.perfis.split(',').includes(perfil);
-    });
-  }
-
   async function buscarNomeUsuarioSeFaltar() {
     if (sessionStorage.getItem('nomeUsuario') || !sessionStorage.getItem('token')) return;
     const resposta = await fetch(`${API_URL}/auth/eu`);
@@ -124,7 +187,6 @@ function numeroAtendimentoValido(numero) {
     carregarComponente('[data-componente="menu-lateral"]', 'menu-lateral.html'),
   ])
     .then(() => {
-      aplicarMenuPorPerfil();
       mostrarUsuarioLogado();
       buscarNomeUsuarioSeFaltar().then(mostrarUsuarioLogado).catch(() => {});
       const arquivoAtual = window.location.pathname.split('/').pop() || 'index.html';

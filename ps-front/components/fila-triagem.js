@@ -53,7 +53,9 @@ function montarLinhaFila(atendimento) {
   const botaoTriar = document.createElement('button');
   botaoTriar.type = 'button';
   botaoTriar.className = 'primary-button';
-  botaoTriar.innerHTML = '<span aria-hidden="true">▶</span>Iniciar triagem';
+  botaoTriar.innerHTML = '<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">'
+    + '<path d="M8 5.5v13l10-6.5-10-6.5Z" /></svg>'
+    + 'Iniciar triagem';
   botaoTriar.addEventListener('click', () => abrirFormularioTriagem(atendimento));
   celulaAcao.appendChild(botaoTriar);
   linha.appendChild(celulaAcao);
