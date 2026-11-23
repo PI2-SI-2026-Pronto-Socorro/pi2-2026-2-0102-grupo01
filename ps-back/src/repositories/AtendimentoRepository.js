@@ -224,4 +224,5 @@ async function travarAtendimentoEBuscarStatus(transacao, idAtendimento) {
 module.exports = {
   findStatusAtual, findEmAndamento, findByNumero, findByCpf, findTodos, create, findAbertos, findTriados, cancelarSeAberto,
   alterarDados, travarAtendimento, travarAtendimentoEBuscarStatus, abrirParaPacienteNaoIdentificado, reservarParaMedico, findReserva,
+  PRIORIDADE_MANCHESTER,
 };

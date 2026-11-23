@@ -1,6 +1,7 @@
 const { eq, asc, inArray, count, sql } = require('drizzle-orm');
 const { db } = require('../db');
 const { atendimento, paciente, triagem } = require('../db/schema');
+const { PRIORIDADE_MANCHESTER } = require('./AtendimentoRepository');
 
 const STATUS_VISIVEIS_NO_PAINEL = ['Aberto', 'Triado'];
 
@@ -19,7 +20,7 @@ async function listarAtendimentosDoPainel() {
     .innerJoin(paciente, eq(paciente.id_paciente, atendimento.id_paciente))
     .leftJoin(triagem, eq(triagem.id_atendimento, atendimento.id_atendimento))
     .where(inArray(atendimento.status_atendimento, STATUS_VISIVEIS_NO_PAINEL))
-    .orderBy(asc(atendimento.data_hora_chegada));
+    .orderBy(asc(PRIORIDADE_MANCHESTER), asc(atendimento.data_hora_chegada));
 }
 
 async function contarAtendimentosDoDiaPorStatus() {
