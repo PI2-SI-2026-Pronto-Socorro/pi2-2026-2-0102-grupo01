@@ -96,7 +96,10 @@ function montarLinhaPainel(atendimentoDoPainel) {
   const acoes = [
     criarBotaoVisualizar(atendimentoDoPainel.numero_atendimento),
   ];
-  if (atendimentoDoPainel.status_atendimento === 'Triado') {
+  if (
+    atendimentoDoPainel.status_atendimento === 'Triado'
+    && sessionStorage.getItem('perfilUsuario') === 'Médico'
+  ) {
     acoes.unshift(criarLinkAtendimentoMedico(atendimentoDoPainel.numero_atendimento));
   }
   const conteudoDasCelulas = [

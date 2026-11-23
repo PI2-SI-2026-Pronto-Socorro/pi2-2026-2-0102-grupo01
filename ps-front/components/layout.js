@@ -146,13 +146,27 @@ async function carregarListaPacientes(corpoTabela, aoEscolherPaciente, criarAcao
     'h04-abrir-atendimento.html': 'atendimento',
     'h05-consultar-atendimento.html': 'historico',
     'h06-fila-triagem.html': 'triagem',
-    'h11-alterar-atendimento.html': 'historico',
-    'h12-atendimento-medico.html': 'painel',
+    'h11-alterar-atendimento.html': 'alterar-atendimento',
+    'h12-atendimento-medico.html': 'atendimento-medico',
     'h14-alta-atendimento.html': 'alta',
     'administracao.html': 'admin',
     'h19-cadastrar-profissional.html': 'cadastro-profissional',
     'h20-completar-dados-paciente.html': 'pacientes',
   };
+
+  const paginasPermitidas = {
+    'Recepção': new Set(['painel', 'pacientes', 'atendimento', 'historico', 'alterar-atendimento', 'cadastro-profissional']),
+    'Enfermagem': new Set(['painel', 'historico', 'triagem']),
+    'Médico': new Set(['painel', 'historico', 'alta', 'atendimento-medico']),
+  };
+
+  const perfilUsuario = sessionStorage.getItem('perfilUsuario');
+  const tokenUsuario = sessionStorage.getItem('token');
+
+  if (!perfilUsuario || !tokenUsuario) {
+    window.location.replace('./login.html');
+    return;
+  }
 
   async function carregarComponente(seletor, arquivo) {
     const destino = document.querySelector(seletor);
@@ -191,6 +205,21 @@ async function carregarListaPacientes(corpoTabela, aoEscolherPaciente, criarAcao
       buscarNomeUsuarioSeFaltar().then(mostrarUsuarioLogado).catch(() => {});
       const arquivoAtual = window.location.pathname.split('/').pop() || 'index.html';
       const paginaAtual = paginas[arquivoAtual];
+      const paginasDoPerfil = paginasPermitidas[perfilUsuario] ?? new Set();
+
+      if (!paginaAtual || !paginasDoPerfil.has(paginaAtual)) {
+        window.location.replace('./index.html');
+        return;
+      }
+
+      document.querySelectorAll('.menu-item[data-pagina]').forEach((item) => {
+        if (!paginasDoPerfil.has(item.dataset.pagina)) item.remove();
+      });
+
+      if (perfilUsuario !== 'Recepção') {
+        document.querySelectorAll('.primary-button').forEach((botao) => botao.remove());
+      }
+
       const itemAtual = document.querySelector(`.menu-item[data-pagina="${paginaAtual}"]`);
 
       if (itemAtual) {
