@@ -2,19 +2,37 @@ openapi: 3.0.0
 info:
   title: API Pronto-Socorro
   version: 1.0.0
-  description: >-
-    Cadastro de pacientes e atendimentos. Para usar as rotas protegidas, faça login em `POST /auth/login`
-    e clique em "Authorize" com o token. O controle de acesso por perfil só é exigido quando o servidor
-    roda com `AUTH_OBRIGATORIA=true` no `.env`.
+  description: |
+    Cadastro de pacientes e atendimentos do pronto-socorro.
+
+    ### Como começar
+    1. **Crie seu usuário** em **Profissionais → `POST /profissionais`** (só na primeira vez).
+    2. **Faça login** em **Autenticação → `POST /auth/login`** e copie o `token` da resposta.
+    3. Clique no botão **Authorize** 🔒 (no canto direito), cole o token e confirme.
+    4. Abra qualquer rota, preencha os campos e clique em **Execute**.
+
+    ### Dicas
+    - CPF vai **só com números** (ex.: `52998224725`) e datas no formato `AAAA-MM-DD`.
+    - Quando der erro, leia o campo `detail` da resposta: ele explica o que está errado.
+    - Use a caixa **Filter by tag** para achar um grupo de rotas mais rápido.
+    - O que você cadastrar aqui fica salvo no banco: use dados de teste.
+    - O login e as permissões por perfil só são exigidos quando o servidor roda com
+      `AUTH_OBRIGATORIA=true` no `.env`. Se ele estiver em `true` e ainda não existir nenhum usuário,
+      deixe em `false` para cadastrar o primeiro e depois volte para `true`.
 servers:
   - url: /api
 
 tags:
   - name: Teste
+    description: Confere se o servidor está no ar.
   - name: Autenticação
+    description: Entrar no sistema e ver quem está logado. Comece por aqui para pegar o token.
   - name: Profissionais
+    description: Cadastrar e listar médicos, enfermeiros e recepcionistas (os usuários do sistema).
   - name: Pacientes
+    description: Buscar, cadastrar e alterar pacientes. Uso da Recepção.
   - name: Atendimentos
+    description: Todo o fluxo do atendimento, da abertura à alta (triagem, médico, medicação, cancelamento).
 
 security:
   - tokenDeAcesso: []
@@ -564,6 +582,8 @@ components:
     tokenDeAcesso:
       type: http
       scheme: bearer
+      bearerFormat: JWT
+      description: Cole aqui só o valor do `token` devolvido pelo login, sem aspas e sem escrever "Bearer".
   schemas:
     Atendimento:
       type: object
