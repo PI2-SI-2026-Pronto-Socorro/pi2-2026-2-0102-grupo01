@@ -1,7 +1,7 @@
 const ConfirmacaoAtendimentoService = require('../services/ConfirmacaoAtendimentoService');
 
 async function confirmarAtendimento(req, res) {
-  const atendimentoConfirmado = await ConfirmacaoAtendimentoService.confirmarAtendimento(req.params.numero);
+  const atendimentoConfirmado = await ConfirmacaoAtendimentoService.confirmarAtendimento(req.params.numero, req.usuario);
   res.json(atendimentoConfirmado);
 }
 

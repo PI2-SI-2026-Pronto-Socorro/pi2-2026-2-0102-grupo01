@@ -1,13 +1,22 @@
 const AtendimentoService = require('../services/AtendimentoService');
 
-
 async function create(req, res) {
   const novo = await AtendimentoService.abrir(req.body || {});
   res.status(201).json(novo);
 }
 
 async function findByNumero(req, res) {
-  res.json(await AtendimentoService.buscarPorNumero(req.params.numero));
+  const encontrado = await AtendimentoService.buscarPorNumero(req.params.numero);
+  AtendimentoService.garantirAcessoDaRecepcao(req.usuario, encontrado.status_atendimento);
+  res.json(encontrado);
+}
+
+async function abrirNaoIdentificado(req, res) {
+  res.status(201).json(await AtendimentoService.abrirNaoIdentificado(req.body ?? {}));
+}
+
+async function reservar(req, res) {
+  res.json(await AtendimentoService.reservar(req.params.numero, req.usuario, req.body));
 }
 
 async function findByCpf(req, res) {
@@ -31,5 +40,5 @@ async function findTriados(req, res) {
 }
 
 module.exports = {
-  create, findByNumero, findByCpf, findAbertos, findTriados, cancelar, alterar,
+  create, findByNumero, findByCpf, findAbertos, findTriados, cancelar, alterar, abrirNaoIdentificado, reservar,
 };

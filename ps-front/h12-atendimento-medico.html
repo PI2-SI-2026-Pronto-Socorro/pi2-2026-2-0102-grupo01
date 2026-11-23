@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>H12 | Atendimento médico</title>
+    <link rel="stylesheet" href="./css/pages/inicio.css" />
+    <link rel="stylesheet" href="./css/pages/h12-atendimento-medico.css" />
+  </head>
+  <body>
+    <div data-componente="cabecalho"></div>
+
+    <div class="dashboard-shell">
+      <div data-componente="menu-lateral"></div>
+      <main class="main-panel pagina-h12">
+        <div class="header-panel">
+          <div class="title-wrap">
+            <h1>Atendimento médico</h1>
+            <p id="identificacao-atendimento">Carregando atendimento...</p>
+          </div>
+          <a class="primary-button" href="./index.html">Voltar ao painel</a>
+        </div>
+
+        <p id="mensagem-carregamento" class="mensagem-h12" role="status" aria-live="polite"></p>
+        <p id="mensagem-atendimento" class="mensagem-h12" role="status" aria-live="polite" hidden></p>
+
+        <section class="cartao-h12" aria-labelledby="titulo-dados-triagem">
+          <h2 id="titulo-dados-triagem">Dados da triagem</h2>
+          <div id="dados-triagem" class="dados-triagem"></div>
+          <section class="queixas-triagem" aria-labelledby="titulo-queixas">
+            <h3 id="titulo-queixas">Queixas relatadas</h3>
+            <ul id="lista-queixas"></ul>
+          </section>
+        </section>
+
+        <section class="cartao-h12" aria-labelledby="titulo-medicacoes">
+          <h2 id="titulo-medicacoes">Medicações registradas</h2>
+          <p id="estado-medicacoes" class="texto-secundario"></p>
+          <p id="orientacoes-registradas" class="texto-secundario" hidden></p>
+          <div class="tabela-h12">
+            <table>
+              <thead>
+                <tr>
+                  <th scope="col">Medicamento</th>
+                  <th scope="col">Dose e intervalo</th>
+                  <th scope="col">Duração</th>
+                  <th scope="col">Via</th>
+                  <th scope="col">Observação</th>
+                  <th scope="col">Prescrita em</th>
+                </tr>
+              </thead>
+              <tbody id="lista-medicacoes"></tbody>
+            </table>
+          </div>
+        </section>
+
+        <section class="cartao-h12" aria-labelledby="titulo-registrar-medicacao">
+          <h2 id="titulo-registrar-medicacao">Registrar medicações</h2>
+          <form id="form-medicacoes">
+            <fieldset id="campos-medicacoes" disabled>
+              <div class="campo-medico">
+                <label for="profissional-responsavel">Profissional médico responsável</label>
+                <select id="profissional-responsavel" name="id_profissional" required>
+                  <option value="">Carregando profissionais...</option>
+                </select>
+              </div>
+              <div id="medicamentos-a-registrar" class="lista-medicamentos-form"></div>
+              <button id="adicionar-medicamento" class="botao-secundario" type="button">Adicionar medicamento</button>
+              <div class="campo-medico">
+                <label for="orientacoes">Orientações</label>
+                <textarea id="orientacoes" name="orientacoes" maxlength="2000" rows="3"></textarea>
+              </div>
+              <p id="mensagem-medicacao" class="mensagem-h12" role="status" aria-live="polite"></p>
+              <button id="salvar-medicacoes" class="primary-button" type="submit" disabled>Registrar medicações</button>
+            </fieldset>
+            <button id="tentar-profissionais-novamente" class="botao-secundario" type="button" hidden>Tentar novamente</button>
+          </form>
+        </section>
+
+        <section class="acoes-confirmacao" aria-label="Confirmação do atendimento">
+          <p id="aviso-confirmacao" class="texto-secundario">Registre ao menos uma medicação antes de confirmar o atendimento.</p>
+          <button id="confirmar-atendimento" class="primary-button" type="button" disabled>Confirmar atendimento</button>
+        </section>
+      </main>
+    </div>
+    <script src="./components/layout.js"></script>
+    <script src="./components/atendimento-medico.js"></script>
+  </body>
+</html>

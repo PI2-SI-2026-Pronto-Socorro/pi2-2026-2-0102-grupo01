@@ -1,7 +1,7 @@
 const { eq, and, desc, isNull } = require('drizzle-orm');
 const { db } = require('../db');
 const { consultaMedica, prescricao, medicacao, prescricaoMedicacao } = require('../db/schema');
-const { travarAtendimentoEBuscarStatus } = require('./AtendimentoRepository');
+const { travarAtendimento } = require('./AtendimentoRepository');
 
 async function buscarOuCriarConsultaAberta(transacao, idAtendimento, idProfissional) {
   const [consultaAberta] = await transacao
@@ -39,8 +39,11 @@ async function buscarOuCriarMedicamento(transacao, dadosMedicamento) {
 
 async function gravarPrescricaoComMedicacoes(idAtendimento, idProfissional, orientacoes, listaMedicacoes) {
   return db.transaction(async (transacao) => {
-    const statusAtualDoAtendimento = await travarAtendimentoEBuscarStatus(transacao, idAtendimento);
+    const atendimentoTravado = await travarAtendimento(transacao, idAtendimento);
+    const statusAtualDoAtendimento = atendimentoTravado?.status_atendimento ?? null;
     if (statusAtualDoAtendimento !== 'Triado') return { gravado: false, statusAtualDoAtendimento };
+    const medicoResponsavel = atendimentoTravado.id_profissional;
+    if (medicoResponsavel && medicoResponsavel !== idProfissional) return { gravado: false, comOutroMedico: true };
 
     const consulta = await buscarOuCriarConsultaAberta(transacao, idAtendimento, idProfissional);
 

@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>H11 | Alterar atendimento</title>
+    <link rel="stylesheet" href="./css/pages/inicio.css" />
+    <link rel="stylesheet" href="./css/pages/h11-alterar-atendimento.css" />
+  </head>
+  <body>
+    <div data-componente="cabecalho"></div>
+    <div class="dashboard-shell">
+      <div data-componente="menu-lateral"></div>
+      <main class="main-panel pagina-h11">
+        <div class="header-panel">
+          <div class="title-wrap">
+            <h1>Alterar atendimento</h1>
+            <p id="identificacao-alteracao">Carregando atendimento...</p>
+          </div>
+        </div>
+
+        <section class="page-card alteracao-card" aria-label="Alteração cadastral do atendimento">
+          <form id="form-alteracao" novalidate>
+            <div class="campo-alteracao">
+              <label for="nome-paciente">Nome do paciente <span aria-hidden="true">*</span></label>
+              <input id="nome-paciente" name="nome" maxlength="100" required />
+            </div>
+            <div class="campo-alteracao">
+              <label for="cpf-paciente">CPF <span aria-hidden="true">*</span></label>
+              <input id="cpf-paciente" name="cpf" maxlength="14" inputmode="numeric" required />
+            </div>
+            <div class="campo-alteracao">
+              <label for="data-nascimento">Data de nascimento <span aria-hidden="true">*</span></label>
+              <input id="data-nascimento" name="data_nascimento" type="date" required />
+            </div>
+            <div class="campo-alteracao">
+              <label for="rg-paciente">RG</label>
+              <input id="rg-paciente" name="rg" maxlength="15" />
+            </div>
+            <div class="campo-alteracao">
+              <label for="genero-paciente">Gênero</label>
+              <input id="genero-paciente" name="genero" maxlength="20" />
+            </div>
+            <div class="campo-alteracao">
+              <label for="telefone-paciente">Telefone</label>
+              <input id="telefone-paciente" name="telefone" maxlength="15" />
+            </div>
+            <div class="campo-alteracao campo-alteracao-largo">
+              <label for="motivo-atendimento">Motivo do atendimento</label>
+              <textarea id="motivo-atendimento" name="motivo_atendimento" maxlength="255" rows="4"></textarea>
+            </div>
+            <p id="mensagem-alteracao" class="mensagem-alteracao" role="status" aria-live="polite"></p>
+            <div class="acoes-alteracao">
+              <a id="voltar-consulta" class="botao-secundario" href="./h05-consultar-atendimento.html">Voltar à consulta</a>
+              <button id="salvar-alteracao" class="botao-principal" type="submit">Salvar alteração</button>
+            </div>
+          </form>
+        </section>
+      </main>
+    </div>
+    <script src="./components/layout.js"></script>
+    <script src="./components/alterar-atendimento.js"></script>
+  </body>
+</html>

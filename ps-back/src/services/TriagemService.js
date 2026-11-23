@@ -1,6 +1,7 @@
 const AtendimentoRepository = require('../repositories/AtendimentoRepository');
 const TriagemRepository = require('../repositories/TriagemRepository');
 const ErroHttp = require('../utils/ErroHttp');
+const { garantirTransicao, mensagemDeTransicaoRecusada } = require('../utils/transicoesAtendimento');
 const { codigoPg } = require('../utils/pgHelpers');
 
 const FORMATO_UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -66,9 +67,7 @@ async function registrarTriagem(numeroAtendimento, dadosTriagem) {
 
   const atendimento = await AtendimentoRepository.findByNumero(numeroFormatado);
   if (!atendimento) throw new ErroHttp(404, 'Atendimento não encontrado');
-  if (atendimento.status_atendimento !== 'Aberto') {
-    throw new ErroHttp(409, `Atendimento não está aberto para triagem (status: ${atendimento.status_atendimento})`);
-  }
+  garantirTransicao(atendimento.status_atendimento, 'Triado');
 
   try {
     const resultadoGravacao = await TriagemRepository.criarTriagemComQueixas({
@@ -79,7 +78,7 @@ async function registrarTriagem(numeroAtendimento, dadosTriagem) {
       temperatura: String(sinaisVitais.temperatura),
     }, queixasValidas);
     if (!resultadoGravacao.gravado) {
-      throw new ErroHttp(409, `Atendimento não está aberto para triagem (status: ${resultadoGravacao.statusAtualDoAtendimento})`);
+      throw new ErroHttp(409, mensagemDeTransicaoRecusada(resultadoGravacao.statusAtualDoAtendimento, 'Triado'));
     }
     return resultadoGravacao.triagemGravada;
   } catch (erro) {
