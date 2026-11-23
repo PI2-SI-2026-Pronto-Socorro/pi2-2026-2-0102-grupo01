@@ -1,12 +1,13 @@
 const express = require('express');
 const rota = require('../middlewares/rota');
+const { exigirPerfil, RECEPCAO } = require('../middlewares/autenticacao');
 const pacienteController = require('../controllers/pacienteController');
 
 const router = express.Router();
 
-router.get('/', rota(pacienteController.findAll));
-router.post('/', rota(pacienteController.create));
-router.get('/:cpf', rota(pacienteController.findByCpf));
-router.patch('/:cpf', rota(pacienteController.update));
+router.get('/', exigirPerfil(RECEPCAO), rota(pacienteController.findAll));
+router.post('/', exigirPerfil(RECEPCAO), rota(pacienteController.create));
+router.get('/:cpf', exigirPerfil(RECEPCAO), rota(pacienteController.findByCpf));
+router.patch('/:cpf', exigirPerfil(RECEPCAO), rota(pacienteController.update));
 
 module.exports = router;

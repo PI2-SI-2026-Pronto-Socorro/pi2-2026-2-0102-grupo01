@@ -6,7 +6,8 @@ async function findAll(req, res) {
 }
 
 async function create(req, res) {
-  res.status(201).json(await ProfissionalService.cadastrar(req.body || {}));
+  const profissionalCadastrado = await ProfissionalService.cadastrarProfissional(req.body);
+  res.status(201).json(profissionalCadastrado);
 }
 
 module.exports = { findAll, create };

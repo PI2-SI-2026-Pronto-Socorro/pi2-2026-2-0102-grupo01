@@ -57,8 +57,8 @@ if (formCadastroProfissional && mensagemCadastroProfissional) {
       mensagemCadastroProfissional.className = 'alert alert-danger';
       return;
     }
-    if (dados.senha.length < 6) {
-      mensagemCadastroProfissional.textContent = 'A senha deve ter pelo menos 6 caracteres.';
+    if (dados.senha.length < 8 || dados.senha.length > 72 || !/\p{L}/u.test(dados.senha) || !/\d/.test(dados.senha)) {
+      mensagemCadastroProfissional.textContent = 'A senha deve ter de 8 a 72 caracteres e conter letras e números.';
       mensagemCadastroProfissional.className = 'alert alert-danger';
       return;
     }

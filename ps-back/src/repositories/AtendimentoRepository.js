@@ -1,9 +1,12 @@
-const { eq, desc, asc, and, notInArray, sql } = require('drizzle-orm');
+const {
+  eq, desc, asc, and, or, isNull, notInArray, sql,
+} = require('drizzle-orm');
 const { db } = require('../db');
-const { atendimento, paciente, triagem } = require('../db/schema');
+const {
+  atendimento, paciente, triagem, profissional,
+} = require('../db/schema');
 const { CLASSIFICACOES_MANCHESTER } = require('../utils/classificacaoManchester');
-
-const STATUS_FINAIS = ['Encerrado', 'Cancelado'];
+const { STATUS_FINAIS, statusDeOrigem } = require('../utils/transicoesAtendimento');
 
 const PRIORIDADE_MANCHESTER = sql`CASE ${triagem.classificacao_risco} ${sql.join(
   CLASSIFICACOES_MANCHESTER.map(({ classificacao, prioridade }) => sql`WHEN ${classificacao} THEN ${sql.raw(String(prioridade))}`),
@@ -66,11 +69,49 @@ async function findByNumero(numero) {
       status_atendimento: atendimento.status_atendimento,
       data_hora_chegada: atendimento.data_hora_chegada,
       motivo_atendimento: atendimento.motivo_atendimento,
+      id_profissional: atendimento.id_profissional,
       nome: paciente.nome,
       cpf: paciente.cpf,
     })
     .from(atendimento)
     .innerJoin(paciente, eq(paciente.id_paciente, atendimento.id_paciente))
+    .where(eq(atendimento.numero_atendimento, numero));
+  return linha ?? null;
+}
+
+async function abrirParaPacienteNaoIdentificado(dadosPaciente, dadosAtendimento) {
+  return db.transaction(async (tx) => {
+    const [pacienteCriado] = await tx.insert(paciente).values(dadosPaciente).returning();
+    const [atendimentoCriado] = await tx.insert(atendimento)
+      .values({ ...dadosAtendimento, id_paciente: pacienteCriado.id_paciente })
+      .returning();
+    return { paciente: pacienteCriado, atendimento: atendimentoCriado };
+  });
+}
+
+async function reservarParaMedico(numero, idMedico) {
+  const [linha] = await db
+    .update(atendimento)
+    .set({ id_profissional: idMedico })
+    .where(and(
+      eq(atendimento.numero_atendimento, numero),
+      eq(atendimento.status_atendimento, statusDeOrigem('Confirmado')),
+      or(isNull(atendimento.id_profissional), eq(atendimento.id_profissional, idMedico)),
+    ))
+    .returning();
+  return linha ?? null;
+}
+
+async function findReserva(numero) {
+  const [linha] = await db
+    .select({
+      numero_atendimento: atendimento.numero_atendimento,
+      status_atendimento: atendimento.status_atendimento,
+      id_profissional: atendimento.id_profissional,
+      nome_profissional: profissional.nome,
+    })
+    .from(atendimento)
+    .leftJoin(profissional, eq(profissional.id_profissional, atendimento.id_profissional))
     .where(eq(atendimento.numero_atendimento, numero));
   return linha ?? null;
 }
@@ -141,7 +182,7 @@ async function findAbertos() {
     })
     .from(atendimento)
     .innerJoin(paciente, eq(paciente.id_paciente, atendimento.id_paciente))
-    .where(eq(atendimento.status_atendimento, 'Aberto'))
+    .where(eq(atendimento.status_atendimento, statusDeOrigem('Triado')))
     .orderBy(asc(atendimento.data_hora_chegada));
 }
 
@@ -151,22 +192,27 @@ async function cancelarSeAberto(numero) {
     .set({ status_atendimento: 'Cancelado', data_hora_saida: sql`now()` })
     .where(and(
       eq(atendimento.numero_atendimento, numero),
-      eq(atendimento.status_atendimento, 'Aberto'),
+      eq(atendimento.status_atendimento, statusDeOrigem('Cancelado')),
     ))
     .returning();
   return linha ?? null;
 }
 
-async function travarAtendimentoEBuscarStatus(transacao, idAtendimento) {
+async function travarAtendimento(transacao, idAtendimento) {
   const [atendimentoTravado] = await transacao
-    .select({ status_atendimento: atendimento.status_atendimento })
+    .select({ status_atendimento: atendimento.status_atendimento, id_profissional: atendimento.id_profissional })
     .from(atendimento)
     .where(eq(atendimento.id_atendimento, idAtendimento))
     .for('update');
+  return atendimentoTravado ?? null;
+}
+
+async function travarAtendimentoEBuscarStatus(transacao, idAtendimento) {
+  const atendimentoTravado = await travarAtendimento(transacao, idAtendimento);
   return atendimentoTravado ? atendimentoTravado.status_atendimento : null;
 }
 
 module.exports = {
   findStatusAtual, findEmAndamento, findByNumero, findByCpf, create, findAbertos, findTriados, cancelarSeAberto,
-  alterarDados, travarAtendimentoEBuscarStatus,
+  alterarDados, travarAtendimento, travarAtendimentoEBuscarStatus, abrirParaPacienteNaoIdentificado, reservarParaMedico, findReserva,
 };

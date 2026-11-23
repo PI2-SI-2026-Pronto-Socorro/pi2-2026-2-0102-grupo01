@@ -64,6 +64,9 @@ async function registrarMedicacoes(numeroAtendimento, dadosRecebidos) {
   if (!STATUS_QUE_ACEITAM_MEDICACAO.includes(atendimento.status_atendimento)) {
     throw new ErroHttp(409, `Só é possível registrar medicação em atendimento Triado (status: ${atendimento.status_atendimento})`);
   }
+  if (atendimento.id_profissional && atendimento.id_profissional !== id_profissional) {
+    throw new ErroHttp(409, 'Atendimento está com outro médico');
+  }
 
   try {
     const resultadoGravacao = await MedicacaoRepository.gravarPrescricaoComMedicacoes(
@@ -72,6 +75,7 @@ async function registrarMedicacoes(numeroAtendimento, dadosRecebidos) {
       orientacoes,
       medicacoesValidas,
     );
+    if (resultadoGravacao.comOutroMedico) throw new ErroHttp(409, 'Atendimento está com outro médico');
     if (!resultadoGravacao.gravado) {
       throw new ErroHttp(409, `Só é possível registrar medicação em atendimento Triado (status: ${resultadoGravacao.statusAtualDoAtendimento})`);
     }
