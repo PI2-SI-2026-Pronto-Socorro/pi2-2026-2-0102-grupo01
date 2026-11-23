@@ -27,6 +27,7 @@ function adicionarDado(container, titulo, valor) {
 }
 
 function montarCardAtendimento(atendimento, paciente) {
+  const buscaQueMostrouOAtendimento = identificadorAtendimento.value;
   const card = document.createElement('article');
   card.className = 'card-atendimento';
   const titulo = document.createElement('h2');
@@ -69,7 +70,9 @@ function montarCardAtendimento(atendimento, paciente) {
       return;
     }
 
-    window.location.reload();
+    identificadorAtendimento.value = buscaQueMostrouOAtendimento;
+    formularioConsulta.requestSubmit();
+    carregarListaAtendimentos();
   });
 
 if (atendimento.status_atendimento === 'Aberto') {

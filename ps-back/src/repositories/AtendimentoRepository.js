@@ -163,6 +163,7 @@ function selecionarAtendimentosComPaciente() {
       data_hora_chegada: atendimento.data_hora_chegada,
       nome: paciente.nome,
       cpf: paciente.cpf,
+      motivo_atendimento: atendimento.motivo_atendimento,
     })
     .from(atendimento)
     .innerJoin(paciente, eq(paciente.id_paciente, atendimento.id_paciente));
@@ -224,4 +225,5 @@ async function travarAtendimentoEBuscarStatus(transacao, idAtendimento) {
 module.exports = {
   findStatusAtual, findEmAndamento, findByNumero, findByCpf, findTodos, create, findAbertos, findTriados, cancelarSeAberto,
   alterarDados, travarAtendimento, travarAtendimentoEBuscarStatus, abrirParaPacienteNaoIdentificado, reservarParaMedico, findReserva,
+  PRIORIDADE_MANCHESTER,
 };

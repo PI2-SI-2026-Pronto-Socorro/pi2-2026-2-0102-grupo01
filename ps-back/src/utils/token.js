@@ -1,7 +1,18 @@
 const crypto = require('crypto');
 
 const VALIDADE_EM_HORAS = 12;
-const SEGREDO = process.env.AUTH_SECRET || crypto.randomBytes(32).toString('hex');
+const TAMANHO_MINIMO_DO_SEGREDO = 32;
+const PREFIXO_DOS_VALORES_DE_EXEMPLO = 'COLE_AQUI';
+
+function segredoValido(segredo) {
+  return typeof segredo === 'string'
+    && segredo.length >= TAMANHO_MINIMO_DO_SEGREDO
+    && !segredo.toUpperCase().startsWith(PREFIXO_DOS_VALORES_DE_EXEMPLO);
+}
+
+const SEGREDO = segredoValido(process.env.AUTH_SECRET)
+  ? process.env.AUTH_SECRET
+  : crypto.randomBytes(32).toString('hex');
 
 function assinar(conteudo) {
   return crypto.createHmac('sha256', SEGREDO).update(conteudo).digest('base64url');
@@ -27,4 +38,6 @@ function lerToken(token) {
   }
 }
 
-module.exports = { gerarToken, lerToken };
+module.exports = {
+  TAMANHO_MINIMO_DO_SEGREDO, segredoValido, gerarToken, lerToken,
+};

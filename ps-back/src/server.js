@@ -1,8 +1,11 @@
 require('dotenv').config();
 
-const TAMANHO_MINIMO_DO_SEGREDO = 32;
-if (process.env.AUTH_OBRIGATORIA === 'true' && (process.env.AUTH_SECRET ?? '').length < TAMANHO_MINIMO_DO_SEGREDO) {
-  console.error(`Com AUTH_OBRIGATORIA=true, defina no .env um AUTH_SECRET com pelo menos ${TAMANHO_MINIMO_DO_SEGREDO} caracteres`);
+const { segredoValido, TAMANHO_MINIMO_DO_SEGREDO } = require('./utils/token');
+
+if (process.env.AUTH_OBRIGATORIA === 'true' && !segredoValido(process.env.AUTH_SECRET)) {
+  console.error(
+    `Com AUTH_OBRIGATORIA=true, troque o AUTH_SECRET do .env por um texto aleatório seu com pelo menos ${TAMANHO_MINIMO_DO_SEGREDO} caracteres`,
+  );
   process.exit(1);
 }
 
