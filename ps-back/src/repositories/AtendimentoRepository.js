@@ -198,16 +198,21 @@ async function cancelarSeAberto(numero) {
   return linha ?? null;
 }
 
-async function travarAtendimentoEBuscarStatus(transacao, idAtendimento) {
+async function travarAtendimento(transacao, idAtendimento) {
   const [atendimentoTravado] = await transacao
-    .select({ status_atendimento: atendimento.status_atendimento })
+    .select({ status_atendimento: atendimento.status_atendimento, id_profissional: atendimento.id_profissional })
     .from(atendimento)
     .where(eq(atendimento.id_atendimento, idAtendimento))
     .for('update');
+  return atendimentoTravado ?? null;
+}
+
+async function travarAtendimentoEBuscarStatus(transacao, idAtendimento) {
+  const atendimentoTravado = await travarAtendimento(transacao, idAtendimento);
   return atendimentoTravado ? atendimentoTravado.status_atendimento : null;
 }
 
 module.exports = {
   findStatusAtual, findEmAndamento, findByNumero, findByCpf, create, findAbertos, findTriados, cancelarSeAberto,
-  alterarDados, travarAtendimentoEBuscarStatus, abrirParaPacienteNaoIdentificado, reservarParaMedico, findReserva,
+  alterarDados, travarAtendimento, travarAtendimentoEBuscarStatus, abrirParaPacienteNaoIdentificado, reservarParaMedico, findReserva,
 };

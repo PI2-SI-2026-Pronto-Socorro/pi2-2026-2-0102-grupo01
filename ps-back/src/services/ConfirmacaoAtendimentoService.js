@@ -1,7 +1,7 @@
 const AtendimentoRepository = require('../repositories/AtendimentoRepository');
 const ConfirmacaoAtendimentoRepository = require('../repositories/ConfirmacaoAtendimentoRepository');
 const ErroHttp = require('../utils/ErroHttp');
-const { garantirTransicao } = require('../utils/transicoesAtendimento');
+const { garantirTransicao, mensagemDeTransicaoRecusada } = require('../utils/transicoesAtendimento');
 
 async function confirmarAtendimento(numeroAtendimento, usuario) {
   const numeroFormatado = String(numeroAtendimento).toUpperCase();
@@ -20,9 +20,17 @@ async function confirmarAtendimento(numeroAtendimento, usuario) {
     throw new ErroHttp(422, 'Registre ao menos uma medicação antes de confirmar o atendimento');
   }
 
-  const atendimentoConfirmado = await ConfirmacaoAtendimentoRepository.passarDeTriadoParaConfirmado(atendimentoEncontrado.id_atendimento);
-  if (!atendimentoConfirmado) throw new ErroHttp(409, 'O atendimento mudou de situação; consulte e tente novamente');
-  return atendimentoConfirmado;
+  const atendimentoConfirmado = await ConfirmacaoAtendimentoRepository.passarDeTriadoParaConfirmado(
+    atendimentoEncontrado.id_atendimento,
+    usuario?.id_profissional,
+  );
+  if (atendimentoConfirmado) return atendimentoConfirmado;
+
+  const atendimentoAtual = await AtendimentoRepository.findByNumero(numeroFormatado);
+  if (atendimentoAtual?.status_atendimento !== atendimentoEncontrado.status_atendimento) {
+    throw new ErroHttp(409, mensagemDeTransicaoRecusada(atendimentoAtual?.status_atendimento, 'Confirmado'));
+  }
+  throw new ErroHttp(409, 'Atendimento está com outro médico');
 }
 
 module.exports = { confirmarAtendimento };

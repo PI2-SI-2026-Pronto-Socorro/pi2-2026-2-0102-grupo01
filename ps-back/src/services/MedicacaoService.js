@@ -75,6 +75,7 @@ async function registrarMedicacoes(numeroAtendimento, dadosRecebidos) {
       orientacoes,
       medicacoesValidas,
     );
+    if (resultadoGravacao.comOutroMedico) throw new ErroHttp(409, 'Atendimento está com outro médico');
     if (!resultadoGravacao.gravado) {
       throw new ErroHttp(409, `Só é possível registrar medicação em atendimento Triado (status: ${resultadoGravacao.statusAtualDoAtendimento})`);
     }
