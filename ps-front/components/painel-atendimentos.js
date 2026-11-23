@@ -93,7 +93,7 @@ function criarSeloClassificacaoRisco(classificacao) {
   'Vermelho': 'risk-emergency',
   'Amarelo': 'risk-urgent',
   'Verde': 'risk-low-urgent'
-}; 
+};
 
   const selo = document.createElement('span');
   selo.className = `risk-badge ${classes[classificacao] ?? ''}`.trim();
