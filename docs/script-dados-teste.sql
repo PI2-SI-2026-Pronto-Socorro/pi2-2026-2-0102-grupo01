@@ -163,7 +163,7 @@ SELECT pg_temp.esperar_erro('2.15 Atendimento com paciente inexistente (FK)',
   $q$INSERT INTO atendimento (id_paciente) VALUES (gen_random_uuid())$q$, '23503');
 
 SELECT pg_temp.esperar_erro('2.16 Excluir paciente com prontuário (RESTRICT)',
-  $q$DELETE FROM paciente WHERE id_paciente = (SELECT id FROM test_ids WHERE chave='paciente')$q$, '23503');
+  $q$DELETE FROM paciente WHERE id_paciente = (SELECT id FROM test_ids WHERE chave='paciente')$q$, '23001');
 
 SELECT pg_temp.esperar_erro('2.17 CPF de profissional duplicado',
   $q$INSERT INTO profissional (nome, cpf, cargo, perfil, usuario, senha_hash)

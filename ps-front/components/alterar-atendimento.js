@@ -15,7 +15,7 @@ function mostrarMensagem(texto, tipo = '') {
 function preencherFormulario(detalhes) {
   const { atendimento, paciente } = detalhes;
   document.getElementById('nome-paciente').value = paciente.nome ?? '';
-  document.getElementById('cpf-paciente').value = formatarCpf(paciente.cpf);
+  document.getElementById('cpf-paciente').value = paciente.cpf ? formatarCpf(paciente.cpf) : '';
   document.getElementById('data-nascimento').value = paciente.data_nascimento ?? '';
   document.getElementById('rg-paciente').value = paciente.rg ?? '';
   document.getElementById('genero-paciente').value = paciente.genero ?? '';

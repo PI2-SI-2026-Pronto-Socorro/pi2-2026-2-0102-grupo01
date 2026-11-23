@@ -2,17 +2,6 @@
   background: #f3f3f3;
 }
 
-.page-card {
-  background: #fff;
-  border: 1px solid #dce3eb;
-  border-radius: 12px;
-  padding: 24px 22px;
-}
-
-.search-card {
-  max-width: 900px;
-}
-
 .busca-form {
   display: flex;
   flex-direction: column;
@@ -21,7 +10,6 @@
 }
 
 .busca-form label {
-  font-size: 1.05rem;
   font-weight: 600;
   color: #263a4b;
 }
@@ -35,12 +23,10 @@
 .linha-busca input {
   min-width: 220px;
   flex: 1;
-  min-height: 50px;
-  padding: 12px 14px;
+  padding: 8px 12px;
   border: 1px solid #bdbdbd;
   border-radius: 10px;
   background: #fff;
-  font-size: 1rem;
 }
 
 .botao-principal {
@@ -48,8 +34,7 @@
   border-radius: 8px;
   background: #0c7d78;
   color: white;
-  padding: 10px 18px;
-  font-size: 1rem;
+  padding: 0 18px;
   font-weight: 600;
   cursor: pointer;
 }
@@ -57,19 +42,10 @@
 .resultado {
   min-height: 24px;
   color: #34485a;
-  font-size: 1rem;
 }
 
 .resultado p {
   margin: 0;
-}
-
-.resultado-pendente {
-  display: grid;
-  justify-items: start;
-  gap: 12px;
-  padding: 14px 0 0;
-  color: #34485a;
 }
 
 .resultado .caixa-vazia {
@@ -77,11 +53,8 @@
   background: transparent;
 }
 
-.resultado .botao-principal {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  text-decoration: none;
+.resultado > .botao-principal {
+  margin-top: 16px;
 }
 
 .resultado .mensagem-erro {
@@ -141,7 +114,7 @@
 
 .mensagem-atendimento {
   margin: 0;
-  font-size: 0.95rem;
+  font-size: 13px;
 }
 
 .mensagem-atendimento.erro,

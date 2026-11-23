@@ -115,6 +115,11 @@
       });
     });
 
+    carregarListaPacientes(document.getElementById('lista-pacientes'), (cpf) => {
+      document.getElementById('cpf').value = cpf;
+      formulario.requestSubmit();
+    });
+
     const parametros = new URLSearchParams(window.location.search);
     const cpfInicial = parametros.get('cpf');
     let cadastroRecente = parametros.get('cadastrado') === '1' ? (cpfInicial ?? '').replace(/\D/g, '') : null;

@@ -293,6 +293,67 @@ formularioConsulta.addEventListener('submit', async (event) => {
   }
 });
 
+const corpoListaAtendimentos = document.getElementById('lista-atendimentos');
+
+function mostrarEstadoListaAtendimentos(texto, erro = false) {
+  const linha = document.createElement('tr');
+  const celula = document.createElement('td');
+  celula.colSpan = 5;
+  celula.className = erro ? 'estado-lista mensagem-erro' : 'estado-lista';
+  celula.setAttribute('role', erro ? 'alert' : 'status');
+  celula.textContent = texto;
+  linha.appendChild(celula);
+  corpoListaAtendimentos.replaceChildren(linha);
+}
+
+function aoClicarNumeroDaLista(event, numeroAtendimento) {
+  event.preventDefault();
+  identificadorAtendimento.value = numeroAtendimento;
+  formularioConsulta.requestSubmit();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function montarLinhaListaAtendimentos(atendimento) {
+  const linha = document.createElement('tr');
+
+  const linkNumero = document.createElement('a');
+  linkNumero.className = 'appointment-number';
+  linkNumero.href = `./h05-consultar-atendimento.html?numero=${encodeURIComponent(atendimento.numero_atendimento)}`;
+  linkNumero.textContent = atendimento.numero_atendimento;
+  linkNumero.addEventListener('click', (event) => aoClicarNumeroDaLista(event, atendimento.numero_atendimento));
+
+  for (const conteudo of [
+    linkNumero,
+    atendimento.nome,
+    formatarCpf(atendimento.cpf),
+    atendimento.status_atendimento,
+    formatarDataHora(atendimento.data_hora_chegada),
+  ]) {
+    const celula = document.createElement('td');
+    celula.append(conteudo ?? '-');
+    linha.appendChild(celula);
+  }
+  return linha;
+}
+
+async function carregarListaAtendimentos() {
+  mostrarEstadoListaAtendimentos('Carregando atendimentos...');
+  let atendimentos;
+  try {
+    atendimentos = await buscarJson(`${API_URL}/atendimentos/historico`);
+  } catch (erro) {
+    mostrarEstadoListaAtendimentos(erro instanceof ErroConsulta ? erro.message : 'Erro ao carregar os atendimentos.', true);
+    return;
+  }
+  if (!Array.isArray(atendimentos) || atendimentos.length === 0) {
+    mostrarEstadoListaAtendimentos('Nenhum atendimento registrado.');
+    return;
+  }
+  corpoListaAtendimentos.replaceChildren(...atendimentos.map(montarLinhaListaAtendimentos));
+}
+
+carregarListaAtendimentos();
+
 const parametros = new URLSearchParams(window.location.search);
 const identificadorInicial = parametros.get('numero') ?? parametros.get('cpf');
 if (identificadorInicial) {

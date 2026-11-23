@@ -112,7 +112,10 @@ O `.env` guarda o endereço do banco. Ele não vem no repositório porque conté
 DATABASE_URL=postgresql://usuario:senha@endereco.neon.tech/neondb?sslmode=require
 ```
 
-5. Salve com `Ctrl + S`.
+5. Troque `COLE_AQUI_UM_SEGREDO_COM_32_OU_MAIS_CARACTERES` por um texto aleatório. Para gerar um, rode `node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"`.
+6. Salve com `Ctrl + S`.
+
+> O login é obrigatório (`AUTH_OBRIGATORIA=true`). O primeiro profissional de cada perfil (Recepção, Enfermagem, Médico) pode ser cadastrado sem login; depois disso, só um profissional logado do mesmo perfil cadastra outro.
 
 > ⚠️ O `.env` **nunca** deve ser commitado (ele já está no `.gitignore`). A URL vai **só** no `.env`, nunca no `.env.example`.
 
@@ -152,7 +155,7 @@ Abra no navegador: **http://localhost:3000**
 
 ### 3.6. Testar a conexão com o banco
 
-Abra http://localhost:3000/api/pacientes. A página deve mostrar a lista de pacientes. Se o banco ainda não tiver nenhum paciente, aparece `[]` (uma lista vazia), o que é normal.
+Abra http://localhost:3000/api/health. A página deve mostrar `{"banco":"ok"}`.
 
 ## Problemas comuns
 

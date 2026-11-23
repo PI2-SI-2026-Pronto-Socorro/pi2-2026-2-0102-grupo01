@@ -6,7 +6,7 @@ async function findAll(req, res) {
 }
 
 async function create(req, res) {
-  const profissionalCadastrado = await ProfissionalService.cadastrarProfissional(req.body);
+  const profissionalCadastrado = await ProfissionalService.cadastrarProfissional(req.body, req.usuario);
   res.status(201).json(profissionalCadastrado);
 }
 

@@ -21,9 +21,16 @@ async function listarProfissionaisPorNome() {
       id_profissional: profissional.id_profissional,
       nome: profissional.nome,
       cargo: profissional.cargo,
+      perfil: profissional.perfil,
     })
     .from(profissional)
     .orderBy(asc(profissional.nome));
+}
+
+async function existeComPerfil(perfil) {
+  const [linha] = await db.select({ id: profissional.id_profissional }).from(profissional)
+    .where(eq(profissional.perfil, perfil)).limit(1);
+  return Boolean(linha);
 }
 
 async function cadastrar(dados) {
@@ -42,4 +49,4 @@ async function buscarPorId(idProfissional) {
   return linha ?? null;
 }
 
-module.exports = { listarProfissionaisPorNome, cadastrar, buscarPorUsuario, buscarPorId };
+module.exports = { listarProfissionaisPorNome, existeComPerfil, cadastrar, buscarPorUsuario, buscarPorId };

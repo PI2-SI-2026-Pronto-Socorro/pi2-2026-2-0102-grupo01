@@ -3,7 +3,6 @@
 }
 
 .consulta-card {
-  max-width: 1000px;
   padding: 24px 22px;
   border: 1px solid #dce3eb;
   border-radius: 12px;
@@ -18,7 +17,6 @@
 }
 
 .consulta-card .busca-form label {
-  font-size: 1.05rem;
   font-weight: 600;
 }
 
@@ -31,7 +29,7 @@
 .consulta-card input {
   min-width: 220px;
   flex: 1;
-  padding: 12px 14px;
+  padding: 8px 12px;
   border: 1px solid #bdbdbd;
   border-radius: 10px;
 }
@@ -39,7 +37,7 @@
 .consulta-card .botao-principal {
   border: 0;
   border-radius: 8px;
-  padding: 10px 18px;
+  padding: 0 18px;
   background: #0c7d78;
   color: #fff;
   font-weight: 600;
@@ -63,10 +61,14 @@
   background: #f8fafc;
 }
 
+.card-atendimento > .botao-principal {
+  margin: 18px 10px 0 0;
+}
+
 .card-atendimento h2,
 .historico-paciente h2 {
   margin: 0 0 14px;
-  font-size: 1.2rem;
+  font-size: 15px;
 }
 
 .dados-atendimento {
@@ -84,7 +86,7 @@
 
 .dado-atendimento span {
   color: #647487;
-  font-size: 0.9rem;
+  font-size: 12px;
 }
 
 .dado-atendimento strong {

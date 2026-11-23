@@ -16,6 +16,7 @@ const router = express.Router();
 router.post('/', exigirPerfil(RECEPCAO), rota(atendimentoController.create));
 router.post('/nao-identificado', exigirPerfil(RECEPCAO), rota(atendimentoController.abrirNaoIdentificado));
 router.get('/', exigirPerfil(RECEPCAO), rota(atendimentoController.findByCpf));
+router.get('/historico', exigirPerfil(...TODOS_OS_PERFIS), rota(atendimentoController.findTodos));
 router.get('/abertos', exigirPerfil(RECEPCAO, ENFERMAGEM), rota(atendimentoController.findAbertos));
 router.get('/triados', exigirPerfil(MEDICO), rota(atendimentoController.findTriados));
 router.get('/painel', exigirPerfil(...TODOS_OS_PERFIS), rota(painelAtendimentosController.findPainel));

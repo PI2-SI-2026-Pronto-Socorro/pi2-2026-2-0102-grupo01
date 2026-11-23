@@ -3,7 +3,6 @@
 }
 
 .atendimento-card {
-  max-width: 900px;
   padding: 24px 22px;
   border: 1px solid #dce3eb;
   border-radius: 12px;
@@ -18,7 +17,6 @@
 }
 
 .atendimento-card .busca-form label {
-  font-size: 1.05rem;
   font-weight: 600;
 }
 
@@ -31,7 +29,7 @@
 .atendimento-card input {
   min-width: 220px;
   flex: 1;
-  padding: 12px 14px;
+  padding: 8px 12px;
   border: 1px solid #bdbdbd;
   border-radius: 10px;
   background: #fff;

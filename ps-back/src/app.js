@@ -20,7 +20,17 @@ app.get('/', (req, res) => {
   res.sendFile(path.join(frontDir, 'landing.html'));
 });
 
-app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec, {
+  customSiteTitle: 'API Pronto-Socorro',
+  swaggerOptions: {
+    docExpansion: 'none',
+    tryItOutEnabled: true,
+    persistAuthorization: true,
+    filter: true,
+    displayRequestDuration: true,
+    defaultModelsExpandDepth: -1,
+  },
+}));
 app.use(express.static(frontDir));
 app.use('/vendor/bootstrap', express.static(path.join(__dirname, '..', 'node_modules', 'bootstrap', 'dist')));
 app.use('/api', routes);

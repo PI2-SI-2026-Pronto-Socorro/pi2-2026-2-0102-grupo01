@@ -3,6 +3,7 @@ const ErroHttp = require('../utils/ErroHttp');
 const { codigoPg } = require('../utils/pgHelpers');
 const { cpfComDigitosValidos } = require('../utils/cpf');
 const { gerarHashSenha } = require('../utils/senha');
+const { autenticacaoObrigatoria } = require('../middlewares/autenticacao');
 
 const CARGOS = ['Médico', 'Enfermeiro', 'Técnico de Enfermagem', 'Recepcionista', 'Outro'];
 const PERFIS = ['Recepção', 'Enfermagem', 'Médico'];
@@ -84,8 +85,18 @@ async function listarProfissionais() {
   return ProfissionalRepository.listarProfissionaisPorNome();
 }
 
-async function cadastrarProfissional(dados) {
+async function garantirPermissaoDeCadastro(perfilNovo, usuario) {
+  if (!autenticacaoObrigatoria()) return;
+  if (!(await ProfissionalRepository.existeComPerfil(perfilNovo))) return;
+  if (!usuario) throw new ErroHttp(401, 'Faça login para continuar');
+  if (usuario.perfil !== perfilNovo) {
+    throw new ErroHttp(403, `O perfil ${usuario.perfil} só pode cadastrar profissionais com perfil ${usuario.perfil}`);
+  }
+}
+
+async function cadastrarProfissional(dados, usuario) {
   const { senha, ...profissionalValido } = validarProfissional(dados);
+  await garantirPermissaoDeCadastro(profissionalValido.perfil, usuario);
   const senha_hash = await gerarHashSenha(senha);
   try {
     return await ProfissionalRepository.cadastrar({ ...profissionalValido, senha_hash });

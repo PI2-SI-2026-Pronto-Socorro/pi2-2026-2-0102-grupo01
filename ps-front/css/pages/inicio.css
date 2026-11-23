@@ -76,6 +76,7 @@ button {
   align-items: flex-start;
   flex-direction: column;
   gap: 2px;
+  line-height: 1.2;
 }
 
 .brand-text strong {
@@ -175,6 +176,23 @@ button {
   min-width: 0;
   flex: 1;
   padding: 24px;
+  font-size: 13px;
+}
+
+.main-panel label {
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.main-panel input,
+.main-panel select,
+.main-panel textarea {
+  font-size: 13px;
+}
+
+.main-panel input:not([type="checkbox"], [type="radio"]),
+.main-panel select {
+  min-height: 40px;
 }
 
 .header-panel {
@@ -199,6 +217,68 @@ button {
   font-size: 12px;
 }
 
+.page-card {
+  padding: 24px 22px;
+  border: 1px solid #dce3eb;
+  border-radius: 12px;
+  background: #fff;
+}
+
+.secao-lista {
+  margin-top: 24px;
+}
+
+.secao-lista h2 {
+  margin: 0 0 12px;
+  color: #253849;
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.secao-lista .estado-lista {
+  height: 72px;
+  text-align: center;
+}
+
+.botao-principal,
+.botao-secundario {
+  display: inline-flex;
+  min-height: 40px;
+  align-items: center;
+  justify-content: center;
+  padding: 0 18px;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.botao-principal {
+  background: #0c7d78;
+  color: #fff;
+}
+
+.botao-secundario {
+  border-color: #d6d9d7;
+  background: #f1f2f1;
+  color: #2a3837;
+}
+
+.botao-principal:hover,
+.botao-secundario:hover {
+  text-decoration: none;
+}
+
+.botao-principal:hover {
+  color: #fff;
+}
+
+.botao-secundario:hover {
+  color: #2a3837;
+}
+
 .primary-button {
   display: inline-flex;
   min-height: 36px;
@@ -216,8 +296,15 @@ button {
   white-space: nowrap;
 }
 
-.primary-button span {
-  font-size: 15px;
+.primary-button svg {
+  width: 16px;
+  height: 16px;
+  flex: 0 0 16px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
 }
 
 .primary-button:hover {
@@ -445,15 +532,31 @@ td:nth-child(2) {
   height: 13px;
 }
 
+.open-button {
+  border-color: transparent;
+  background: #e6f4f3;
+  color: #0c7d78;
+  cursor: pointer;
+}
+
+.open-button svg {
+  width: 15px;
+  height: 15px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+}
+
+.open-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
 .view-button {
   border-color: transparent;
   background: #e9f8ef;
   color: #267c4b;
-}
-
-.edit-button {
-  background: #f7f8fb;
-  color: #6253ae;
 }
 
 .medical-action {
@@ -491,42 +594,11 @@ td:nth-child(2) {
   font-size: 11px;
 }
 
-.pagination {
-  display: flex;
-  align-items: center;
-  gap: 5px;
-}
-
-.page-button {
-  display: grid;
-  width: 26px;
-  height: 26px;
-  place-items: center;
-  padding: 0;
-  border: 1px solid var(--card-border);
-  border-radius: 5px;
-  background: #fff;
-  color: #34485a;
-  font-size: 11px;
-  font-weight: 600;
-}
-
-.page-button:disabled {
-  cursor: default;
-}
-
-.page-button.active {
-  border-color: #5d4cac;
-  background: #5d4cac;
-  color: #fff;
-}
-
 .menu-item:focus-visible,
 .primary-button:focus-visible,
 .appointment-number:focus-visible,
 .icon-button:focus-visible,
-.logout-link:focus-visible,
-.page-button:focus-visible {
+.logout-link:focus-visible {
   outline: 2px solid #2877d4;
   outline-offset: 2px;
 }
@@ -630,9 +702,5 @@ td:nth-child(2) {
     flex-direction: column;
     justify-content: center;
     padding: 10px 12px;
-  }
-
-  .pagination {
-    align-self: flex-end;
   }
 }
