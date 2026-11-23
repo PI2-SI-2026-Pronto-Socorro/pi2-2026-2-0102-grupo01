@@ -52,6 +52,7 @@ function validarOpcionais(p) {
 function validar(p) {
   if (!nomeValido(p.nome)) return 'Nome inválido';
   if (!cpfValido(p.cpf)) return 'CPF deve ter 11 números';
+  if (!cpfComDigitosValidos(p.cpf)) return 'CPF inválido';
   if (!dataValida(p.data_nascimento)) return 'Data de nascimento inválida (use AAAA-MM-DD, entre 1900 e hoje)';
   return validarOpcionais(p);
 }
@@ -59,6 +60,7 @@ function validar(p) {
 function validarAlteracao(p) {
   if ('nome' in p && !nomeValido(p.nome)) return 'Nome inválido';
   if ('cpf' in p && !cpfValido(p.cpf)) return 'CPF deve ter 11 números';
+  if ('cpf' in p && !cpfComDigitosValidos(p.cpf)) return 'CPF inválido';
   if ('data_nascimento' in p && !dataValida(p.data_nascimento)) return 'Data de nascimento inválida (use AAAA-MM-DD, entre 1900 e hoje)';
   return validarOpcionais(p);
 }
@@ -106,7 +108,6 @@ async function atualizarPorCpf(cpfAtual, dadosRecebidos) {
   const dadosLimpos = normalizarDadosPaciente(dadosRecebidos);
   const erro = validarAlteracao(dadosLimpos);
   if (erro) throw new ErroHttp(422, erro);
-  if ('cpf' in dadosLimpos && !cpfComDigitosValidos(dadosLimpos.cpf)) throw new ErroHttp(422, 'CPF inválido');
 
   try {
     const atualizada = await PacienteRepository.updateByCpf(cpfAtual, dadosLimpos);

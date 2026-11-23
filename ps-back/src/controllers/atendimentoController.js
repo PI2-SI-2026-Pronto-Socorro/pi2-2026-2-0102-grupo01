@@ -20,7 +20,7 @@ async function reservar(req, res) {
 }
 
 async function findByCpf(req, res) {
-  res.json(await AtendimentoService.buscarPorCpf(req.query.cpf ?? ''));
+  res.json(await AtendimentoService.buscarPorCpf(req.query.cpf ?? '', req.usuario));
 }
 
 async function findAbertos(req, res) {

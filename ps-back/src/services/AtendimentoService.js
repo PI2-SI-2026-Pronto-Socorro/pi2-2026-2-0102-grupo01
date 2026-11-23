@@ -48,11 +48,12 @@ async function buscarPorNumero(numero) {
   return { ...new Atendimento(linha), nome: linha.nome, cpf: linha.cpf };
 }
 
-async function buscarPorCpf(cpf) {
+async function buscarPorCpf(cpf, usuario) {
   if (!/^\d{11}$/.test(cpf)) throw new ErroHttp(422, 'CPF deve ter 11 números');
 
   const linhas = await AtendimentoRepository.findByCpf(cpf);
-  return linhas.map((linha) => ({ ...new Atendimento(linha), nome: linha.nome, cpf: linha.cpf }));
+  const ehRecepcaoRestrita = autenticacaoObrigatoria() && usuario?.perfil === RECEPCAO;
+  return linhas.filter((linha) => !ehRecepcaoRestrita || recepcaoTemAcesso(linha.status_atendimento)).map((linha) => ({ ...new Atendimento(linha), nome: linha.nome, cpf: linha.cpf }));
 }
 
 async function listarAbertos() {

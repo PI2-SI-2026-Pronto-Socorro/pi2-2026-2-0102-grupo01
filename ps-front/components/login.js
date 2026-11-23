@@ -51,6 +51,7 @@ formularioLogin.addEventListener('submit', async (event) => {
         }
 
         sessionStorage.setItem('perfilUsuario', perfil);
+        sessionStorage.setItem('nomeUsuario', dados.profissional?.nome ?? '');
 
         if (dados.token) {
             sessionStorage.setItem('token', dados.token);

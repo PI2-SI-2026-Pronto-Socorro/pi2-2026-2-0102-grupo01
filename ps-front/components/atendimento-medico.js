@@ -300,7 +300,7 @@ async function carregarProfissionais() {
     return;
   }
 
-  const medicos = profissionais.filter((profissional) => profissional.cargo === 'Médico');
+  const medicos = profissionais.filter((profissional) => profissional.perfil === 'Médico');
   const opcaoInicial = new Option(medicos.length ? 'Selecione' : 'Nenhum médico cadastrado', '');
   const opcoes = medicos.map(
     (profissional) => new Option(profissional.nome, profissional.id_profissional),

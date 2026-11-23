@@ -26,7 +26,7 @@ async function contarAtendimentosDoDiaPorStatus() {
   return db
     .select({ status_atendimento: atendimento.status_atendimento, quantidade: count() })
     .from(atendimento)
-    .where(sql`${atendimento.data_hora_chegada} >= date_trunc('day', now())`)
+    .where(sql`${atendimento.data_hora_chegada} >= date_trunc('day', now() AT TIME ZONE 'America/Sao_Paulo') AT TIME ZONE 'America/Sao_Paulo'`)
     .groupBy(atendimento.status_atendimento);
 }
 

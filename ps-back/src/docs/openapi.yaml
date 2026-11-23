@@ -6,7 +6,8 @@ info:
     Cadastro de pacientes e atendimentos do pronto-socorro.
 
     ### Como começar
-    1. **Crie seu usuário** em **Profissionais → `POST /profissionais`** (só na primeira vez).
+    1. **Crie seu usuário** em **Profissionais → `POST /profissionais`**. O primeiro profissional de cada perfil
+       pode ser criado sem login; os seguintes só por alguém logado com o mesmo perfil.
     2. **Faça login** em **Autenticação → `POST /auth/login`** e copie o `token` da resposta.
     3. Clique no botão **Authorize** 🔒 (no canto direito), cole o token e confirme.
     4. Abra qualquer rota, preencha os campos e clique em **Execute**.
@@ -17,8 +18,7 @@ info:
     - Use a caixa **Filter by tag** para achar um grupo de rotas mais rápido.
     - O que você cadastrar aqui fica salvo no banco: use dados de teste.
     - O login e as permissões por perfil só são exigidos quando o servidor roda com
-      `AUTH_OBRIGATORIA=true` no `.env`. Se ele estiver em `true` e ainda não existir nenhum usuário,
-      deixe em `false` para cadastrar o primeiro e depois volte para `true`.
+      `AUTH_OBRIGATORIA=true` no `.env` (o padrão). Deixe em `false` só para testes locais.
 servers:
   - url: /api
 
@@ -47,7 +47,7 @@ paths:
           description: Banco conectado
           content:
             application/json:
-              example: { banco: ok, pacientes: 3 }
+              example: { banco: ok }
 
   /pacientes:
     get:
@@ -94,7 +94,7 @@ paths:
         - in: path
           name: cpf
           required: true
-          schema: { type: string, example: '12345678900' }
+          schema: { type: string, example: '52998224725' }
       responses:
         '200':
           description: Paciente encontrado
@@ -121,7 +121,7 @@ paths:
         - in: path
           name: cpf
           required: true
-          schema: { type: string, pattern: '^\d{11}$', example: '12345678900' }
+          schema: { type: string, pattern: '^\d{11}$', example: '52998224725' }
       requestBody:
         required: true
         content:
@@ -160,7 +160,7 @@ paths:
         - in: query
           name: cpf
           required: true
-          schema: { type: string, example: '12345678900' }
+          schema: { type: string, example: '52998224725' }
       responses:
         '200':
           description: Atendimentos do paciente
@@ -174,7 +174,7 @@ paths:
                     - type: object
                       properties:
                         nome: { type: string, example: Maria da Silva }
-                        cpf: { type: string, nullable: true, example: '12345678900' }
+                        cpf: { type: string, nullable: true, example: '52998224725' }
         '422':
           description: CPF ausente ou inválido
           content:
@@ -290,7 +290,7 @@ paths:
                   - type: object
                     properties:
                       nome: { type: string, example: Maria da Silva }
-                      cpf: { type: string, nullable: true, example: '12345678900' }
+                      cpf: { type: string, nullable: true, example: '52998224725' }
         '404':
           description: Atendimento não encontrado
           content:
@@ -462,12 +462,15 @@ paths:
                     id_profissional: { type: string, format: uuid }
                     nome: { type: string }
                     cargo: { type: string }
+                    perfil: { type: string, enum: [Recepção, Enfermagem, Médico] }
     post:
       tags: [Profissionais]
-      summary: Cadastra um profissional (perfil Recepção)
+      summary: Cadastra um profissional (mesmo perfil de quem está logado)
       description: >-
         Grava a senha só como hash (scrypt). O cargo define o perfil: Médico → Médico; Enfermeiro e Técnico
         de Enfermagem → Enfermagem; Recepcionista → Recepção. O CRM é obrigatório para médico.
+        O primeiro profissional de cada perfil pode ser cadastrado sem login; depois disso, só um
+        profissional logado com o mesmo perfil cadastra outro.
       requestBody:
         required: true
         content:
@@ -479,6 +482,16 @@ paths:
           content:
             application/json:
               schema: { $ref: '#/components/schemas/Profissional' }
+        '401':
+          description: Já existe profissional com esse perfil e não há login
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Erro' }
+        '403':
+          description: O perfil logado é diferente do perfil a cadastrar
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Erro' }
         '409':
           description: CPF, usuário ou registro profissional já cadastrado
           content:
@@ -599,7 +612,7 @@ components:
       properties:
         id_paciente: { type: string, format: uuid, example: 3f2b8c1e-9a4d-4e7b-8c21-5d6f7a8b9c0d }
         nome: { type: string, example: Maria da Silva }
-        cpf: { type: string, nullable: true, example: '12345678900' }
+        cpf: { type: string, nullable: true, example: '52998224725' }
         rg: { type: string, nullable: true, example: '123456789' }
         data_nascimento: { type: string, format: date, nullable: true, example: '1990-03-14' }
         genero: { type: string, nullable: true, example: Feminino }
@@ -609,7 +622,7 @@ components:
       required: [nome, cpf, data_nascimento]
       properties:
         nome: { type: string, maxLength: 100, example: Maria da Silva }
-        cpf: { type: string, pattern: '^\d{11}$', example: '12345678900' }
+        cpf: { type: string, pattern: '^\d{11}$', example: '52998224725' }
         rg: { type: string, maxLength: 15, example: '123456789' }
         data_nascimento: { type: string, format: date, example: '1990-03-14' }
         genero: { type: string, maxLength: 20, example: Feminino }
@@ -620,7 +633,7 @@ components:
       additionalProperties: false
       properties:
         nome: { type: string, maxLength: 100, example: Maria da Silva }
-        cpf: { type: string, pattern: '^\d{11}$', example: '12345678900' }
+        cpf: { type: string, pattern: '^\d{11}$', example: '52998224725' }
         rg: { type: string, nullable: true, maxLength: 15, example: '123456789' }
         data_nascimento: { type: string, format: date, example: '1990-03-14' }
         genero: { type: string, nullable: true, maxLength: 20, example: Feminino }
@@ -632,7 +645,7 @@ components:
       properties:
         motivo_atendimento: { type: string, nullable: true, maxLength: 255, example: Dor abdominal }
         nome: { type: string, maxLength: 100, example: Maria da Silva }
-        cpf: { type: string, pattern: '^\d{11}$', example: '12345678900' }
+        cpf: { type: string, pattern: '^\d{11}$', example: '52998224725' }
         rg: { type: string, nullable: true, maxLength: 15, example: '123456789' }
         data_nascimento: { type: string, format: date, example: '1990-03-14' }
         genero: { type: string, nullable: true, maxLength: 20, example: Feminino }

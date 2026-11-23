@@ -49,10 +49,23 @@ function numeroAtendimentoValido(numero) {
 
 (() => {
   const fetchOriginal = window.fetch.bind(window);
+  function voltarAoLoginSeSessaoExpirou(resposta) {
+    if (resposta.status === 401) {
+      sessionStorage.removeItem('token');
+      sessionStorage.removeItem('perfilUsuario');
+      sessionStorage.removeItem('nomeUsuario');
+      window.location.href = './login.html';
+    }
+    return resposta;
+  }
+
   window.fetch = (url, opcoes = {}) => {
+    if (!String(url).startsWith(API_URL)) return fetchOriginal(url, opcoes);
     const token = sessionStorage.getItem('token');
-    if (!token || !String(url).startsWith(API_URL)) return fetchOriginal(url, opcoes);
-    return fetchOriginal(url, { ...opcoes, headers: { ...opcoes.headers, Authorization: `Bearer ${token}` } });
+    const opcoesComToken = token
+      ? { ...opcoes, headers: { ...opcoes.headers, Authorization: `Bearer ${token}` } }
+      : opcoes;
+    return fetchOriginal(url, opcoesComToken).then(voltarAoLoginSeSessaoExpirou);
   };
 
   const paginas = {
@@ -92,12 +105,28 @@ function numeroAtendimentoValido(numero) {
     });
   }
 
+  async function buscarNomeUsuarioSeFaltar() {
+    if (sessionStorage.getItem('nomeUsuario') || !sessionStorage.getItem('token')) return;
+    const resposta = await fetch(`${API_URL}/auth/eu`);
+    const profissional = resposta.ok ? await lerJson(resposta) : null;
+    if (profissional?.nome) sessionStorage.setItem('nomeUsuario', profissional.nome);
+  }
+
+  function mostrarUsuarioLogado() {
+    const nome = sessionStorage.getItem('nomeUsuario') || 'Usuário';
+    document.getElementById('nome-usuario').textContent = nome;
+    document.getElementById('perfil-usuario').textContent = sessionStorage.getItem('perfilUsuario') ?? '';
+    document.getElementById('avatar-usuario').textContent = nome.charAt(0).toUpperCase();
+  }
+
   Promise.all([
     carregarComponente('[data-componente="cabecalho"]', 'cabecalho.html'),
     carregarComponente('[data-componente="menu-lateral"]', 'menu-lateral.html'),
   ])
     .then(() => {
       aplicarMenuPorPerfil();
+      mostrarUsuarioLogado();
+      buscarNomeUsuarioSeFaltar().then(mostrarUsuarioLogado).catch(() => {});
       const arquivoAtual = window.location.pathname.split('/').pop() || 'index.html';
       const paginaAtual = paginas[arquivoAtual];
       const itemAtual = document.querySelector(`.menu-item[data-pagina="${paginaAtual}"]`);

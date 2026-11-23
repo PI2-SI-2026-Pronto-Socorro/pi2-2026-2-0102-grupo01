@@ -22,7 +22,7 @@ function mostrarErroCampo(campo, mensagem) {
 
 function validarCadastro(dados) {
   let valido = true;
-  const cpfValido = /^\d{11}$/.test(dados.cpf) && !/^(\d)\1{10}$/.test(dados.cpf);
+  const cpfValido = cpfComDigitosValidos(dados.cpf);
 
   Object.keys(camposCadastro).forEach((campo) => mostrarErroCampo(campo, ''));
 

@@ -64,14 +64,6 @@
   margin: 0;
 }
 
-.resultado-pendente {
-  display: grid;
-  justify-items: start;
-  gap: 12px;
-  padding: 14px 0 0;
-  color: #34485a;
-}
-
 .resultado .caixa-vazia {
   border: 0;
   background: transparent;

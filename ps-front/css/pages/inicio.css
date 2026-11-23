@@ -76,6 +76,7 @@ button {
   align-items: flex-start;
   flex-direction: column;
   gap: 2px;
+  line-height: 1.2;
 }
 
 .brand-text strong {
@@ -451,11 +452,6 @@ td:nth-child(2) {
   color: #267c4b;
 }
 
-.edit-button {
-  background: #f7f8fb;
-  color: #6253ae;
-}
-
 .medical-action {
   display: inline-flex;
   min-height: 28px;
@@ -491,42 +487,11 @@ td:nth-child(2) {
   font-size: 11px;
 }
 
-.pagination {
-  display: flex;
-  align-items: center;
-  gap: 5px;
-}
-
-.page-button {
-  display: grid;
-  width: 26px;
-  height: 26px;
-  place-items: center;
-  padding: 0;
-  border: 1px solid var(--card-border);
-  border-radius: 5px;
-  background: #fff;
-  color: #34485a;
-  font-size: 11px;
-  font-weight: 600;
-}
-
-.page-button:disabled {
-  cursor: default;
-}
-
-.page-button.active {
-  border-color: #5d4cac;
-  background: #5d4cac;
-  color: #fff;
-}
-
 .menu-item:focus-visible,
 .primary-button:focus-visible,
 .appointment-number:focus-visible,
 .icon-button:focus-visible,
-.logout-link:focus-visible,
-.page-button:focus-visible {
+.logout-link:focus-visible {
   outline: 2px solid #2877d4;
   outline-offset: 2px;
 }
@@ -630,9 +595,5 @@ td:nth-child(2) {
     flex-direction: column;
     justify-content: center;
     padding: 10px 12px;
-  }
-
-  .pagination {
-    align-self: flex-end;
   }
 }
