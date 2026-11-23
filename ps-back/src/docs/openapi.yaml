@@ -2,14 +2,22 @@ openapi: 3.0.0
 info:
   title: API Pronto-Socorro
   version: 1.0.0
-  description: Cadastro de pacientes e atendimentos
+  description: >-
+    Cadastro de pacientes e atendimentos. Para usar as rotas protegidas, faça login em `POST /auth/login`
+    e clique em "Authorize" com o token. O controle de acesso por perfil só é exigido quando o servidor
+    roda com `AUTH_OBRIGATORIA=true` no `.env`.
 servers:
   - url: /api
 
 tags:
   - name: Teste
+  - name: Autenticação
+  - name: Profissionais
   - name: Pacientes
   - name: Atendimentos
+
+security:
+  - tokenDeAcesso: []
 
 paths:
   /health:
@@ -321,7 +329,202 @@ paths:
             application/json:
               schema: { $ref: '#/components/schemas/Erro' }
 
+  /auth/login:
+    post:
+      tags: [Autenticação]
+      summary: Entra com usuário e senha e devolve o token e o perfil
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [usuario, senha]
+              properties:
+                usuario: { type: string, example: maria.recepcao }
+                senha: { type: string, format: password, example: senha1234 }
+      responses:
+        '200':
+          description: Login feito
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  token: { type: string }
+                  expira_em: { type: string, format: date-time }
+                  profissional:
+                    type: object
+                    properties:
+                      id_profissional: { type: string, format: uuid }
+                      nome: { type: string, example: Maria Souza }
+                      cargo: { type: string, example: Recepcionista }
+                      perfil: { type: string, enum: [Recepção, Enfermagem, Médico], example: Recepção }
+        '401':
+          description: Usuário ou senha inválidos
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Erro' }
+        '422':
+          description: Usuário ou senha não informados
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Erro' }
+
+  /auth/eu:
+    get:
+      tags: [Autenticação]
+      summary: Devolve o profissional do token
+      responses:
+        '200':
+          description: Profissional logado
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Profissional' }
+        '401':
+          description: Sem token ou token vencido
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Erro' }
+
+  /profissionais:
+    get:
+      tags: [Profissionais]
+      summary: Lista os profissionais por nome
+      responses:
+        '200':
+          description: Profissionais
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id_profissional: { type: string, format: uuid }
+                    nome: { type: string }
+                    cargo: { type: string }
+    post:
+      tags: [Profissionais]
+      summary: Cadastra um profissional (perfil Recepção)
+      description: >-
+        Grava a senha só como hash (scrypt). O cargo define o perfil: Médico → Médico; Enfermeiro e Técnico
+        de Enfermagem → Enfermagem; Recepcionista → Recepção. O CRM é obrigatório para médico.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/NovoProfissional' }
+      responses:
+        '201':
+          description: Profissional cadastrado (sem a senha)
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Profissional' }
+        '409':
+          description: CPF, usuário ou registro profissional já cadastrado
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Erro' }
+              example: { detail: Usuário já está em uso }
+        '422':
+          description: Dado inválido
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Erro' }
+
+  /atendimentos/nao-identificado:
+    post:
+      tags: [Atendimentos]
+      summary: Abre atendimento para paciente sem RG e CPF (perfil Recepção)
+      description: >-
+        Cria o paciente sem documento e já abre o atendimento em Aberto. O nome é opcional
+        (padrão "Paciente não identificado"). Os dados são completados depois pelo
+        `PATCH /atendimentos/{numero}`, no mesmo cadastro.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              properties:
+                nome: { type: string, maxLength: 100, example: Homem aproximadamente 40 anos }
+                data_nascimento: { type: string, format: date }
+                genero: { type: string, maxLength: 20, example: Masculino }
+                telefone: { type: string, maxLength: 15 }
+                motivo_atendimento: { type: string, maxLength: 255, example: Encontrado desacordado na rua }
+      responses:
+        '201':
+          description: Atendimento aberto
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Atendimento'
+                  - type: object
+                    properties:
+                      paciente: { $ref: '#/components/schemas/Paciente' }
+        '422':
+          description: Dado inválido, ou CPF/RG enviado (use o cadastro normal)
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Erro' }
+
+  /atendimentos/{numero}/reserva:
+    post:
+      tags: [Atendimentos]
+      summary: Reserva o atendimento para o médico que o abriu (perfil Médico)
+      description: >-
+        Só para atendimento Triado. O médico vem do token; sem login obrigatório, mande `id_profissional`
+        no corpo. O mesmo médico pode chamar de novo; outro médico recebe 409. Depois da reserva, medicação e
+        confirmação feitas por outro médico também são recusadas.
+      parameters:
+        - in: path
+          name: numero
+          required: true
+          schema: { type: string, pattern: '^AT\d{4,9}$', example: AT0008 }
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                id_profissional: { type: string, format: uuid }
+      responses:
+        '200':
+          description: Atendimento reservado
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Atendimento'
+                  - type: object
+                    properties:
+                      id_profissional: { type: string, format: uuid }
+                      medico_responsavel: { type: string, example: Dra. Juliana Prates Moreira }
+        '403':
+          description: Profissional não é médico
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Erro' }
+        '404':
+          description: Atendimento ou profissional não encontrado
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Erro' }
+        '409':
+          description: Atendimento com outro médico ou fora de Triado
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Erro' }
+              example: { detail: Atendimento já está com Dr. Ricardo Almeida Souza }
+
 components:
+  securitySchemes:
+    tokenDeAcesso:
+      type: http
+      scheme: bearer
   schemas:
     Atendimento:
       type: object
@@ -364,6 +567,33 @@ components:
         data_nascimento: { type: string, format: date, example: '1990-03-14' }
         genero: { type: string, nullable: true, maxLength: 20, example: Feminino }
         telefone: { type: string, nullable: true, maxLength: 15, example: (11) 98765-4321 }
+    Profissional:
+      type: object
+      properties:
+        id_profissional: { type: string, format: uuid }
+        nome: { type: string, example: Maria Souza }
+        cpf: { type: string, example: '52998224725' }
+        telefone: { type: string, nullable: true }
+        cargo: { type: string, enum: [Médico, Enfermeiro, Técnico de Enfermagem, Recepcionista, Outro] }
+        registro_profissional: { type: string, nullable: true, example: CRM-SP 123456 }
+        plantao: { type: string, nullable: true }
+        especialidade: { type: string, nullable: true }
+        perfil: { type: string, enum: [Recepção, Enfermagem, Médico] }
+        usuario: { type: string, example: maria.recepcao }
+    NovoProfissional:
+      type: object
+      required: [nome, cpf, cargo, perfil, usuario, senha]
+      properties:
+        nome: { type: string, maxLength: 100, example: Maria Souza }
+        cpf: { type: string, example: '52998224725' }
+        cargo: { type: string, enum: [Médico, Enfermeiro, Técnico de Enfermagem, Recepcionista, Outro], example: Recepcionista }
+        perfil: { type: string, enum: [Recepção, Enfermagem, Médico], example: Recepção }
+        usuario: { type: string, pattern: '^[a-z0-9._-]{3,50}$', example: maria.recepcao }
+        senha: { type: string, format: password, minLength: 8, maxLength: 72, example: senha1234 }
+        registro_profissional: { type: string, maxLength: 25 }
+        telefone: { type: string, maxLength: 15 }
+        especialidade: { type: string, maxLength: 80 }
+        plantao: { type: string, maxLength: 50 }
     Erro:
       type: object
       properties:
