@@ -391,6 +391,39 @@ td:nth-child(2) {
   color: #c83438;
 }
 
+.risk-badge {
+  display: inline-block;
+  padding: 4px 8px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.risk-emergency {
+  background: #fee2e2;
+  color: #b91c1c;
+}
+
+.risk-very-urgent {
+  background: #ffedd5;
+  color: #c2410c;
+}
+
+.risk-urgent {
+  background: #fef9c3;
+  color: #a16207;
+}
+
+.risk-low-urgent {
+  background: #dcfce7;
+  color: #15803d;
+}
+
+.risk-not-urgent {
+  background: #dbeafe;
+  color: #1d4ed8;
+}
+
 .table-actions {
   display: flex;
   align-items: center;

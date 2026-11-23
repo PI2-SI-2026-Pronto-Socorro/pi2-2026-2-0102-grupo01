@@ -8,5 +8,6 @@ const router = express.Router();
 router.get('/', exigirPerfil(RECEPCAO), rota(pacienteController.findAll));
 router.post('/', exigirPerfil(RECEPCAO), rota(pacienteController.create));
 router.get('/:cpf', exigirPerfil(RECEPCAO), rota(pacienteController.findByCpf));
+router.patch('/:cpf', exigirPerfil(RECEPCAO), rota(pacienteController.update));
 
 module.exports = router;

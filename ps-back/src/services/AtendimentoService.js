@@ -71,7 +71,7 @@ async function cancelar(numero) {
 }
 
 const STATUS_SEM_ALTERACAO = Object.keys(TRANSICOES_PERMITIDAS).filter((status) => !podeAlterarDados(status));
-const CAMPOS_PACIENTE = ['nome', 'cpf', 'data_nascimento', 'rg', 'genero', 'telefone'];
+const { CAMPOS_PACIENTE } = PacienteService;
 const CAMPOS_ATENDIMENTO = ['motivo_atendimento'];
 
 function separarCamposAlteracao(dados) {

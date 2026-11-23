@@ -27,4 +27,9 @@ async function create(dados) {
   return linha;
 }
 
-module.exports = { findAll, findByCpf, exists, count: countAll, create };
+async function updateByCpf(cpf, dados) {
+  const [linha] = await db.update(paciente).set(dados).where(eq(paciente.cpf, cpf)).returning();
+  return linha ?? null;
+}
+
+module.exports = { findAll, findByCpf, exists, count: countAll, create, updateByCpf };

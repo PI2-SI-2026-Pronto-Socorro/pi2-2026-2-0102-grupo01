@@ -40,23 +40,57 @@ function montarCardAtendimento(atendimento, paciente) {
   adicionarDado(dados, 'Data e hora de chegada', formatarDataHora(atendimento.data_hora_chegada));
   adicionarDado(dados, 'Motivo', atendimento.motivo_atendimento || 'Não informado');
 
-  card.append(titulo, dados);
-  if (!['Confirmado', 'Encerrado', 'Cancelado'].includes(atendimento.status_atendimento)) {
-    const acaoAlterar = document.createElement('a');
-    acaoAlterar.className = 'botao-principal';
-    acaoAlterar.href =
-      `./h11-alterar-atendimento.html?numero=${encodeURIComponent(atendimento.numero_atendimento)}`;
-    acaoAlterar.textContent = 'Alterar atendimento';
-    card.appendChild(acaoAlterar);
-  }
-  return card;
-}
+    card.append(titulo, dados);
+     const botaoCancelar = document.createElement('button');
+  botaoCancelar.type = 'button';
+  botaoCancelar.className = 'botao-principal';
+  botaoCancelar.textContent = 'Cancelar consulta';
 
-function montarHistorico(atendimentos) {
-  const secao = document.createElement('section');
-  secao.className = 'historico-paciente';
-  const titulo = document.createElement('h2');
-  titulo.textContent = 'Histórico de atendimentos';
+  botaoCancelar.addEventListener('click', async () => {
+    if (!window.confirm('Deseja realmente cancelar esta consulta?')) return;
+
+    botaoCancelar.disabled = true;
+    let resposta;
+    try {
+      resposta = await fetch(
+        `${API_URL}/atendimentos/${encodeURIComponent(atendimento.numero_atendimento)}/cancelar`,
+        { method: 'PATCH' },
+      );
+    } catch {
+      mostrarMensagem('Não foi possível conectar à API para cancelar a consulta.', true);
+      botaoCancelar.disabled = false;
+      return;
+    }
+
+    const resultado = await lerJson(resposta);
+    if (!resposta.ok) {
+      mostrarMensagem(resultado?.detail ?? 'Não foi possível cancelar a consulta.', true);
+      botaoCancelar.disabled = false;
+      return;
+    }
+
+    window.location.reload();
+  });
+
+if (atendimento.status_atendimento === 'Aberto') {
+  card.appendChild(botaoCancelar);
+}
+    if (!['Confirmado', 'Encerrado', 'Cancelado'].includes(atendimento.status_atendimento)) {
+      const acaoAlterar = document.createElement('a');
+      acaoAlterar.className = 'botao-principal';
+      acaoAlterar.href =
+        `./h11-alterar-atendimento.html?numero=${encodeURIComponent(atendimento.numero_atendimento)}`;
+      acaoAlterar.textContent = 'Alterar atendimento';
+      card.appendChild(acaoAlterar);
+    }
+    return card;
+  }
+
+  function montarHistorico(atendimentos) {
+    const secao = document.createElement('section');
+    secao.className = 'historico-paciente';
+    const titulo = document.createElement('h2');
+    titulo.textContent = 'Histórico de atendimentos';
 
   const tabela = document.createElement('table');
   tabela.innerHTML = '<thead><tr><th>Número</th><th>Chegada</th><th>Situação</th></tr></thead>';
