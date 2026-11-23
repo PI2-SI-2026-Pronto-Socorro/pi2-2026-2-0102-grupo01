@@ -4,6 +4,7 @@ const Paciente = require('../models/Paciente');
 const ErroHttp = require('../utils/ErroHttp');
 const { codigoPg } = require('../utils/pgHelpers');
 const { cpfComDigitosValidos } = require('../utils/cpf');
+const { podeAlterarDados } = require('../utils/transicoesAtendimento');
 
 const CAMPOS_TEXTO_OPCIONAL = ['rg', 'genero', 'telefone'];
 const CAMPOS_PACIENTE = ['nome', 'cpf', 'data_nascimento', 'rg', 'genero', 'telefone'];
@@ -108,6 +109,16 @@ async function atualizarPorCpf(cpfAtual, dadosRecebidos) {
   const dadosLimpos = normalizarDadosPaciente(dadosRecebidos);
   const erro = validarAlteracao(dadosLimpos);
   if (erro) throw new ErroHttp(422, erro);
+
+  const pacienteAtual = await PacienteRepository.findByCpf(cpfAtual);
+  if (!pacienteAtual) throw new ErroHttp(404, 'Paciente não encontrado');
+  const atendimentoEmAndamento = await AtendimentoRepository.findEmAndamento(pacienteAtual.id_paciente);
+  if (atendimentoEmAndamento && !podeAlterarDados(atendimentoEmAndamento.status_atendimento)) {
+    throw new ErroHttp(
+      409,
+      `Os dados do paciente não podem ser alterados com o atendimento ${atendimentoEmAndamento.numero_atendimento} em ${atendimentoEmAndamento.status_atendimento}`,
+    );
+  }
 
   try {
     const atualizada = await PacienteRepository.updateByCpf(cpfAtual, dadosLimpos);

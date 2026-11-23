@@ -116,7 +116,8 @@ paths:
       summary: Altera os dados cadastrais de um paciente pelo CPF
       description: >-
         Altera só os campos enviados. Ao enviar um novo cpf, ele precisa ter dígitos verificadores válidos
-        e não pode pertencer a outro paciente.
+        e não pode pertencer a outro paciente. Recusa a alteração enquanto o paciente tiver atendimento
+        em andamento fora de Aberto e Triado.
       parameters:
         - in: path
           name: cpf
@@ -140,10 +141,11 @@ paths:
             application/json:
               schema: { $ref: '#/components/schemas/Erro' }
         '409':
-          description: CPF já cadastrado para outro paciente
+          description: CPF já cadastrado para outro paciente, ou atendimento em andamento que não aceita alteração
           content:
             application/json:
               schema: { $ref: '#/components/schemas/Erro' }
+              example: { detail: Os dados do paciente não podem ser alterados com o atendimento AT0008 em Confirmado }
         '422':
           description: CPF da rota inválido, corpo vazio, campo não permitido ou valor inválido
           content:

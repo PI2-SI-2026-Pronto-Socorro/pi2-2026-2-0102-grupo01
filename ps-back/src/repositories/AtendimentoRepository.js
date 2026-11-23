@@ -163,6 +163,7 @@ function selecionarAtendimentosComPaciente() {
       data_hora_chegada: atendimento.data_hora_chegada,
       nome: paciente.nome,
       cpf: paciente.cpf,
+      motivo_atendimento: atendimento.motivo_atendimento,
     })
     .from(atendimento)
     .innerJoin(paciente, eq(paciente.id_paciente, atendimento.id_paciente));
