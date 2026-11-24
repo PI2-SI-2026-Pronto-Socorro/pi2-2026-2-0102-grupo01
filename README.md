@@ -166,3 +166,99 @@ Abra http://localhost:3000/api/health. A página deve mostrar `{"banco":"ok"}`.
 | `Cannot find module '...'` | As dependências não estão instaladas ou estão incompletas. | Rode `npm install` dentro de `ps-back`. |
 | Rotas respondendo `500` | A `DATABASE_URL` do `.env` está errada ou vazia. | Confira o `.env` e reinicie o servidor. |
 | `relation "paciente" does not exist` | As tabelas não foram criadas no banco. | Rode `npm run db:push` dentro de `ps-back`. |
+
+# Perfis de Usuário e Responsabilidades no Sistema
+
+Este documento especifica os atores (perfis de acesso) do **Sistema de Atendimento de Pronto-Socorro**, detalhando suas responsabilidades em cada etapa do fluxo assistencial, as ações permitidas, as restrições e os critérios de rastreabilidade.
+---
+
+## 1. Visão Geral dos Perfis
+
+O acesso ao sistema é controlado por autenticação individual (**usuário e senha**), vinculando cada profissional cadastrado a um dos três perfis operacionais abaixo. Essa vinculação permite ao back-end aplicar as regras de permissão e registrar automaticamente o profissional responsável em cada etapa do prontuário e do atendimento.
+
+| Perfil | Etapa do Fluxo | Responsabilidade Central | Login de Exemplo (Homologação) |
+| :--- | :--- | :--- | :--- |
+| **Recepção** | **1. Recepção do atendimento** | Identificar/cadastrar o paciente, abrir o atendimento (`AT0001`), manter dados cadastrais e cancelar antes da triagem. | `maria.recepcao` |
+| **Enfermagem** | **2. Triagem do atendimento** | Avaliar pacientes aguardando triagem, registrar sinais vitais e queixas e atribuir a classificação de risco (Protocolo de Manchester). | `eliana.enf` |
+| **Médico** | **3. Atendimento médico** | Atender pacientes pela ordem de prioridade do painel, registrar diagnóstico e medicações, confirmar o atendimento e dar alta. | `regina.medica` |
+
+---
+
+## 2. Perfil: Recepção
+
+A **Recepção** é a porta de entrada do paciente no Pronto-Socorro e atua exclusivamente na abertura, manutenção cadastral e eventual cancelamento inicial do atendimento.
+
+### Ações Permitidas
+* **Consultar paciente pelo CPF:** Antes de criar um novo cadastro, busca o CPF na base para reaproveitar o registro existente e preservar o histórico único do prontuário.
+* **Cadastrar paciente:** Registra os dados pessoais completos.
+* **Abrir atendimento e gerar senha:** Cria um novo atendimento no estado **`Aberto`**, registrando data/hora de chegada e gerando o número sequencial (`AT0001`, `AT0002`, ..., com reinício anual).
+* **Consultar e alterar dados do atendimento/paciente:** Atualiza informações cadastrais ou corrige dados preenchidos incorretamente.
+* **Cancelar atendimento:** Encerra o atendimento antes da triagem (mudando o estado para **`Cancelado`**), em casos de desistência na recepção.
+* **Cadastrar profissionais (Administração simplificada):** Registra os dados básicos dos profissionais (nome, CPF, registro profissional e perfil/especialidade) para criação de acessos ao sistema.
+
+### Regras de Negócio e Restrições
+* **Bloqueio de atendimentos simultâneos:** Não pode abrir um novo atendimento para um paciente que já possua um atendimento ativo nos estados `Aberto`, `Triado` ou `Confirmado`.
+* **Janela de cancelamento:** O cancelamento só é permitido enquanto o atendimento estiver no estado **`Aberto`** (antes da triagem). Após a triagem (`Triado`), o cancelamento é bloqueado pelo sistema.
+* **Janela de consulta e alteração:** Pode consultar e alterar os dados cadastrais enquanto o atendimento estiver em **`Aberto`** ou **`Triado`** (inclusive durante a triagem, sem alterar o estado do atendimento).
+* **Perda de acesso após confirmação médica:** Assim que o médico confirma o atendimento (estado **`Confirmado`**), a Recepção perde definitivamente o direito de consultar ou alterar aquele registro.
+
+---
+
+## 3. Perfil: Enfermagem
+
+A **Enfermagem** é responsável pela avaliação clínica inicial e pela classificação de risco que organiza a fila de prioridade médica.
+
+### Ações Permitidas
+* **Visualizar fila de triagem:** Acessa a lista de atendimentos que estão no estado **`Aberto`** aguardando classificação.
+* **Registrar sinais vitais:** Insere os parâmetros clínicos do paciente em campos numéricos validados (peso, altura, pressão arterial em mmHg, temperatura corporal em °C e frequência cardíaca em bpm).
+* **Registrar queixas:** Seleciona ou vincula uma ou mais queixas relatadas pelo paciente (ex.: dor de cabeça, náusea, enjoo, dor muscular, suor excessivo).
+* **Classificar risco (Protocolo de Manchester):** Define manualmente a cor de prioridade clínica com base nos sinais vitais e queixas avaliados, transicionando o atendimento de **`Aberto`** para **`Triado`** e enviando-o automaticamente para o Painel Médico.
+
+### Escala de Classificação Utilizada pela Enfermagem
+| Cor | Nível de Urgência | Tempo Máximo de Espera | Prioridade no Painel |
+| :--- | :--- | :--- | :--- |
+| **Vermelho** | Emergência | `0 minutos` (Imediato) | 1ª (Máxima) |
+| **Laranja** | Muito Urgente | `10 minutos` | 2ª |
+| **Amarelo** | Urgente | `50 minutos` | 3ª |
+| **Verde** | Pouco Urgente | `120 minutos` (2 horas) | 4ª |
+| **Azul** | Não Urgente | `240 minutos` (4 horas) | 5ª (Mínima) |
+
+### Regras de Negócio e Restrições
+* **Unicidade da triagem (sem re-triagem):** Cada atendimento comporta no máximo uma triagem. Não é permitido realizar uma nova triagem no mesmo atendimento caso o paciente piore na sala de espera.
+* **Fluxo unidirecional:** Após concluir a triagem (`Triado`), a Enfermagem não pode cancelar o atendimento nem devolvê-lo para o estado `Aberto` (Recepção).
+* **Validação de faixas numéricas:** O sistema impede o registro de sinais vitais fora das faixas numéricas válidas ou com campos obrigatórios vazios.
+
+---
+
+## 4. Perfil: Médico
+
+O **Médico** realiza o atendimento clínico propriamente dito, administra medicações, valida a conclusão do atendimento e autoriza a saída do paciente da unidade.
+
+### Ações Permitidas
+* **Visualizar o Painel Médico:** Acompanha a fila de atendimentos no estado **`Triado`**, exibindo a cor acompanhada do texto por extenso (acessibilidade para daltonismo).
+* **Chamar e visualizar detalhes do atendimento:** Abre um atendimento da fila para visualizar os sinais vitais e as queixas registradas pela Enfermagem.
+* **Registrar consulta e conduta médica:** Preenche diagnóstico, observações clínicas, procedimentos realizados, solicitação de exames, prescrição/receita médica e eventual indicação de internação.
+* **Registrar medicações administradas:** Documenta os medicamentos aplicados no paciente durante o atendimento no Pronto-Socorro.
+* **Confirmar o atendimento:** Conclui a etapa clínica (transicionando de **`Triado`** para **`Confirmado`**), removendo o paciente da fila de espera e bloqueando o acesso da Recepção.
+* **Dar alta ao paciente:** Registra a saída do paciente do Pronto-Socorro (transicionando de **`Confirmado`** para **`Encerrado`**) e grava a data/hora de encerramento.
+
+### Regras de Negócio e Restrições
+* **Ordenação e desempate da fila:** O painel médico ordena os atendimentos primeiro pela gravidade do Protocolo de Manchester (Vermelho > Laranja > Amarelo > Verde > Azul) e, em caso de **mesma cor**, desempata pela **data e hora de chegada** (quem chegou primeiro aparece antes).
+* **Ordem obrigatória entre Confirmação e Alta:** O médico não pode dar alta diretamente a um paciente em `Triado`; é obrigatório registrar as medicações e **confirmar** o atendimento (`Confirmado`) antes de acionar a **alta** (`Encerrado`).
+* **Imutabilidade após alta e confirmação:** Após a confirmação, os botões de edição/confirmação da etapa médica são bloqueados; após a alta (`Encerrado`), o registro torna-se histórico imutável.
+
+---
+
+## 5. Resumo Comparativo de Permissões por Perfil
+
+| Funcionalidade / Ação | Recepção | Enfermagem | Médico |
+| :--- | :---: | :---: | :---: |
+| Cadastrar / buscar paciente e abrir atendimento (`AT`) | Sim | Não | Não |
+| Consultar e alterar dados cadastrais (antes da confirmação médica) | Sim | Não | Não |
+| Cancelar atendimento (apenas no estado `Aberto`) | Sim | Não | Não |
+| Visualizar fila de espera para triagem (`Aberto`) | Não | Sim | Não |
+| Registrar sinais vitais, queixas e classificação de Manchester | Não | Sim | Não |
+| Visualizar Painel Médico ordenado (`Triado`) | Não | Não | Sim |
+| Registrar diagnóstico, consulta e medicações administradas | Não | Não | Sim |
+| Confirmar atendimento (bloqueando a Recepção) | Não | Não | Sim |
+| Dar alta médica e encerrar atendimento (`Encerrado`) | Não | Não | Sim |
